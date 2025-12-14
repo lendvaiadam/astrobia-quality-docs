@@ -766,90 +766,30 @@ export class Game {
         const newCPCount = controlPoints.length;
         
         if (newCPCount >= 2) {
-            const mainPath = projectedPoints.map(p => p.clone());
+            unit.path = projectedPoints.map(p => p.clone());
             
-            // === SMOOTH REJOIN LOGIC ===
-            // Instead of teleporting, create a transition curve from current position to track
-            
-            // Find the best rejoin point on the new path
-            // Must be FORWARD in the track (not behind the unit's current direction)
-            let bestRejoinIdx = 0;
+            // Find closest point on new path
+            let closestIdx = 0;
             let bestDist = Infinity;
             
-            // Get unit's current velocity direction (if moving)
-            const unitVelocity = unit.lastVelocity || new THREE.Vector3();
-            const hasVelocity = unitVelocity.lengthSq() > 0.001;
-            
-            for (let i = 0; i < mainPath.length; i++) {
-                const pathPoint = mainPath[i];
-                const toPoint = pathPoint.clone().sub(unit.position);
-                const dist = toPoint.length();
-                
-                // Check if this point is roughly forward (dot product with velocity)
-                let isForward = true;
-                if (hasVelocity) {
-                    const dot = toPoint.normalize().dot(unitVelocity.clone().normalize());
-                    isForward = dot > -0.3; // Allow some backward angle tolerance
-                }
-                
-                if (isForward && dist < bestDist) {
+            for (let i = 0; i < unit.path.length; i++) {
+                const dist = unit.position.distanceTo(unit.path[i]);
+                if (dist < bestDist) {
                     bestDist = dist;
-                    bestRejoinIdx = i;
+                    closestIdx = i;
                 }
             }
             
-            // If unit is far from track, find an intermediate rejoin point
-            const MAX_DIRECT_REJOIN_DIST = 5.0; // Max distance for direct rejoin
-            const rejoinPoint = mainPath[bestRejoinIdx];
-            
-            if (bestDist > MAX_DIRECT_REJOIN_DIST) {
-                // Find a point between current position and rejoin that's closer
-                // Look for points on the main path that we can reach sooner
-                for (let i = Math.max(0, bestRejoinIdx - 20); i < bestRejoinIdx; i++) {
-                    const candidatePoint = mainPath[i];
-                    const candidateDist = unit.position.distanceTo(candidatePoint);
-                    if (candidateDist < bestDist * 0.7) {
-                        bestRejoinIdx = i;
-                        bestDist = candidateDist;
-                        break;
-                    }
-                }
+            if (bestDist > 0.5) {
+                unit.position.copy(unit.path[closestIdx]);
             }
             
-            // Create smooth transition curve from current position to rejoin point
-            if (bestDist > 0.3) {
-                // Generate transition path using geodesic interpolation
-                const transitionPoints = [];
-                const numTransitionPts = Math.max(5, Math.floor(bestDist * 3));
-                
-                const startDir = unit.position.clone().normalize();
-                const endDir = mainPath[bestRejoinIdx].clone().normalize();
-                const groundOffset = unit.groundOffset || 0.5;
-                
-                for (let i = 0; i <= numTransitionPts; i++) {
-                    const t = i / numTransitionPts;
-                    // Smooth easing for nice curve
-                    const eased = t * t * (3 - 2 * t); // smoothstep
-                    const dir = new THREE.Vector3().lerpVectors(startDir, endDir, eased).normalize();
-                    const radius = this.planet.terrain.getRadiusAt(dir);
-                    transitionPoints.push(dir.multiplyScalar(radius + groundOffset));
-                }
-                
-                // Prepend transition to main path starting from rejoin point
-                unit.path = [...transitionPoints, ...mainPath.slice(bestRejoinIdx + 1)];
-                unit.pathIndex = 1; // Start at first transition point (skip position 0 which is current pos)
-                unit.isOnTransitionPath = true;
-                unit.transitionEndIndex = transitionPoints.length;
-            } else {
-                // Already on track, just use main path
-                unit.path = mainPath;
-                unit.pathIndex = bestRejoinIdx + 1;
-                if (unit.pathIndex >= unit.path.length) {
-                    unit.pathIndex = (unit.loopingEnabled || unit.isPathClosed) ? 0 : unit.path.length - 1;
-                }
-                unit.isOnTransitionPath = false;
+            let targetIdx = closestIdx + 1;
+            if (targetIdx >= unit.path.length) {
+                targetIdx = (unit.loopingEnabled || unit.isPathClosed) ? 0 : unit.path.length - 1;
             }
             
+            unit.pathIndex = targetIdx;
             if (unit.pathIndex >= unit.path.length) {
                 unit.pathIndex = (unit.loopingEnabled || unit.isPathClosed) ? 0 : unit.path.length - 1;
             }
@@ -857,6 +797,7 @@ export class Game {
             
             unit.isFollowingPath = true;
             unit.lastCommittedControlPointCount = newCPCount;
+            // console.log(`[A* Path] Generated ${unit.path.length} points, pathIndex=${unit.pathIndex}`);
         }
     }
     

@@ -68,12 +68,6 @@ export class Unit {
         this.keyboardOverrideTimer = 0;  // Time since last keyboard input (4s to resume)
         this.isKeyboardOverriding = false; // Currently being controlled by keyboard
         
-        // === SMOOTH REJOIN SYSTEM ===
-        this.lastVelocity = new THREE.Vector3(); // Track velocity for smooth path changes
-        this.lastPosition = new THREE.Vector3(); // Previous frame position
-        this.isOnTransitionPath = false;        // Currently on temporary rejoin path
-        this.transitionEndIndex = 0;            // Where transition ends in path array
-        
         // Unit identity
         this.id = Math.floor(Math.random() * 10000);
         this.name = `Unit ${this.id}`;
@@ -397,12 +391,6 @@ export class Unit {
         if (this.isSelected || this.selectionIntensity > 0.01) {
             this.updateSelectionVisuals(dt);
         }
-        
-        // === VELOCITY TRACKING FOR SMOOTH REJOIN ===
-        if (this.lastPosition.lengthSq() > 0) {
-            this.lastVelocity.copy(this.position).sub(this.lastPosition);
-        }
-        this.lastPosition.copy(this.position);
 
         const turnSpeed = this.turnSpeed * dt;
         
