@@ -1,4 +1,5 @@
 import { Pane } from 'tweakpane';
+import { BUILD_HASH, BUILD_DATE } from '../buildInfo.js';
 
 export class DebugPanel {
     constructor(game) {
@@ -7,7 +8,13 @@ export class DebugPanel {
         this.autoRegenerate = true;
         this.performanceMode = false;
         
-        // === PERFORMANCE MODE - First control at the top ===
+        // === BUILD INFO - Top of panel ===
+        this.pane.addBinding({ build: `${BUILD_HASH} (${BUILD_DATE})` }, 'build', { 
+            label: '🔧 Build', 
+            readonly: true 
+        });
+        
+        // === PERFORMANCE MODE ===
         this.pane.addBinding(this, 'performanceMode', { label: '⚡ PERFORMANCE MODE' })
             .on('change', (ev) => this.setPerformanceMode(ev.value));
         
