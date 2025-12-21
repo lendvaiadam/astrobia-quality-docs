@@ -35,8 +35,8 @@ export class SphericalCameraController4 {
             zoomMinVelocity: 0.0005,     // Stop later for longer tail (was 0.001)
             zoomTimeout: 500,            // Longer reset time (was 300)
             // Chase Config
-            chaseDistance: 8.0,
-            chaseHeight: 4.0,
+            chaseDistance: 12.0, // Was 8.0 - Further back
+            chaseHeight: 2.5,    // Was 4.0 - Lower down (TPS view)
             chaseResponsiveness: 0.015, // Ultra smooth, heavy balloon-like inertia
             // Collision Config
             minRockDistance: 2.0,      // Min distance from rock surface
@@ -528,6 +528,10 @@ export class SphericalCameraController4 {
      * Uses a gradual force that increases with distance.
      */
     applyDistanceCentering(dt) {
+        // DISABLED: User requested no auto-centering behavior
+        // The camera should stay where the user positions it
+        return;
+
         if (!this.planet) return;
         if (this.isFlying || this.isDragging || this.isOrbiting) return; // Don't interfere with user input
 

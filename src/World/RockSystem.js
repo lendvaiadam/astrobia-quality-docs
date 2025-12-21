@@ -9,23 +9,25 @@ export class RockSystem {
         this.rocks = [];
         this.rockGroup = new THREE.Group();
         this.scene = game.scene;
-        
+
         this.scene.add(this.rockGroup);
-        
+
         // Default params
         this.params = {
-            count: 60,        // Increased from 40 (+20 smaller)
+            count: 300,        // Increased to 300 for better density
             seed: 12345,
-            minScale: 0.5,    // Smaller rocks now allowed
+            minScale: 0.5,
             maxScale: 3.0,
             radius: 1.2,
             detail: 2
         };
-        
+
+        // ... loads textures ...
+
         // Load 4 rock texture variants
         const textureLoader = new THREE.TextureLoader();
         this.materials = [];
-        
+
         // Texture tuning values - logged to console for adjustment
         this.textureConfig = {
             normalScale: 1.0,
@@ -34,19 +36,19 @@ export class RockSystem {
         };
         console.log('[RockSystem] Texture config:', this.textureConfig);
         console.log('[RockSystem] To change: game.rockSystem.textureConfig.normalScale = X');
-        
+
         for (let i = 1; i <= 4; i++) {
             const diffusePath = `assets/textures/rock_${i}.png`;
             const normalPath = `assets/textures/rock_${i}_normal.png`;
-            
+
             const diffuse = textureLoader.load(diffusePath, () => {
                 console.log(`[RockSystem] Loaded: ${diffusePath}`);
             });
             const normal = textureLoader.load(normalPath);
-            
+
             diffuse.wrapS = diffuse.wrapT = THREE.RepeatWrapping;
             normal.wrapS = normal.wrapT = THREE.RepeatWrapping;
-            
+
             const mat = new THREE.MeshStandardMaterial({
                 map: diffuse,
                 normalMap: normal,
@@ -55,9 +57,10 @@ export class RockSystem {
                 metalness: this.textureConfig.metalness,
                 flatShading: false,
                 transparent: true,
-                alphaTest: 0.1 // Ensure invisible rocks don't write depth
+                side: THREE.DoubleSide, // Ensure visibility from all angles
+                alphaTest: 0 // Disable alpha test to prevent culling
             });
-            
+
             // Apply FOW shader to EACH material
             const self = this;
             mat.onBeforeCompile = (shader) => {
@@ -72,11 +75,11 @@ export class RockSystem {
                     uniform vec2 uUVScale;
                     uniform vec2 uUVOffset;
                 ` + shader.fragmentShader;
-                
+
                 shader.vertexShader = `
                     varying vec3 vWorldPosition;
                 ` + shader.vertexShader;
-                
+
                 shader.vertexShader = shader.vertexShader.replace(
                     '#include <worldpos_vertex>',
                     `
@@ -84,11 +87,11 @@ export class RockSystem {
                     vWorldPosition = (modelMatrix * vec4(transformed, 1.0)).xyz;
                     `
                 );
-                
+
                 shader.fragmentShader = `
                     varying vec3 vWorldPosition;
                 ` + shader.fragmentShader;
-                
+
                 shader.fragmentShader = shader.fragmentShader.replace(
                     '#include <dithering_fragment>',
                     `
@@ -117,9 +120,10 @@ export class RockSystem {
                         vec3 nightColor = vec3(0.02, 0.04, 0.08); 
                         finalColor = mix(finalColor, desaturated, 0.95) * 0.2 + nightColor * 0.1;
                     } else {
-                        // Unexplored - TRANSPARENT (Invisible)
+                        // Unexplored - OPAQUE BLACK (Silhouette)
+                        // This prevents depth sorting issues and ensures rocks are visible as dark shapes
                         finalColor = vec3(0.0, 0.0, 0.0);
-                        gl_FragColor = vec4(finalColor, 0.0); // Alpha 0
+                        gl_FragColor = vec4(finalColor, 1.0); 
                         return;
                     }
                     
@@ -129,44 +133,30 @@ export class RockSystem {
                     #include <dithering_fragment>
                     `
                 );
-                
+
                 mat.materialShader = shader;
             };
-            
+
             // Critical for transparency
             mat.transparent = true;
-            mat.depthWrite = true; // Still write depth for correct sorting when visible? 
-            // Actually if it's invisible (alpha 0), we might not want depth write if using discard.
-            // But we are using blending. keeping depthWrite=true can cause occlusion issues for things behind invisible rocks.
-            // Better to use alphaTest if we want them to disappear?
-            // User asked for "Transparent". Let's try standard transparency.
-            // If we use alpha=0, we should probably set depthWrite = false for those pixels, but we can't switch depthWrite per pixel.
-            // We can use alphaTest.
-            mat.alphaTest = 0.5; // If alpha < 0.5, discard -> No depth write => Invisible rocks don't occlude.
-            // But we want smooth fade maybe?
-            // "Sziklák ne feketék legyenek, hanem átlátszóak"
-            // If alphaTest is used, it's boolean.
-            // Let's stick to transparency without alphaTest first, but if they are invisible, they shouldn't block selection? Raycast collision handles selection.
-            // Visuals: If depthWrite is on, invisible rock writes depth, so ground behind it is not drawn?
-            // Correct. If alpha=0 and depthWrite=true, you get "x-ray" hole to background.
-            // SO: We MUST use alphaTest or Custom Depth Material.
-            // Simplest: alphaTest = 0.1.
-            mat.alphaTest = 0.1;
-            
+            mat.side = THREE.DoubleSide; // Ensure visibility from all angles
+            mat.alphaTest = 0;         // Disable alpha test to prevent culling
+            mat.depthWrite = true;     // Keep depth write for correct sorting
+
             this.materials.push(mat);
         }
-        
+
         // Default material (first one)
         this.material = this.materials[0];
-        
+
         // FOW is now applied to each material in the loop above
     }
 
     generateRocks() {
         // Clear existing
-        while(this.rockGroup.children.length > 0){ 
+        while (this.rockGroup.children.length > 0) {
             const mesh = this.rockGroup.children[0];
-            if(mesh.geometry) mesh.geometry.dispose();
+            if (mesh.geometry) mesh.geometry.dispose();
             this.rockGroup.remove(mesh);
         }
         this.rocks = [];
@@ -195,25 +185,25 @@ export class RockSystem {
             const v = rng();
             const theta = 2 * Math.PI * u;
             const phi = Math.acos(2 * v - 1);
-            
+
             const dir = new THREE.Vector3(
                 Math.sin(phi) * Math.cos(theta),
                 Math.sin(phi) * Math.sin(theta),
                 Math.cos(phi)
             );
-            
+
             // 2. Get Terrain Height
             const terrainRadius = this.planet.terrain.getRadiusAt(dir);
-            
+
             // Avoid water?
             // If terrain radius is close to default radius (water level), maybe skip?
             // User didn't specify, but usually rocks are on land.
             // Let's blindly place them for now.
-            
+
             // 3. Generate Unique Rock Mesh (Time consuming?)
             // For 60 rocks, generating 60 unique meshes is fine.
             const scaleVal = this.params.minScale + rng() * (this.params.maxScale - this.params.minScale);
-            
+
             const rockParams = {
                 radius: this.params.radius,
                 detail: this.params.detail,
@@ -226,38 +216,38 @@ export class RockSystem {
                 // Looking at RockMeshGenerator inside: `this._applyNoise` uses `vertex.x`. 
                 // To vary, we can offset the input coordinates to noise!
             };
-            
+
             // Generate
             const { geometry } = this.generator.generate(rockParams);
-            
+
             // Fix position - SINK INTO GROUND for flush shadow at contact
             // This ensures shadow appears at terrain-rock junction, not floating
             const sinkDepth = scaleVal * 0.15; // 15% of rock size sinks below surface
             const pos = dir.clone().multiplyScalar(terrainRadius - sinkDepth);
-            
+
             // Random material from 4 variants
             const matIndex = Math.floor(rng() * this.materials.length);
             const selectedMaterial = this.materials[matIndex];
-            
+
             const mesh = new THREE.Mesh(geometry, selectedMaterial);
             mesh.position.copy(pos);
-            mesh.lookAt(new THREE.Vector3(0,0,0)); // Point down?
+            mesh.lookAt(new THREE.Vector3(0, 0, 0)); // Point down?
             // Align Up to Normal
             const up = pos.clone().normalize();
             const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), up);
             mesh.quaternion.copy(quaternion);
-            
+
             // Random rotation around Up
             const randRot = rng() * Math.PI * 2;
             mesh.rotateY(randRot);
-            
+
             // Store collision radius (based on deformed scale)
             mesh.userData.collisionRadius = scaleVal * this.params.radius;
-            
+
             // Cast Shadow
             mesh.castShadow = true;
             mesh.receiveShadow = true;
-            
+
             // SHADOW EXTENSION: Invisible geometry extending below rock into ground
             // This prevents light bleeding at rock-terrain junction on shadow side
             // The shadow of this extension blocks light from going "under" the rock
@@ -265,9 +255,9 @@ export class RockSystem {
             const extensionRadius = scaleVal * 0.7; // 70% of rock width
             const shadowExtGeo = new THREE.CylinderGeometry(extensionRadius, extensionRadius * 0.8, extensionHeight, 8);
             shadowExtGeo.translate(0, -extensionHeight * 0.5, 0); // Move pivot to top
-            
+
             // Invisible material - only casts shadows, not rendered
-            const shadowExtMat = new THREE.MeshBasicMaterial({ 
+            const shadowExtMat = new THREE.MeshBasicMaterial({
                 visible: false // Invisible but still casts shadows
             });
             const shadowExtension = new THREE.Mesh(shadowExtGeo, shadowExtMat);
@@ -276,7 +266,7 @@ export class RockSystem {
             shadowExtension.castShadow = true; // Cast shadow into the "under" area
             shadowExtension.receiveShadow = false;
             this.rockGroup.add(shadowExtension);
-            
+
             // CONTACT SHADOW (Blob beneath rock to prevent floating look)
             const shadowRadius = scaleVal * 0.8; // Slightly smaller than rock
             const contactShadowGeo = new THREE.CircleGeometry(shadowRadius, 32);
@@ -308,7 +298,7 @@ export class RockSystem {
             contactShadow.quaternion.copy(quaternion);
             contactShadow.renderOrder = -1;
             this.rockGroup.add(contactShadow);
-            
+
             this.rockGroup.add(mesh);
             this.rocks.push(mesh);
         }

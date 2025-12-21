@@ -1003,6 +1003,8 @@ body.split-screen #bottom-panel .toggle-icon {
     letter-spacing: 4px;
     margin-bottom: 30px;
     font-weight: 300;
+    text-align: center;
+    /* CENTERED */
 }
 
 .mode-buttons {
@@ -1018,7 +1020,8 @@ body.split-screen #bottom-panel .toggle-icon {
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 10px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.05s cubic-bezier(0.1, 0.7, 0.1, 1);
+    /* Instant response */
     position: relative;
     overflow: hidden;
     display: flex;

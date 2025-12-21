@@ -114,9 +114,9 @@ export class Unit {
         this.positionHistoryTimer = 0;     // Throttle history recording
 
         // === DUST PARTICLE CONFIG ===
-        this.dustOpacity = 0.005;          // Half of previous (very subtle)
-        this.dustMaxParticles = 40;        // 20% less density than before
-        this.dustSpawnInterval = 0.05;     // Slower spawn rate
+        this.dustOpacity = 0.1;            // Default transparency
+        this.dustMaxParticles = 50;        // Default density
+        this.dustSpawnInterval = 0.03;     // Default frequency
 
         // Unit identity
         this.id = Math.floor(Math.random() * 10000);
@@ -270,8 +270,9 @@ export class Unit {
 
         // === DUST PARTICLE SYSTEM ===
         this.dustParticles = [];
-        this.dustMaxParticles = 100; // Refined count
-        this.dustSpawnRate = 0.03;
+        // Use constructor value or default (don't overwrite if already set)
+        this.dustMaxParticles = this.dustMaxParticles || 50;
+        this.dustSpawnRate = this.dustSpawnInterval || 0.03;
         this.dustSpawnTimer = 0;
 
         // Use PlaneGeometry for textured dust puffs
@@ -948,15 +949,25 @@ export class Unit {
                     }
                     this.isBraking = false;
                 } else if (autoMove !== 0) {
-                    // MANUAL MOVEMENT
-                    const moveSpeed = this.speed * autoMove;
+                    // MANUAL / AUTO MOVEMENT (Smooth Acceleration)
+                    const targetSpeed = this.speed * autoMove;
                     const moveDir = new THREE.Vector3(0, 0, 1).applyQuaternion(this.headingQuaternion); // Forward
 
-                    this.position.addScaledVector(moveDir, moveSpeed * dt);
+                    const targetVel = moveDir.clone().multiplyScalar(targetSpeed);
 
-                    this.velocity.copy(moveDir).multiplyScalar(moveSpeed);
+                    // Smooth Ease-In (Acceleration)
+                    // Lerp velocity towards target (dt * factor)
+                    const accelFactor = 3.0; // Adjust for "weight" feel
+                    this.velocity.lerp(targetVel, dt * accelFactor);
+
+                    // Scale position by ACTUAL velocity, not target
+                    this.position.addScaledVector(this.velocity, dt);
+
                     if (!this.velocityDirection) this.velocityDirection = new THREE.Vector3();
-                    this.velocityDirection.copy(moveDir);
+                    // Use velocity for direction if moving, otherwise keep last
+                    if (this.velocity.lengthSq() > 0.01) {
+                        this.velocityDirection.copy(this.velocity).normalize();
+                    }
                     this.isBraking = false;
                 } else {
                     // IDLE / BRAKING ("Easy In" Stop)
@@ -1019,32 +1030,98 @@ export class Unit {
                 const m = new THREE.Matrix4().makeBasis(right, up, orthoForward);
                 const targetHeading = new THREE.Quaternion().setFromRotationMatrix(m);
 
-                // Smooth rotation (slerp) - Gradual for smooth arc following
-                this.headingQuaternion.slerp(targetHeading, 0.15);
+                // INSTANT orientation - unit always faces movement direction exactly
+                // User Request: "mindig tökéletesen abba az irányba álljon be... ne kenjük el"
+                this.headingQuaternion.copy(targetHeading);
             }
 
             // Skip normal movement
             autoMove = 0;
             autoTurn = 0;
-        } else if (this.isFollowingPath && this.path && this.path.length > 0) {
-            // Legacy steering-based path following (only if actively following)
-            const target = this.path[0];
+        } else if (this.isInTransition && this.transitionPath && this.transitionPath.length > 0) {
+            // TRANSITION PATH FOLLOWING (Simple Point-to-Point for Smooth Curve)
+            const target = this.transitionPath[0];
             const dist = this.position.distanceTo(target);
 
-            if (dist < 1.0) {
-                this.path.shift();
-            } else {
-                const basis = SphericalMath.getBasis(this.headingQuaternion);
-                const toTarget = target.clone().sub(this.position).normalize();
-                const up = basis.up;
-                const tangentTarget = toTarget.clone().sub(up.clone().multiplyScalar(toTarget.dot(up))).normalize();
-                const forward = basis.forward;
-                const right = basis.right;
-                const dot = forward.dot(tangentTarget);
-                const cross = right.dot(tangentTarget);
+            // Move towards target
+            const toTarget = target.clone().sub(this.position).normalize();
 
-                if (Math.abs(cross) > 0.05) autoTurn = Math.sign(cross);
-                if (dot > -0.3) autoMove = 1;
+            // Speed control (constant during transition for consistency)
+            this.velocity = toTarget.multiplyScalar(this.speed);
+            this.velocityDirection = toTarget.clone();
+
+            // Advance point (Simpler threshold for smooth curve traversal)
+            if (dist < 1.0) {
+                this.lastWaypoint = target.clone();
+                this.transitionPath.shift();
+                this.transitionIndex++;
+                if (this.transitionPath.length === 0) {
+                    this.isInTransition = false;
+                    this.transitionPath = null;
+                    // Resume normal path: Skip points that we merged past
+                    // InteractionManager sets pathIndex to the merge point index
+                    // Resume normal path. Path indices are preserved.
+                    // DO NOT SPLICE.
+                }
+            }
+        } else if (this.isFollowingPath && this.path && this.path.length > 0) {
+            // SEGMENT TRACKING LOGIC (Non-destructive)
+            if (this.pathIndex >= this.path.length) {
+                if (this.loopingEnabled) this.pathIndex = 0;
+            }
+
+            if (this.pathIndex < this.path.length) {
+                const target = this.path[this.pathIndex];
+                const dist = this.position.distanceTo(target);
+
+                if (dist < 1.0) {
+                    // Reached Waypoint
+                    this.lastWaypoint = target.clone();
+                    this.lastPassedControlPointIndex = this.pathIndex; // Update Anchor Index (Blue - legacy)
+                    this.pathIndex++; // Advance Index
+                    this.targetControlPointIndex = this.pathIndex;     // Update Target Index (Orange - legacy)
+
+                    // Update ID for proper prioritization in Game.js visuals
+                    if (this.waypoints && this.waypoints[this.pathIndex]) {
+                        // The point we just passed (at pathIndex - 1) is the Last Waypoint
+                        // Wait, pathIndex was just incremented.
+                        // So the passed point is at this.pathIndex - 1.
+                        // But Unit.path (dense) is not Unit.waypoints (sparse).
+
+                        // CRITICAL: We need the ID of the Control Point we just reached.
+                        // Dense path doesn't map 1:1 to Waypoints!
+                        // "Reached Waypoint" logic line 1080 executes for EVERY dense point?
+                        // YES! line 1080: if (dist < 1.0) inside loop over `this.path`.
+
+                        // IF `this.path` contains ALL interpolated points, then "Reached Waypoint" triggers hundreds of times!
+                        // My previous assumption was WRONG if path is dense.
+                        // But looking at code: `target = this.path[this.pathIndex]`.
+                        // If path is dense, we parse every small step.
+
+                        // BUT, does `targetWaypointId` apply to every small step?
+                        // `InteractionManager` sets `targetWaypointId` to a specific Control Point ID.
+                        // `Unit.js` doesn't know which dense point corresponds to a Control Point unless we track it!
+
+                        // `Game.js` `handlePathLooping` uses `CatmullRomCurve3`.
+                        // `this.path` is `loopPoints`.
+
+                        // If I update `targetWaypointId` based on `this.waypoints[this.pathIndex]`, it fails if pathIndex is 200 and waypoints has 5 items.
+
+                        // I NEED TO REDESIGN THIS LOGIC.
+                    }
+                } else {
+                    const basis = SphericalMath.getBasis(this.headingQuaternion);
+                    const toTarget = target.clone().sub(this.position).normalize();
+                    const up = basis.up;
+                    const tangentTarget = toTarget.clone().sub(up.clone().multiplyScalar(toTarget.dot(up))).normalize();
+                    const forward = basis.forward;
+                    const right = basis.right;
+                    const dot = forward.dot(tangentTarget);
+                    const cross = right.dot(tangentTarget);
+
+                    if (Math.abs(cross) > 0.05) autoTurn = Math.sign(cross);
+                    if (dot > -0.3) autoMove = 1;
+                }
             }
         }
 
@@ -1654,6 +1731,7 @@ export class Unit {
         const baseRadius = this.planet.terrain.params.radius;
         const waterDepth = Math.max(0, (baseRadius + waterLevel) - currentRadius);
         const isUnderwater = waterDepth > 0.05; // Tolerance
+        this.isUnderwater = isUnderwater; // Store for other systems (Dust)
 
         // Debug helper
         // if (this.game.debug && isUnderwater) console.log(`Water State: ${this.waterState}, Depth: ${waterDepth.toFixed(2)}`);
@@ -1853,6 +1931,12 @@ export class Unit {
                 // Shader injection for Fading (Fading to WHITE = Disappearing in Multiply)
                 mat.onBeforeCompile = (shader) => {
                     shader.uniforms.uTime = { value: 0 };
+                    // User Request: Opacity Slider Control
+                    shader.uniforms.uTrackOpacity = { value: this.trackOpacity || 0.1 };
+
+                    // Save reference to shader for updates
+                    mat.userData.shader = shader;
+
                     shader.vertexShader = `
                         attribute float aBirthTime;
                         varying float vBirthTime;
@@ -1866,6 +1950,7 @@ export class Unit {
                     );
                     shader.fragmentShader = `
                         uniform float uTime;
+                        uniform float uTrackOpacity;
                         varying float vBirthTime;
                         const float LIFETIME = 600.0; 
                     ` + shader.fragmentShader;
@@ -1875,14 +1960,16 @@ export class Unit {
                         #include <map_fragment>
                         
                         // Fade Logic for Multiply Blending
-                        // WHITE (1.0) = invisible, DARKER = visible
-                        // User wants: 20% base opacity (0.8 color = near white)
-                        //             60% max opacity (0.4 color) when layers overlap
-                        // So we start at 0.8 and let Multiply darken to min 0.4
                         float age = uTime - vBirthTime;
                         
-                        // Base brightness = 0.9 (10% dark = 90% brightness)
-                        float baseBrightness = 0.9;
+                        // Opacity Control: Use uTrackOpacity to mix between WHITE (invisible) and TEXTURE COLOR
+                        // uTrackOpacity = 1.0 -> Full Texture
+                        // uTrackOpacity = 0.0 -> Full White (Invisible)
+                        // Make sure we clamp it
+                        float opacity = clamp(uTrackOpacity, 0.0, 1.0);
+                        
+                        // Apply user opacity setting FIRST
+                        vec3 targetColor = mix(vec3(1.0), diffuseColor.rgb, opacity);
                         
                         if (age > LIFETIME) {
                             diffuseColor.rgb = vec3(1.0); // Invisible
@@ -1890,11 +1977,12 @@ export class Unit {
                             // Fade out over last 15 seconds
                             float fadeStart = LIFETIME - 15.0;
                             if (age > fadeStart) {
-                                float fade = (age - fadeStart) / 15.0;
-                                diffuseColor.rgb = mix(diffuseColor.rgb * baseBrightness, vec3(1.0), fade);
+                                float fade = (age - fadeStart) / 15.0; // 0 to 1
+                                // Fade from targetColor to White/Invisible
+                                diffuseColor.rgb = mix(targetColor, vec3(1.0), fade);
                             } else {
-                                // Apply base brightness (makes tracks lighter/more transparent)
-                                diffuseColor.rgb = diffuseColor.rgb * baseBrightness;
+                                // Just target color (with user opacity applied)
+                                diffuseColor.rgb = targetColor;
                             }
                         }
                         // Note: With Multiply blending, overlapping tracks will darken more
@@ -1949,8 +2037,14 @@ export class Unit {
             const pBL = getWheelPos(-1, -1);
             const pBR = getWheelPos(1, -1);
 
-            // Dust
-            this.generateDustParticles(pFL, pFR);
+            // Dust Logic (User Request: Frequency Slider Controlled)
+            this.dustSpawnTimer += dt;
+            const interval = this.dustSpawnInterval || 0.03;
+
+            if (this.dustSpawnTimer >= interval) {
+                this.generateDustParticles(pFL, pFR);
+                this.dustSpawnTimer = 0;
+            }
 
             // Update InstancedMesh (4 instances)
             const dummy = new THREE.Object3D();
@@ -2031,6 +2125,9 @@ export class Unit {
         // CHECK TOGGLE (Optimization: Don't spawn if invisible)
         if (Unit.enableDust === false) return;
 
+        // CHECK UNDERWATER (User Request: No dust in water)
+        if (this.isUnderwater) return;
+
         // CHECK DISTANCE
         let distToCam = 0;
         if (this.game && this.game.camera) {
@@ -2057,8 +2154,8 @@ export class Unit {
                 map: this.dustTexture,
                 color: 0xddccbb,
                 transparent: true,
-                // User Request: "kezdetben is 50% transparenciája" (Opacity = 0.5)
-                opacity: 0.5,
+                // User Request: Dust transparency controlled by dustOpacity property
+                opacity: this.dustOpacity || 0.5,
                 depthWrite: false,
                 side: THREE.FrontSide,
             });
@@ -2095,7 +2192,7 @@ export class Unit {
                 lifetime: lifeTime,
                 // User Request: 20x growth (size * 20)
                 maxSize: size * 20.0,
-                startOpacity: 0.3, // More visible
+                startOpacity: this.dustOpacity || 0.5, // Use configurable opacity
             });
         };
 
@@ -2198,4 +2295,5 @@ export class Unit {
             }
         }
     }
+
 }

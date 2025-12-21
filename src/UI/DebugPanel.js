@@ -105,6 +105,35 @@ export class DebugPanel {
             }
         });
 
+        // === DUST PARTICLES CONTROLS ===
+        const dustFolder = folder.addFolder({ title: 'Dust Particles', expanded: true });
+        const dustConfig = {
+            opacity: 0.1,
+            spawnRate: 0.03
+        };
+
+        dustFolder.addBinding(dustConfig, 'opacity', {
+            min: 0.01, max: 0.5, step: 0.01, label: 'Transparency'
+        }).on('change', (ev) => {
+            console.error('[Dust] Opacity changed to:', ev.value);
+            if (this.game.units) {
+                this.game.units.forEach(u => {
+                    if (u) u.dustOpacity = ev.value;
+                });
+            }
+        });
+
+        dustFolder.addBinding(dustConfig, 'spawnRate', {
+            min: 0.01, max: 0.2, step: 0.01, label: 'Frequency (lower=more)'
+        }).on('change', (ev) => {
+            console.error('[Dust] Spawn rate changed to:', ev.value);
+            if (this.game.units) {
+                this.game.units.forEach(u => {
+                    if (u) u.dustSpawnInterval = ev.value;
+                });
+            }
+        });
+
         // TRACKS (Static Flag + Group Visibility)
         folder.addBinding(toggles, 'tracks').on('change', (ev) => {
             Unit.enableTracks = ev.value;
@@ -112,6 +141,37 @@ export class DebugPanel {
             if (this.game.units) {
                 this.game.units.forEach(u => {
                     if (u.trackGroup) u.trackGroup.visible = ev.value;
+                });
+            }
+        });
+
+        // === TRACK CONTROLS ===
+        const trackFolder = folder.addFolder({ title: 'Track Controls', expanded: true });
+        const trackConfig = {
+            opacity: 0.1,
+            height: 0.02
+        };
+
+        trackFolder.addBinding(trackConfig, 'opacity', {
+            min: 0.0, max: 1.0, step: 0.05, label: 'Opacity'
+        }).on('change', (ev) => {
+            if (this.game.units) {
+                this.game.units.forEach(u => {
+                    u.trackOpacity = ev.value;
+                    if (u.trackInstancedMesh && u.trackInstancedMesh.material && u.trackInstancedMesh.material.userData.shader && u.trackInstancedMesh.material.userData.shader.uniforms.uTrackOpacity) {
+                        // Update shader uniform
+                        u.trackInstancedMesh.material.userData.shader.uniforms.uTrackOpacity.value = ev.value;
+                    }
+                });
+            }
+        });
+
+        trackFolder.addBinding(trackConfig, 'height', {
+            min: 0.01, max: 0.1, step: 0.005, label: 'HeightOffset'
+        }).on('change', (ev) => {
+            if (this.game.units) {
+                this.game.units.forEach(u => {
+                    u.trackHeightOffset = ev.value;
                 });
             }
         });
@@ -695,48 +755,13 @@ export class DebugPanel {
             this.game.fogOfWar.setResolution(ev.value);
         });
 
-        // === DUST PARTICLE CONTROLS ===
-        const dustParams = {
-            opacity: 0.1,
-            maxParticles: 50,
-            spawnInterval: 0.03
-        };
 
-        unitFolder.addBinding(dustParams, 'opacity', {
-            min: 0.01, max: 0.5, step: 0.01, label: 'Dust Opacity'
-        }).on('change', (ev) => {
-            console.error('[Debug] Dust opacity changed to:', ev.value, 'units:', this.game.units?.length);
-            // Apply to all units
-            this.game.units.forEach(unit => {
-                if (unit) unit.dustOpacity = ev.value;
-            });
-        });
-
-        unitFolder.addBinding(dustParams, 'maxParticles', {
-            min: 0, max: 100, step: 5, label: 'Dust Density'
-        }).on('change', (ev) => {
-            // Apply to all units
-            this.game.units.forEach(unit => {
-                if (unit) unit.dustMaxParticles = ev.value;
-            });
-        });
-
-        unitFolder.addBinding(dustParams, 'spawnInterval', {
-            min: 0.01, max: 0.2, step: 0.01, label: 'Spawn Rate (lower=more)'
-        }).on('change', (ev) => {
-            // Apply to all units
-            this.game.units.forEach(unit => {
-                if (unit) unit.dustSpawnInterval = ev.value;
-            });
-        });
-
-        const fowFolder = unitFolder.addFolder({ title: 'FOW Debug' });
 
         const debugParams = {
             showTexture: false
         };
 
-        fowFolder.addBinding(debugParams, 'showTexture', {
+        unitFolder.addBinding(debugParams, 'showTexture', {
             label: 'Show Texture Map'
         }).on('change', (ev) => {
             this.game.textureDebugger.enabled = ev.value;
@@ -751,28 +776,28 @@ export class DebugPanel {
             hiddenColor: { r: 0, g: 0, b: 0 }
         };
 
-        fowFolder.addBinding(params, 'uvScaleX', { min: 0.1, max: 5.0 }).on('change', (ev) => {
+        unitFolder.addBinding(params, 'uvScaleX', { min: 0.1, max: 5.0 }).on('change', (ev) => {
             if (this.game.planet.mesh.material.materialShader) {
                 this.game.planet.mesh.material.materialShader.uniforms.uUVScale.value.x = ev.value;
             }
         });
-        fowFolder.addBinding(params, 'uvScaleY', { min: 0.1, max: 5.0 }).on('change', (ev) => {
+        unitFolder.addBinding(params, 'uvScaleY', { min: 0.1, max: 5.0 }).on('change', (ev) => {
             if (this.game.planet.mesh.material.materialShader) {
                 this.game.planet.mesh.material.materialShader.uniforms.uUVScale.value.y = ev.value;
             }
         });
-        fowFolder.addBinding(params, 'uvOffsetX', { min: -1.0, max: 1.0 }).on('change', (ev) => {
+        unitFolder.addBinding(params, 'uvOffsetX', { min: -1.0, max: 1.0 }).on('change', (ev) => {
             if (this.game.planet.mesh.material.materialShader) {
                 this.game.planet.mesh.material.materialShader.uniforms.uUVOffset.value.x = ev.value;
             }
         });
-        fowFolder.addBinding(params, 'uvOffsetY', { min: -1.0, max: 1.0 }).on('change', (ev) => {
+        unitFolder.addBinding(params, 'uvOffsetY', { min: -1.0, max: 1.0 }).on('change', (ev) => {
             if (this.game.planet.mesh.material.materialShader) {
                 this.game.planet.mesh.material.materialShader.uniforms.uUVOffset.value.y = ev.value;
             }
         });
 
-        fowFolder.addBinding(params, 'debugMode', {
+        unitFolder.addBinding(params, 'debugMode', {
             options: { Normal: 0, UV: 1, Texture: 2 }
         }).on('change', (ev) => {
             if (this.game.planet.mesh.material.materialShader) {
@@ -780,7 +805,7 @@ export class DebugPanel {
             }
         });
 
-        fowFolder.addBinding(params, 'hiddenColor').on('change', (ev) => {
+        unitFolder.addBinding(params, 'hiddenColor').on('change', (ev) => {
             if (this.game.planet.mesh.material.materialShader) {
                 this.game.planet.mesh.material.materialShader.uniforms.uFowColor.value.setRGB(ev.value.r, ev.value.g, ev.value.b);
             }

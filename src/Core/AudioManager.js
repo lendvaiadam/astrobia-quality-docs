@@ -180,7 +180,40 @@ export class AudioManager {
             }
         }
         this.pendingUnitSounds = [];
-        console.log("[Audio] All audio started after user gesture");
+        console.error("[Audio] All audio started after user gesture");
+
+        // RETRY MECHANISM: If music didn't start, retry periodically
+        if (!this.spaceSound?.isPlaying && !this._retryInterval) {
+            console.error('[Audio] Music not playing yet, setting up retry...');
+            this._retryCount = 0;
+            this._retryInterval = setInterval(() => {
+                this._retryCount++;
+                console.error('[Audio] Retry attempt', this._retryCount);
+
+                // Check if buffer is now available
+                if (this.spaceSound && this.spaceSound.buffer && !this.spaceSound.isPlaying) {
+                    this.spaceSoundReady = true;
+                    try {
+                        this.spaceSound.play();
+                        console.error('[Audio] Music started on retry!');
+                    } catch (e) {
+                        console.error('[Audio] Retry play error:', e);
+                    }
+                }
+
+                if (this.atmoSound && this.atmoSound.buffer && !this.atmoSound.isPlaying) {
+                    this.atmoSoundReady = true;
+                    this.atmoSound.play();
+                }
+
+                // Stop retrying after success or 10 attempts
+                if (this.spaceSound?.isPlaying || this._retryCount >= 10) {
+                    clearInterval(this._retryInterval);
+                    this._retryInterval = null;
+                    console.error('[Audio] Retry mechanism stopped, isPlaying:', this.spaceSound?.isPlaying);
+                }
+            }, 1000);
+        }
     }
 
     // Check if music is ready to play

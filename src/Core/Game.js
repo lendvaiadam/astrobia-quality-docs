@@ -68,17 +68,17 @@ export class Game {
         // Camera
         this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-        // Lighting
-        // Ambient: Dim base light for shadow side (simulates space ambient)
-        const ambientLight = new THREE.AmbientLight(0x334466, 0.15);
+        // LIGHTING SETUP
+        // Increased ambient light for better visibility in shadow (was 0.15)
+        const ambientLight = new THREE.AmbientLight(0x405060, 0.6);
         this.scene.add(ambientLight);
 
         // Hemisphere Light: Subtle sky/ground color difference
         const hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x444422, 0.2);
         this.scene.add(hemiLight);
 
-        // SUNLIGHT: Main directional light for day/night
-        const sunLight = new THREE.DirectionalLight(0xfffaf0, 2.0); // Warm white
+        // Main Sun Light - slightly brighter (was 2.0)
+        const sunLight = new THREE.DirectionalLight(0xfffaf0, 2.3); // Warm white
         sunLight.position.set(400, 0, 0); // Pure side = exact 50/50 light/shadow
         sunLight.castShadow = true;
         sunLight.shadow.mapSize.width = 4096;
@@ -109,6 +109,9 @@ export class Game {
         // Camera Controls (System 4.0 - Clean Rebuild)
         this.cameraControls = new SphericalCameraController4(this.camera, this.renderer.domElement, this.planet);
         this.cameraControls.game = this; // Reference for unit collision
+
+        // Audio Manager
+        this.audioManager = new AudioManager();
 
         // Entities
         this.units = [];
@@ -178,8 +181,7 @@ export class Game {
         // Interaction Manager (System V3)
         this.interactionManager = new InteractionManager(this);
 
-        // Audio Manager
-        this.audioManager = new AudioManager();
+        // Audio Manager (Initialized above before loadUnits)
     }
 
     // Unit Loading handled below
@@ -1215,16 +1217,16 @@ export class Game {
             let opacity = 0.7;
 
             if (index === targetIndex) {
-                // BLUE: Current Target
-                color = 0x00aaff;
+                // ORANGE: Current Target (User request: "célzott")
+                color = 0xffaa00;
                 opacity = 1.0;
             } else if (index === targetIndex - 1) {
-                // ORANGE: Just Passed (previous waypoint)
-                color = 0xffaa00;
+                // BLUE: Just Passed (User request: "elhagyott")
+                color = 0x00aaff;
                 opacity = 0.85;
             } else if (unit.isPathClosed && targetIndex === 0 && index === unit.waypoints.length - 1) {
-                // ORANGE: Loop case - last point is "previous" when targeting first
-                color = 0xffaa00;
+                // BLUE: Loop case - last point is "previous" when targeting first
+                color = 0x00aaff;
                 opacity = 0.85;
             }
 
