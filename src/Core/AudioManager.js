@@ -297,7 +297,20 @@ export class AudioManager {
     updateUnitSounds(units) {
         units.forEach(unit => {
             const sound = this.unitSounds.get(unit);
-            if (sound && sound.isPlaying) {
+            if (!sound) return;
+
+            // FALLBACK: Start sound if ready but not playing
+            // This handles the case where startMusic() ran before sounds were loaded
+            if (sound.isReady && !sound.isPlaying && sound.buffer) {
+                try {
+                    sound.play();
+                    console.log('[Audio] Unit sound started (fallback)');
+                } catch (e) {
+                    console.error('[Audio] Failed to start unit sound:', e);
+                }
+            }
+
+            if (sound.isPlaying) {
                 // Volume based on speed
                 // Speed ~0 -> Volume 0.3 (Idle - always audible)
                 // Speed ~5 (Max) -> Volume 0.8
