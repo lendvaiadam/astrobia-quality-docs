@@ -24,6 +24,9 @@ export class DebugPanel {
 
         this.setupTerrainControls();
         this.setupUnitControls();
+
+        // Initialize shadows after async GLTF models load
+        this.initializeShadowsAndLighting();
     }
 
     setupProfiler() {
@@ -204,29 +207,18 @@ export class DebugPanel {
 
         // SHADOW OPACITY (Controlled by Ambient Light)
         // More ambient light = lighter (more transparent) shadows
-        const shadowParams = { opacity: 0.7 }; // Default 30% transparent (1.0 - 0.3)
+        const shadowParams = { opacity: 0.0 }; // Default: lightest shadows
         folder.addBinding(shadowParams, 'opacity', {
             min: 0.0, max: 1.0, step: 0.05, label: 'Shadow Opacity'
         }).on('change', (ev) => {
             // High Opacity = Dark Shadow = Low Ambient
             // Low Opacity = Light Shadow = High Ambient
-            // Base Ambient was 0.6. Let's map Opacity 1.0 -> Ambient 0.2, Opacity 0.0 -> Ambient 1.5
-            const ambientIntensity = THREE.MathUtils.lerp(1.5, 0.2, ev.value);
-            if (this.game.ambientLight) {
+            // Manual lerp: lerp(a, b, t) = a + (b - a) * t
+            const ambientIntensity = 1.5 + (0.2 - 1.5) * ev.value;
+            if (this.game && this.game.ambientLight) {
                 this.game.ambientLight.intensity = ambientIntensity;
             }
         });
-
-        // Initial application of shadow settings
-        // Wait for next frame to ensure everything is loaded
-        setTimeout(() => {
-            this.updateShadowsState(toggles.shadows);
-            // Apply initial opacity
-            const initialAmbient = THREE.MathUtils.lerp(1.5, 0.2, shadowParams.opacity);
-            if (this.game.ambientLight) {
-                this.game.ambientLight.intensity = initialAmbient;
-            }
-        }, 100);
 
         // === GRAPHICS SETTINGS ===
         this.setupGraphicsControls();
@@ -884,6 +876,26 @@ export class DebugPanel {
                 }
             }
         }
+    }
+
+    initializeShadowsAndLighting() {
+        // GLTF models load async - wait longer and retry if needed
+        const tryInit = () => {
+            const allMeshes = [];
+            this.game.scene.traverse(obj => {
+                if (obj.isMesh) allMeshes.push(obj);
+            });
+            console.log('[ShadowInit] Found meshes:', allMeshes.length);
+
+            if (allMeshes.length > 10) { // Reasonable threshold (planet + rocks + units)
+                this.updateShadowsState(true);
+                console.log('[ShadowInit] Shadows initialized');
+            } else {
+                console.log('[ShadowInit] Not enough meshes yet, retrying...');
+                setTimeout(tryInit, 500);
+            }
+        };
+        setTimeout(tryInit, 1000);
     }
 
     regeneratePlanet() {

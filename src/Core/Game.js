@@ -71,7 +71,7 @@ export class Game {
         // LIGHTING SETUP
         // Increased ambient light for better visibility in shadow (was 0.15)
         // Increased ambient light for better visibility in shadow (was 0.15)
-        this.ambientLight = new THREE.AmbientLight(0x405060, 0.6);
+        this.ambientLight = new THREE.AmbientLight(0x405060, 0.9);
         this.scene.add(this.ambientLight);
 
         // Hemisphere Light: Subtle sky/ground color difference
@@ -292,11 +292,9 @@ export class Game {
         // Update tab active state
         this.updateTabActiveState();
 
-        // Update Panel Content if Panel is already OPEN
-        if (document.body.classList.contains('split-screen')) {
-            this.focusedUnit = unit;
-            this.updatePanelContent(unit);
-        }
+        // Update Panel Content with selected unit's command queue
+        this.focusedUnit = unit;
+        this.updatePanelContent(unit);
     }
 
     // Zoom camera to show unit's entire path with smooth transition
@@ -1545,7 +1543,9 @@ export class Game {
 
     updatePanelContent(unit) {
         const panelContent = document.querySelector('#bottom-panel .panel-content');
+        console.log('[Panel] updatePanelContent called - unit:', unit?.name, 'panelContent:', panelContent);
         if (panelContent) {
+            console.log('[Panel] panelContent found! Building HTML...');
             // Build Command Queue HTML from unit's waypoints
             let commandQueueHTML = '<div class="command-queue-list" id="command-queue-list">';
 
@@ -1663,6 +1663,7 @@ export class Game {
             `;
 
             // Setup drag reorder listeners
+            alert('About to setup drag listeners!');
             this.setupCommandQueueDragListeners();
 
             // Setup playback button listeners
@@ -1672,11 +1673,16 @@ export class Game {
 
     setupCommandQueueDragListeners() {
         const list = document.getElementById('command-queue-list');
+        console.log('[Drag] setupCommandQueueDragListeners - list:', list);
         if (!list) return;
 
         let draggedItem = null;
 
-        list.querySelectorAll('.command-item').forEach(item => {
+        const items = list.querySelectorAll('.command-item');
+        console.log('[Drag] Found items:', items.length, items);
+
+        items.forEach((item, idx) => {
+            console.log(`[Drag] Attaching listeners to item ${idx}:`, item);
             item.addEventListener('dragstart', (e) => {
                 draggedItem = item;
                 item.classList.add('dragging');
