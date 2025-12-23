@@ -1543,9 +1543,16 @@ export class Game {
 
     updatePanelContent(unit) {
         const panelContent = document.querySelector('#bottom-panel .panel-content');
-        console.log('[Panel] updatePanelContent called - unit:', unit?.name, 'panelContent:', panelContent);
+
+        // console.log('[Panel] updatePanelContent called - unit:', unit?.name, 'panelContent:', panelContent); // Removed spam log
+
+        // BLOCK UPDATES DURING DRAG to prevent DOM thrashing and killing the drag event
+        if (this.isCommandQueueDragging) {
+            return;
+        }
+
         if (panelContent) {
-            console.log('[Panel] panelContent found! Building HTML...');
+            // console.log('[Panel] panelContent found! Building HTML...');
             // Build Command Queue HTML from unit's waypoints
             let commandQueueHTML = '<div class="command-queue-list" id="command-queue-list">';
 
@@ -1689,7 +1696,10 @@ export class Game {
         });
 
         items.forEach((item) => {
+
+
             item.addEventListener('dragstart', (e) => {
+                this.isCommandQueueDragging = true; // LOCK UPDATES
                 draggedItem = item;
                 item.classList.add('dragging');
                 e.dataTransfer.effectAllowed = 'move';
@@ -1698,6 +1708,7 @@ export class Game {
             });
 
             item.addEventListener('dragend', () => {
+                this.isCommandQueueDragging = false; // UNLOCK UPDATES
                 item.classList.remove('dragging');
 
                 // Check if order changed
