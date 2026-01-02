@@ -33,7 +33,7 @@ export class FogOfWar {
                 uUnitPosition: { value: new THREE.Vector3() },
                 uVisionRadius: { value: 5.0 },
                 uPlanetRadius: { value: planetRadius },
-                uBlurAmount: { value: 0.3 }
+                uBlurAmount: { value: 0.5 } // Softer vision circle edges
             },
             vertexShader: `
                 varying vec2 vUv;

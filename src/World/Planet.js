@@ -85,22 +85,25 @@ export class Planet {
                 float isVisible = visible.r;
                 float isExplored = explored.r;
                 
-                vec3 finalColor = gl_FragColor.rgb;
+                vec3 originalColor = gl_FragColor.rgb;
                 
-                if (isVisible > 0.1) {
-                    // Visible - bright water
-                    finalColor = finalColor * 1.2;
-                } else if (isExplored > 0.1) {
-                    // Explored - dark memory water
-                    float gray = dot(finalColor, vec3(0.299, 0.587, 0.114));
-                    vec3 desaturated = vec3(gray);
-                    finalColor = mix(finalColor, desaturated, 0.8) * 0.3;
-                } else {
-                    // Unexplored - invisible
-                    discard;
-                }
+                // Calculate color states
+                vec3 brightColor = originalColor * 1.2; // Visible - bright water
+                float gray = dot(originalColor, vec3(0.299, 0.587, 0.114));
+                vec3 desaturated = vec3(gray);
+                vec3 dimColor = mix(originalColor, desaturated, 0.8) * 0.3; // Explored - dark memory
                 
-                gl_FragColor = vec4(finalColor, gl_FragColor.a);
+                // Smooth transitions using smoothstep (feathered edges)
+                float exploredFactor = smoothstep(0.0, 0.5, isExplored); // Wide feather for FOW edge
+                float visibleFactor = smoothstep(0.05, 0.35, isVisible);
+                
+                // Discard unexplored water
+                if (exploredFactor < 0.01) discard;
+                
+                // Layered blend: dim → bright
+                vec3 finalColor = mix(dimColor, brightColor, visibleFactor);
+                
+                gl_FragColor = vec4(finalColor, gl_FragColor.a * exploredFactor);
                 #include <dithering_fragment>
                 `
             );
@@ -187,7 +190,7 @@ export class Planet {
             shader.uniforms.uUVOffset = { value: new THREE.Vector2(0, 0) };
             shader.uniforms.uDebugMode = { value: 0 };
             shader.uniforms.uFowColor = { value: new THREE.Color(0x000000) };
-            shader.uniforms.uFowSmoothing = { value: 0.0 }; // 0.0 = OFF, >0.0 = Blur Radius
+            shader.uniforms.uFowSmoothing = { value: 0.8 }; // Edge feather radius
 
             // Tri-planar texturing uniforms
             shader.uniforms.uTextureScale = { value: 0.5 }; // World-space texture repeat
@@ -206,26 +209,19 @@ export class Planet {
                 uniform float uBlendSharpness;
                 uniform float uFowSmoothing;
 
-                // Smooth FOW sampling (3x3 Blur)
+                // Optimized FOW sampling - uses hardware bilinear + 4-tap for soft edges
                 vec4 sampleFowSmooth(sampler2D tex, vec2 uv) {
                     if (uFowSmoothing <= 0.01) return texture2D(tex, uv);
-
-                    vec4 sum = vec4(0.0);
-                    vec2 step = vec2(uFowSmoothing * 0.005); 
-
-                    sum += texture2D(tex, uv + vec2(-step.x, -step.y)) * 1.0;
-                    sum += texture2D(tex, uv + vec2(0.0,     -step.y)) * 2.0;
-                    sum += texture2D(tex, uv + vec2(step.x,  -step.y)) * 1.0;
                     
-                    sum += texture2D(tex, uv + vec2(-step.x, 0.0))     * 2.0;
-                    sum += texture2D(tex, uv)                          * 4.0;
-                    sum += texture2D(tex, uv + vec2(step.x,  0.0))     * 2.0;
+                    // Simple 4-tap cross pattern (faster than 9-tap)
+                    float offset = uFowSmoothing * 0.002;
+                    vec4 center = texture2D(tex, uv);
+                    vec4 right = texture2D(tex, uv + vec2(offset, 0.0));
+                    vec4 up = texture2D(tex, uv + vec2(0.0, offset));
+                    vec4 left = texture2D(tex, uv - vec2(offset, 0.0));
+                    vec4 down = texture2D(tex, uv - vec2(0.0, offset));
                     
-                    sum += texture2D(tex, uv + vec2(-step.x, step.y))  * 1.0;
-                    sum += texture2D(tex, uv + vec2(0.0,     step.y))  * 2.0;
-                    sum += texture2D(tex, uv + vec2(step.x,  step.y))  * 1.0;
-                    
-                    return sum / 16.0;
+                    return (center * 2.0 + right + up + left + down) / 6.0;
                 }
                 
                 // Tri-planar sampling function
@@ -287,20 +283,25 @@ export class Planet {
                     return;
                 }
                 
-                vec3 finalColor = gl_FragColor.rgb;
+                vec3 originalColor = gl_FragColor.rgb;
                 
-                if (isVisible > 0.1) {
-                    // Visible - keep original water color
-                } else if (isExplored > 0.1) {
-                    // Explored but not visible - 50% darker, 50% desaturated
-                    float gray = dot(finalColor, vec3(0.299, 0.587, 0.114));
-                    vec3 desaturated = vec3(gray);
-                    // 50% desaturation, 50% darkening
-                    finalColor = mix(finalColor, desaturated, 0.5) * 0.5;
-                } else {
-                    // Unexplored terrain - SOLID BLACK (stars render on top)
-                    finalColor = vec3(0.0, 0.0, 0.0);
-                }
+                // Calculate luminance to detect shadows (darker = more shadow)
+                float luminance = dot(originalColor, vec3(0.299, 0.587, 0.114));
+                
+                // Calculate color states - PRESERVE shadows by keeping originalColor's lighting
+                vec3 brightColor = originalColor; // Visible - keeps shadows from Three.js
+                vec3 desaturated = vec3(luminance);
+                vec3 dimColor = mix(originalColor, desaturated, 0.5) * 0.5; // Explored - dim but keeps shadow shape
+                vec3 blackColor = vec3(0.0); // Unexplored - black
+                
+                // Smooth transitions using smoothstep (feathered edges)
+                float exploredFactor = smoothstep(0.0, 0.5, isExplored); // Wide feather for FOW edge
+                float visibleFactor = smoothstep(0.05, 0.35, isVisible);
+                
+                // Layered blend: unexplored → explored → visible
+                // Key: brightColor ALREADY contains shadow from Three.js lighting
+                vec3 finalColor = mix(blackColor, dimColor, exploredFactor);
+                finalColor = mix(finalColor, brightColor, visibleFactor);
                 
                 gl_FragColor = vec4(finalColor, 1.0);
                 #include <dithering_fragment>
