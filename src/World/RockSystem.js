@@ -108,30 +108,26 @@ export class RockSystem {
                     float isVisible = visible.r; 
                     float isExplored = explored.r;
                     
-                    // Smooth transitions using smoothstep (feathered edges)
-                    // WIDER feather band: 0.0 to 0.6 for explored boundary
+                    // Smooth transitions
                     float exploredFactor = smoothstep(0.0, 0.6, isExplored);
                     float visibleFactor = smoothstep(0.05, 0.4, isVisible);
                     
-                    // Unexplored rocks = TRANSPARENT (discard)
+                    // Unexplored = transparent
                     if (exploredFactor < 0.01) {
                         discard;
                     }
                     
                     vec3 originalColor = gl_FragColor.rgb;
                     
-                    // Calculate color states
-                    vec3 brightColor = originalColor; // Visible - full brightness
+                    // Visible = full, Explored = dark
+                    vec3 brightColor = originalColor;
                     float gray = dot(originalColor, vec3(0.299, 0.587, 0.114));
                     gray = pow(gray, 1.5);
                     vec3 desaturated = vec3(gray);
                     vec3 nightColor = vec3(0.02, 0.04, 0.08); 
-                    vec3 dimColor = mix(originalColor, desaturated, 0.95) * 0.2 + nightColor * 0.1; // Explored - dark
+                    vec3 dimColor = mix(originalColor, desaturated, 0.95) * 0.2 + nightColor * 0.1;
                     
-                    // Layered blend with feather
                     vec3 finalColor = mix(dimColor, brightColor, visibleFactor);
-                    
-                    // Alpha: ALWAYS 1.0 for explored rocks (no transparency)
                     gl_FragColor = vec4(finalColor, 1.0);
                     
                     #include <dithering_fragment>

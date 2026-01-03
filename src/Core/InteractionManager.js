@@ -391,6 +391,12 @@ export class InteractionManager {
                                     unit.pathIndex = bestMergeIdx + 1; // Resume after merge point
                                     console.log('[Transition] Created arc with', arcPoints.length, 'points');
                                 }
+                            } else {
+                                // NO velocityDirection = unit was stationary (but isFollowingPath was true due to looping)
+                                // Just start moving directly toward the dragged waypoint
+                                unit.isFollowingPath = true;
+                                unit.pathIndex = 0; // Start from path beginning
+                                console.log('[MarkerDrag] No velocity, starting path from index 0');
                             }
 
 
