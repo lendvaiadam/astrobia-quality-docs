@@ -391,24 +391,19 @@ export class InteractionManager {
                                     unit.pathIndex = bestMergeIdx + 1; // Resume after merge point
                                     console.log('[Transition] Created arc with', arcPoints.length, 'points');
                                 }
-                            } else {
-                                // NO velocityDirection = unit was stationary (but isFollowingPath was true due to looping)
-                                // Just start moving directly toward the dragged waypoint
-                                unit.isFollowingPath = true;
-                                unit.pathIndex = 0; // Start from path beginning
-                                console.log('[MarkerDrag] No velocity, starting path from index 0');
                             }
 
 
                             // Just ensure manual panel update if needed
                         }
                     } else {
-                        // Unit was NOT following path (stationary at a station)
+                        // Unit was NOT following path (stationary at a station, possibly waiting)
                         // After dragging a waypoint, start moving again
                         if (unit.path && unit.path.length > 0) {
                             unit.isFollowingPath = true;
+                            unit.waitTimer = 0; // CRITICAL: Cancel any active wait timer
                             unit.pathIndex = 0; // Start from beginning of path
-                            console.log('[MarkerDrag] Unit was stationary, starting path from index 0');
+                            console.log('[MarkerDrag] Unit was stationary, canceling wait, starting path from index 0');
                         }
                     }
 
