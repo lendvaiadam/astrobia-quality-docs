@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Launcher - Version Select</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            color: #00bcd4;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .container {
+            background-color: #1e1e1e;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .version-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .version-item {
+            background-color: #2a2a2a;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s, background-color 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            border-left: 5px solid #444;
+        }
+
+        .version-item:hover {
+            transform: translateX(5px);
+            background-color: #333;
+            border-left-color: #00bcd4;
+        }
+
+        .version-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .version-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        .version-date {
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-top: 4px;
+        }
+
+        .play-btn {
+            background-color: #00bcd4;
+            color: #121212;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        .latest-dev {
+            border-left-color: #ff9800;
+            margin-bottom: 2rem;
+        }
+
+        .latest-dev .version-name {
+            color: #ff9800;
+        }
+
+        .latest-dev .play-btn {
+            background-color: #ff9800;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>🚀 Game Versions</h1>
+
+        <ul class="version-list">
+            <!-- Latest Dev Build (Current code) -->
+            <a href="game.html" class="version-item latest-dev">
+                <div class="version-info">
+                    <span class="version-name">⚡ Latest Development Build</span>
+                    <span class="version-date">Run the current working version</span>
+                </div>
+                <div class="play-btn">PLAY DEV</div>
+            </a>
+        </ul>
+
+        <div style="margin: 1rem 0; font-size: 0.9rem; color: #888; text-transform: uppercase; font-weight: bold;">
+            Archived Versions
+        </div>
+
+        <ul class="version-list" id="archived-list">
+            <li id="loading" style="text-align: center; color: #666;">Loading versions...</li>
+        </ul>
+    </div>
+
+    <script>
+        async function loadVersions() {
+            const list = document.getElementById('archived-list');
+            try {
+                // Cache buster to ensure fresh list
+                const response = await fetch('public/versions.json?t=' + Date.now());
+                if (!response.ok) throw new Error("No versions found");
+
+                const versions = await response.json();
+
+                list.innerHTML = ''; // Clear loading
+
+                if (versions.length === 0) {
+                    list.innerHTML = '<li style="text-align: center; padding: 1rem; color: #666;">No archived versions yet.</li>';
+                    return;
+                }
+
+                versions.forEach(ver => {
+                    const date = new Date(ver.date).toLocaleString();
+                    const item = document.createElement('a');
+                    item.href = ver.path;
+                    item.className = 'version-item';
+                    item.innerHTML = `
+                        <div class="version-info">
+                            <span class="version-name">${ver.name}</span>
+                            <span class="version-date">📅 ${date}</span>
+                        </div>
+                        <div class="play-btn">PLAY</div>
+                    `;
+                    list.appendChild(item);
+                });
+
+            } catch (error) {
+                console.warn("Could not load versions:", error);
+                list.innerHTML = '<li style="text-align: center; padding: 1rem; color: #666;">No archived versions found (versions/versions.json missing).</li>';
+            }
+        }
+
+        loadVersions();
+    </script>
+
+</body>
+
+</html>
