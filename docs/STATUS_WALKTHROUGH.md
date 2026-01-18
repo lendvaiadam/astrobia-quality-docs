@@ -3,7 +3,7 @@
 ## NOW
 (Current focus: Workflow Finalization)
 
-## WORK PACKAGE ROLE MAP (BINDING)
+## WORK PACKAGE ROLE MAP (BINDING) <!-- ops-sync: verified -->
 - Antigravity MUST assign and publish the Role Map for each Work Package.
 - Ádám MAY override role assignments by explicit instruction.
 - Execution MUST NOT start until the Role Map is published here.
