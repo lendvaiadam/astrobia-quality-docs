@@ -74,6 +74,7 @@ You MUST read these binding specs from `publish/quality_docs_snapshot_2026-01-14
   - `ASTROBIA_CANONICAL_FEATURE_MATERA_TRANSPORT_2026-01-13.md`
   - `ASTROBIA_CANONICAL_FEATURE_TERRAIN_SHAPING_2026-01-13.md`
   - `ASTROBIA_CANONICAL_FEATURE_UNIT_CARRIER_2026-01-13.md`
+  - `ASTROBIA_CANONICAL_FEATURE_UNIT_DESIGNER_2026-01-18.md`
 
 ### Read-only / Write protocol (BINDING)
 - **ChatGPT**: GitHub read-only; any file edits must be executed by Antigravity via commit+push, returning commit hash + raw links.

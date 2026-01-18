@@ -56,6 +56,7 @@ OPENING PACK (RAW LINKS)
 - FEATURE_TRANSPORT: https://raw.githubusercontent.com/lendvaiadam/asterobia/main/publish/quality_docs_snapshot_2026-01-14/spec_sources/ASTROBIA_CANONICAL_FEATURE_MATERA_TRANSPORT_2026-01-13.md
 - FEATURE_TERRAIN_SHAPING: https://raw.githubusercontent.com/lendvaiadam/asterobia/main/publish/quality_docs_snapshot_2026-01-14/spec_sources/ASTROBIA_CANONICAL_FEATURE_TERRAIN_SHAPING_2026-01-13.md
 - FEATURE_UNIT_CARRIER: https://raw.githubusercontent.com/lendvaiadam/asterobia/main/publish/quality_docs_snapshot_2026-01-14/spec_sources/ASTROBIA_CANONICAL_FEATURE_UNIT_CARRIER_2026-01-13.md
+- FEATURE_UNIT_DESIGNER: https://raw.githubusercontent.com/lendvaiadam/asterobia/main/publish/quality_docs_snapshot_2026-01-14/spec_sources/ASTROBIA_CANONICAL_FEATURE_UNIT_DESIGNER_2026-01-18.md
 
 ## Baseline Index
 - https://raw.githubusercontent.com/lendvaiadam/asterobia/baseline/pre-claude-stable/docs/CANONICAL_SOURCES_INDEX.md
