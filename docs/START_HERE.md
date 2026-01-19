@@ -152,6 +152,12 @@ When Ádám proposes a new idea, the receiving agent MUST:
    - SOON/LATER → add to docs/IDEA_LOG.md with suggested release + dependencies
 5) If “will definitely be needed later”: add a “Forward-compat constraint” so current work avoids rework.
 
+## BINDING: NO FORCE PUSH
+Direct pushes to `main` are allowed ONLY for document updates by trusted agents.
+**FORCE PUSH TO MAIN IS STRICTLY FORBIDDEN.**
+All significant changes must come via Pull Request merge.
+Recurrence of missing files due to overwrite will result in immediate revocation of direct push privileges.
+
 ## CHANGE BROADCAST (BINDING)
 Every agent reply must include a 1–3 bullet broadcast:
 - What changed (files / decisions)

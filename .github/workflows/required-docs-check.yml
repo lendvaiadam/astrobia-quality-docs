@@ -1,0 +1,37 @@
+name: Required Docs Check
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  check-manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Check for Critical Files
+        run: |
+          missing_files=0
+          
+          # Read manifest and check existence only of non-checked items if we parsed markdown
+          # simpler approach: Hardcode the critical list or read the manifest line by line.
+          # Here we just check the list defined IN the manifest by grep.
+          
+          echo "Checking files listed in docs/REQUIRED_DOCS_MANIFEST.md..."
+          
+          # Grep for lines starting with "- [x] [" and extract path
+          grep -oP '(?<=- \[x\] \[)[^]]*' docs/REQUIRED_DOCS_MANIFEST.md | while read -r file; do
+            if [ ! -f "$file" ]; then
+              echo "::error::MISSING CRITICAL FILE: $file"
+              missing_files=1
+            else
+              echo "OK: $file"
+            fi
+          done
+          
+          if [ $missing_files -eq 1 ]; then
+            exit 1
+          fi
