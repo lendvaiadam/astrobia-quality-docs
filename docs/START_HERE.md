@@ -95,8 +95,11 @@ You MUST read these binding specs from `publish/quality_docs_snapshot_2026-01-14
 ## Workflow (how we work)
 - Agents communicate through Ádám (copy/paste relay).
 - Canonical docs are binding. If anything conflicts: Canonical > Audit notes > Chat.
-- Implementation is done as small PR branches (prX-...). Merged to main by Antigravity or the implementing agent AFTER Ádám’s explicit PASS/approval in chat.
+- Implementation is done as small PR branches (prX-...). Merged to main by Antigravity or the implementing agent AFTER Ádám’s explicit PASS/approval in chat. Ádám never performs Git operations.
 - **Mailbox Restriction**: MAILBOX is agent-to-agent output sync only. Never instruct Ádám to read it. Delivery of prompts/info to other agents must happen via Ádám in chat (paste-ready), with rationale.
+
+## Language Rules (Binding)
+- Do NOT add Hungarian translations to coding prompts. English-only for inter-agent coding prompts. Hungarian is only for Ádám-facing summaries and HU test scenarios.
 - **Planning Protocol (Binding)**: [docs/PLANNING_PROTOCOL.md](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/PLANNING_PROTOCOL.md). All implementation work must follow this.
 - **Fresh session rule (binding)**: Open [docs/STATUS_WALKTHROUGH.md](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/STATUS_WALKTHROUGH.md) and follow the **## NOW** section before asking any questions.
 - **Spec Update Rule**: After any Release is completed and verified: update [CURRENT_SYSTEM_SPEC](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/CURRENT_SYSTEM_SPEC.md) with what changed.
