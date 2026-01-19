@@ -2,7 +2,7 @@
 
 **Orchestration Tool:** Windows Terminal (Multi-Tab/Pane) + Git
 **Worker Type:** 5x Claude Code (CLI) or 5x Web Instances
-**Controller:** Antigravity (Role Assignment) + Ádám (Execution)
+**Controller:** Antigravity (Role Assignment) + Ádám (Ideas/Decisions/Testing)
 
 ---
 
@@ -38,7 +38,7 @@ Run in 5 separate terminal tabs:
 ### **STOP (Merge & Teardown)**
 1. [ ] **Worker:** Push Branch + verify CI (if any).
 2. [ ] **Antigravity:** Approve Merge (PASS).
-3. [ ] **Worker/Ádám:** Merge to main.
+3. [ ] **Worker/Antigravity:** Merge to main.
 4. [ ] **Orchestration:** `git checkout main`, `git branch -d wX-task-name`.
 
 ---
