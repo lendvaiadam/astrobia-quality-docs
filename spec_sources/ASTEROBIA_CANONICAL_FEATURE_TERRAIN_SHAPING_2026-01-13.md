@@ -1,4 +1,4 @@
-# Astrobia — Feature Spec: Terrain Shaping (formerly “Surface Shaping”)
+﻿# Asterobia — Feature Spec: Terrain Shaping (formerly “Surface Shaping”)
 **Status:** CANONICAL  
 **Date:** 2026-01-13  
 **Applies to:** Demo 1.0 + forward-compatible
@@ -10,9 +10,9 @@ If any older doc/code conflicts with this file, **this file wins** for Terrain S
 This file describes the intended behavior in enough detail for implementation, but avoids locking into a single terrain-tech approach. Implementation suggestions are **non-binding**.
 
 ### 0.1 Related canonical documents
-- `ASTROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md`
-- `ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
-- `ASTROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md` (movement + command queue timeline concepts)
+- `ASTEROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md`
+- `ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
+- `ASTEROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md` (movement + command queue timeline concepts)
 
 ---
 

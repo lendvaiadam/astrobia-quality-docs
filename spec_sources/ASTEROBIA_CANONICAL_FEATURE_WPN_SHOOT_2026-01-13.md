@@ -1,5 +1,5 @@
-# Astrobia Feature Spec — WPN_SHOOT (Weapon / Shooting)
-**Project:** Astrobia Demo 1.0  
+﻿# Asterobia Feature Spec — WPN_SHOOT (Weapon / Shooting)
+**Project:** Asterobia Demo 1.0  
 **Doc Type:** Feature Implementation Specification (Claude Code reference)  
 **Feature ID:** `WPN_SHOOT`  
 **Status:** STUB (core contract defined; detailed behavior TBD)  
@@ -125,7 +125,7 @@ To be defined when detailed behavior is specified:
 
 ## 8) Cross‑References
 
-- **Central system spec:** `ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
+- **Central system spec:** `ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
 - **Command Queue Timeline:** §8.6 of GRFDTRDPU System
 - **Related features:**
   - `SUP_SHIELD.md` (defense)

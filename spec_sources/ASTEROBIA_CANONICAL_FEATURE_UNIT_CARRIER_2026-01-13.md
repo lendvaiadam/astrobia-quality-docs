@@ -1,4 +1,4 @@
-# Astrobia — Feature Spec: Unit Carrier
+﻿# Asterobia — Feature Spec: Unit Carrier
 **Status:** CANONICAL  
 **Date:** 2026-01-13  
 **Applies to:** Demo 1.0 + forward-compatible
@@ -7,9 +7,9 @@
 This document is the **canonical** behavior spec for the **Unit Carrier** feature.
 
 ### 0.1 Related canonical documents
-- `ASTROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md`
-- `ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
-- `ASTROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md` (movement + command queue)
+- `ASTEROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md`
+- `ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
+- `ASTEROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md` (movement + command queue)
 
 ---
 

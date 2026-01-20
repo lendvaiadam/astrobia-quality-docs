@@ -1,8 +1,8 @@
-# ASTROBIA — MASTER BIBLE (CANONICAL INDEX)
+﻿# Asterobia — MASTER BIBLE (CANONICAL INDEX)
 **Version:** CANONICAL_SET_2026-01-13  
 **Date:** 2026-01-13  
 **Status:** CANONICAL  
-**Audience:** Claude Code / contributors implementing Astrobia systems
+**Audience:** Claude Code / contributors implementing Asterobia systems
 
 ---
 
@@ -10,15 +10,15 @@
 
 This repository contains multiple documents produced over time. To prevent “mixed canon,” use this precedence order:
 
-1. **This file** (`ASTROBIA — MASTER BIBLE (CANONICAL INDEX)`)  
+1. **This file** (`Asterobia — MASTER BIBLE (CANONICAL INDEX)`)  
    Canonical for *project philosophy, system boundaries, cross-system invariants, and file ownership map*.
 
-2. **Engine contract**: `ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`  
+2. **Engine contract**: `ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`  
    Canonical for the **G‑R‑F‑Tr‑D‑P‑U** pipeline mechanics, global math, data contracts, and the action scheduler/command queue rules.
 
 3. **Feature specs** (one file per feature; these are canonical for feature behavior + API):  
-   - `ASTROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md`  
-   - `ASTROBIA_CANONICAL_FEATURE_PERCEPTION_OPTICAL_VISION_2026-01-13.md`  
+   - `ASTEROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md`  
+   - `ASTEROBIA_CANONICAL_FEATURE_PERCEPTION_OPTICAL_VISION_2026-01-13.md`  
    - (future) additional `docs/features/**` specs (shooting, mining, storage, etc.)
 
 4. **World/runtime service specs and audits** (FogOfWar, VisionSystem, rendering constraints, etc.)  
@@ -34,7 +34,7 @@ This repository contains multiple documents produced over time. To prevent “mi
 
 This file is intentionally **not** a dump of every per-feature algorithm. Instead, it defines:
 
-- the **architectural intent** of Astrobia,
+- the **architectural intent** of Asterobia,
 - the **system boundaries** (“what lives where”),
 - the **canonical file layout** Claude must follow,
 - the **cross-system invariants** that feature implementations must not violate.
@@ -47,7 +47,7 @@ Detailed feature logic belongs in **feature spec files** (one per feature). Move
 
 ## 1) Executive summary
 
-Astrobia is an evolutionary RTS on a spherical world.
+Asterobia is an evolutionary RTS on a spherical world.
 
 - **The Logic:** Units do not “climb a static tech tree.” They evolve capabilities via the **G‑R‑F‑Tr‑D‑P‑U** pipeline.
 - **The Physics:** SimCore-driven, deterministic, heavy inertia (rover-like), with slope rules and tangent-space motion.
@@ -75,7 +75,7 @@ Astrobia is an evolutionary RTS on a spherical world.
 
 # PART II — THE EVOLUTIONARY PIPELINE (G‑R‑F‑Tr‑D‑P‑U)
 
-**Canonical reference:** `ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
+**Canonical reference:** `ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
 
 ### G — Goal system (Need generator)
 - Goals are reactive, originating from `GameEvents`.
@@ -192,7 +192,7 @@ The Central Unit is spawned at game start with the following **default blueprint
 # PART VI — MULTIPLAYER & PERSISTENCE (TARGET STATE)
 
 ## 1) Persistence requirement (canonical)
-Astrobia must support:
+Asterobia must support:
 - Re‑entering later and seeing the same world state.
 - Backend-hosted world state **and** frontend autosave/snapshot behavior.
 
@@ -206,29 +206,29 @@ Multiple authenticated users may control the same empire in real time. Concurren
 # PART VII — CANONICAL FILE OWNERSHIP MAP
 
 ## 1) Engine contract
-- `ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
+- `ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
 
 ## 2) Feature specs (canonical, organized by Command Queue Lane)
 
 ### LOCOMOTION Lane
-- `ASTROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md`
-- `ASTROBIA_CANONICAL_FEATURE_UNIT_CARRIER_2026-01-13.md`
-- `ASTROBIA_CANONICAL_FEATURE_MATERA_TRANSPORT_2026-01-13.md`
+- `ASTEROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md`
+- `ASTEROBIA_CANONICAL_FEATURE_UNIT_CARRIER_2026-01-13.md`
+- `ASTEROBIA_CANONICAL_FEATURE_MATERA_TRANSPORT_2026-01-13.md`
 - Future: `MOVE_SWIM`, `MOVE_FLY`, `MOVE_CLIMB`, `MOVE_TUNNEL`, etc.
 
 ### PERCEPTION Lane
 Perception is a top-level feature with sub-capabilities that share its allocation %.
-- `ASTROBIA_CANONICAL_FEATURE_PERCEPTION_OPTICAL_VISION_2026-01-13.md` (passive)
-- `ASTROBIA_CANONICAL_FEATURE_PERCEPTION_SUBSURFACE_SCAN_2026-01-13.md` (action, toggleable)
+- `ASTEROBIA_CANONICAL_FEATURE_PERCEPTION_OPTICAL_VISION_2026-01-13.md` (passive)
+- `ASTEROBIA_CANONICAL_FEATURE_PERCEPTION_SUBSURFACE_SCAN_2026-01-13.md` (action, toggleable)
 - Future: `PERCEPTION_THERMAL`, `PERCEPTION_ACOUSTIC`, etc.
 
 ### TOOL Lane
-- `ASTROBIA_CANONICAL_FEATURE_TERRAIN_SHAPING_2026-01-13.md`
-- `ASTROBIA_CANONICAL_FEATURE_MATERA_MINING_2026-01-13.md`
+- `ASTEROBIA_CANONICAL_FEATURE_TERRAIN_SHAPING_2026-01-13.md`
+- `ASTEROBIA_CANONICAL_FEATURE_MATERA_MINING_2026-01-13.md`
 - Future: construction, repair tools
 
 ### WEAPON Lane
-- `ASTROBIA_CANONICAL_FEATURE_WPN_SHOOT_2026-01-13.md`
+- `ASTEROBIA_CANONICAL_FEATURE_WPN_SHOOT_2026-01-13.md`
 - Future: additional weapon types
 
 ## 3) Runtime services (world-level, not features)

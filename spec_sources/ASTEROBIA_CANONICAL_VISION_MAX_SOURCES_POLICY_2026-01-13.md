@@ -1,7 +1,7 @@
-# MaxSources Cap & Deterministic Ordering (Current Behavior)
+﻿# MaxSources Cap & Deterministic Ordering (Current Behavior)
 
 > [!NOTE]
-> The **canonical VisionSource schema** is defined in `ASTROBIA_CANONICAL_FEATURE_PERCEPTION_OPTICAL_VISION_2026-01-13.md` §4.1.
+> The **canonical VisionSource schema** is defined in `ASTEROBIA_CANONICAL_FEATURE_PERCEPTION_OPTICAL_VISION_2026-01-13.md` §4.1.
 > This document describes the **runtime behavior** of the VisionSystem/Collector.
 
 ## 1) VisionSource Structure
