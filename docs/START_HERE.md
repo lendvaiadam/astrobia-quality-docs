@@ -52,6 +52,23 @@ If an agent creates a new repo file that ChatGPT must read and it is not yet lis
 - Update CHATGPT_OPENING_PACK.md to include it,
 - Push to GitHub (SYNC) and provide commit SHA + commit-SHA RAW links.
 
+## FIRST WORK PACKAGE — FULL MASTER DEVELOPMENT PLAN (BINDING)
+Before any “first steps”, PR sequencing, or Phase 0 execution planning:
+1) **Antigravity** and **Claude Code** MUST read **ALL** available project materials:
+   - every `*.md` in the repo (docs/, quality/, publish/ snapshots, baseline/ where relevant)
+   - plus the key code entrypoints needed to understand reality (e.g. `package.json`, `src/Main.js`, and any listed “entry” files in docs).
+2) Each must produce an independent **end-to-end Master Development Plan** to the final target:
+   - gameplay/feature roadmap (dependencies, unlocks, core loops)
+   - UI/UX + design pipeline (how design feeds implementation)
+   - multiplayer + backend plan (staging: local → host-authoritative → backend services)
+   - persistence/state strategy (snapshots/replay/storage)
+   - engineering architecture + repo structure implications
+   - releases/milestones with “Done When” gates
+   - test/QA strategy + risk register
+   - a 5-worker Work Package map (what can be parallelized)
+3) Output must be a single Markdown plan in chat, ending with **max 3 blocking questions**.
+Only after both Master Plans exist and are synthesized/approved do we request PR-by-PR plans.
+
 ## Fresh Session Bootstrap (BINDING)
 > **On a fresh session:** DO NOT ask questions. First read the Required Reading Set below. Then open `docs/STATUS_WALKTHROUGH.md` and execute **## NOW**. Ask only if a required link/input is missing.
 
