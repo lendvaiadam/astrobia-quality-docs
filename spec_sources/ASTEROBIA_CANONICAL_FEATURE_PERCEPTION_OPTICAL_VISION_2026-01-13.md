@@ -1,4 +1,4 @@
-# ASTROBIA — FEATURE FILE SPEC
+﻿# Asterobia — FEATURE FILE SPEC
 ## Perception Feature (Optical Vision + Fog of War Integration)
 **Status:** CANONICAL (implementation-spec source for Claude Code)  
 **Last Updated:** 2026-01-12  
@@ -9,7 +9,7 @@
 
 ## 0) Why this file exists
 
-Astrobia’s long-term architecture requires that **each Feature’s code lives in its own dedicated file** (e.g., Movement already started with `MOVE_ROLL.md`, and later Shooting, Mining, etc.). The current “Vision” behavior exists partly as a runtime system (`VisionSystem`) and partly as a renderer/service (`FogOfWar`). This file defines:
+Asterobia’s long-term architecture requires that **each Feature’s code lives in its own dedicated file** (e.g., Movement already started with `MOVE_ROLL.md`, and later Shooting, Mining, etc.). The current “Vision” behavior exists partly as a runtime system (`VisionSystem`) and partly as a renderer/service (`FogOfWar`). This file defines:
 
 1) **The boundary**: what remains a World service vs. what becomes Feature logic.  
 2) **The full behavior contract**: so Claude can refactor without breaking semantics.  
@@ -551,12 +551,12 @@ Expose console-configurable parameters for:
 ## 16) Where this spec connects to other canonical docs
 
 - The global pipeline and multipliers are defined in:
-  - `ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
+  - `ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
 - Movement feature patterns are defined in:
-  - `ASTROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md`
+  - `ASTEROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md`
 - Vision/FOW audits that informed this spec:
   - `VISION_FOW_SYSTEM_AUDIT.md`
   - `VISION_FOW_REFACTOR_AUDIT.md`
-  - `ASTROBIA_CANONICAL_VISION_MAX_SOURCES_POLICY_2026-01-13.md`
+  - `ASTEROBIA_CANONICAL_VISION_MAX_SOURCES_POLICY_2026-01-13.md`
 
 This Perception/Vision Feature spec must remain consistent with those files. If a conflict is found later, treat the *latest “CANONICAL” tagged document* as authoritative, and record an explicit “Conflict Resolution” section in the updated file.

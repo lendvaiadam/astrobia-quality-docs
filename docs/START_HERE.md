@@ -1,11 +1,11 @@
-# START HERE — Asterobia Control Entry Point (Stable)
+﻿# START HERE — Asterobia Control Entry Point (Stable)
 This file is the single entrypoint link you can give to any AI (ChatGPT, Antigravity Gemini, Claude, Claude Code).
 It contains stable rules, roles, and pointers to where everything lives.
 
 ---
 
 ## What this project is
-Astrobia/Asterobia is a strategy/simulation game project.
+Asterobia/Asterobia is a strategy/simulation game project.
 Current engineering priority: Refactor toward Phase 0 “Netcode Readiness” (host-authoritative, deterministic, backend-ready).
 
 ---
@@ -22,6 +22,7 @@ Current engineering priority: Refactor toward Phase 0 “Netcode Readiness” (h
 ### Antigravity (Gemini) — Auditor & Snapshot Operator
 - Audits, repo mapping, risk registers, documentation snapshots, link indexing, preflight checks.
 - Docs operator (creates/edits markdown files) unless explicitly stated otherwise.
+- **NO UNSOLICITED DOC EDITS (BINDING)**: Antigravity MUST NOT directly modify docs unless STATUS_WALKTHROUGH explicitly requires it OR ChatGPT provides an exact patch. Otherwise: propose changes only.
 
 ### Claude / Claude Code — Implementer
 - Implements code changes in small PRs strictly following binding canonical specs.
@@ -58,23 +59,24 @@ If an agent creates a new repo file that ChatGPT must read and it is not yet lis
 1) `docs/STATUS_WALKTHROUGH.md` (execute ## NOW after reading)
 2) `docs/IMPLEMENTATION_GATES.md`
 3) `docs/CANONICAL_SOURCES_INDEX.md` (use the “Absolute Raw Links” section if raw-view breaks relative links)
+4) `docs/RELEASE_PLAN.md`
 
 ### Canonical Spec Sources (BINDING)
 You MUST read these binding specs from `publish/quality_docs_snapshot_2026-01-14/spec_sources/`:
-- `ASTROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md`
-- `ASTROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md`
-- `ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
-- `ASTROBIA_CANONICAL_VISION_MAX_SOURCES_POLICY_2026-01-13.md`
+- `ASTEROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md`
+- `ASTEROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md`
+- `ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
+- `ASTEROBIA_CANONICAL_VISION_MAX_SOURCES_POLICY_2026-01-13.md`
 - All 8 Feature Specs:
-  - `ASTROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md`
-  - `ASTROBIA_CANONICAL_FEATURE_WPN_SHOOT_2026-01-13.md`
-  - `ASTROBIA_CANONICAL_FEATURE_PERCEPTION_OPTICAL_VISION_2026-01-13.md`
-  - `ASTROBIA_CANONICAL_FEATURE_PERCEPTION_SUBSURFACE_SCAN_2026-01-13.md`
-  - `ASTROBIA_CANONICAL_FEATURE_MATERA_MINING_2026-01-13.md`
-  - `ASTROBIA_CANONICAL_FEATURE_MATERA_TRANSPORT_2026-01-13.md`
-  - `ASTROBIA_CANONICAL_FEATURE_TERRAIN_SHAPING_2026-01-13.md`
-  - `ASTROBIA_CANONICAL_FEATURE_UNIT_CARRIER_2026-01-13.md`
-  - `ASTROBIA_CANONICAL_FEATURE_UNIT_DESIGNER_2026-01-18.md`
+  - `ASTEROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md`
+  - `ASTEROBIA_CANONICAL_FEATURE_WPN_SHOOT_2026-01-13.md`
+  - `ASTEROBIA_CANONICAL_FEATURE_PERCEPTION_OPTICAL_VISION_2026-01-13.md`
+  - `ASTEROBIA_CANONICAL_FEATURE_PERCEPTION_SUBSURFACE_SCAN_2026-01-13.md`
+  - `ASTEROBIA_CANONICAL_FEATURE_MATERA_MINING_2026-01-13.md`
+  - `ASTEROBIA_CANONICAL_FEATURE_MATERA_TRANSPORT_2026-01-13.md`
+  - `ASTEROBIA_CANONICAL_FEATURE_TERRAIN_SHAPING_2026-01-13.md`
+  - `ASTEROBIA_CANONICAL_FEATURE_UNIT_CARRIER_2026-01-13.md`
+  - `ASTEROBIA_CANONICAL_FEATURE_UNIT_DESIGNER_2026-01-18.md`
 
 ### Read-only / Write protocol (BINDING)
 - **ChatGPT**: GitHub read-only; any file edits must be executed by Antigravity via commit+push, returning commit hash + raw links.

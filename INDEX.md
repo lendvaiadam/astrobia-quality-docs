@@ -1,10 +1,10 @@
-# Astrobia Quality Documentation Snapshot (2026-01-14)
+﻿# Asterobia Quality Documentation Snapshot (2026-01-14)
 
 > **Status**: PUBLIC REVIEW STAGE
 > **Snapshot Date**: 2026-01-14
 > **Auditor**: System Intake Auditor
 
-This bundle contains the canonical engineering specifications and quality assurance documents for the Astrobia project. It serves as the authoritative reference for external implementation reviews and feature verification.
+This bundle contains the canonical engineering specifications and quality assurance documents for the Asterobia project. It serves as the authoritative reference for external implementation reviews and feature verification.
 
 ## 📂 1. Quality Procedures
 - [KNOWN_RISK_AREAS.md](./KNOWN_RISK_AREAS.md) - Identified technical risks and mitigation strategies.
@@ -14,22 +14,22 @@ This bundle contains the canonical engineering specifications and quality assura
 *These documents supersede all legacy files.*
 
 ### Core Systems
-- [MASTER_BIBLE](./spec_sources/ASTROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md) - High-level architecture and precedence rules.
-- [GRFDTRDPU_SYSTEM](./spec_sources/ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md) - Game loop, R&D, and Production systems.
-- [REFACTOR_PROCESS](./spec_sources/ASTROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md) - Guidelines for codebase migration.
+- [MASTER_BIBLE](./spec_sources/ASTEROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md) - High-level architecture and precedence rules.
+- [GRFDTRDPU_SYSTEM](./spec_sources/ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md) - Game loop, R&D, and Production systems.
+- [REFACTOR_PROCESS](./spec_sources/ASTEROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md) - Guidelines for codebase migration.
 
 ### Feature Specifications
-- [MOVE_ROLL](./spec_sources/ASTROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md)
-- [TERRAIN_SHAPING](./spec_sources/ASTROBIA_CANONICAL_FEATURE_TERRAIN_SHAPING_2026-01-13.md)
-- [MATERA_MINING](./spec_sources/ASTROBIA_CANONICAL_FEATURE_MATERA_MINING_2026-01-13.md)
-- [MATERA_TRANSPORT](./spec_sources/ASTROBIA_CANONICAL_FEATURE_MATERA_TRANSPORT_2026-01-13.md)
-- [UNIT_CARRIER](./spec_sources/ASTROBIA_CANONICAL_FEATURE_UNIT_CARRIER_2026-01-13.md)
-- [WPN_SHOOT](./spec_sources/ASTROBIA_CANONICAL_FEATURE_WPN_SHOOT_2026-01-13.md)
+- [MOVE_ROLL](./spec_sources/ASTEROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md)
+- [TERRAIN_SHAPING](./spec_sources/ASTEROBIA_CANONICAL_FEATURE_TERRAIN_SHAPING_2026-01-13.md)
+- [MATERA_MINING](./spec_sources/ASTEROBIA_CANONICAL_FEATURE_MATERA_MINING_2026-01-13.md)
+- [MATERA_TRANSPORT](./spec_sources/ASTEROBIA_CANONICAL_FEATURE_MATERA_TRANSPORT_2026-01-13.md)
+- [UNIT_CARRIER](./spec_sources/ASTEROBIA_CANONICAL_FEATURE_UNIT_CARRIER_2026-01-13.md)
+- [WPN_SHOOT](./spec_sources/ASTEROBIA_CANONICAL_FEATURE_WPN_SHOOT_2026-01-13.md)
 
 ### Perception & Vision (Critical)
-- [OPTICAL_VISION](./spec_sources/ASTROBIA_CANONICAL_FEATURE_PERCEPTION_OPTICAL_VISION_2026-01-13.md)
-- [SUBSURFACE_SCAN](./spec_sources/ASTROBIA_CANONICAL_FEATURE_PERCEPTION_SUBSURFACE_SCAN_2026-01-13.md)
-- [VISION_MAX_SOURCES_POLICY](./spec_sources/ASTROBIA_CANONICAL_VISION_MAX_SOURCES_POLICY_2026-01-13.md)
+- [OPTICAL_VISION](./spec_sources/ASTEROBIA_CANONICAL_FEATURE_PERCEPTION_OPTICAL_VISION_2026-01-13.md)
+- [SUBSURFACE_SCAN](./spec_sources/ASTEROBIA_CANONICAL_FEATURE_PERCEPTION_SUBSURFACE_SCAN_2026-01-13.md)
+- [VISION_MAX_SOURCES_POLICY](./spec_sources/ASTEROBIA_CANONICAL_VISION_MAX_SOURCES_POLICY_2026-01-13.md)
 - [VISION_MAX_SOURCES_SPEC](./spec_sources/VISION_MAX_SOURCES_SPEC.md)
 - [VISION_FOW_SYSTEM_AUDIT](./spec_sources/VISION_FOW_SYSTEM_AUDIT.md)
 - [VISION_FOW_REFACTOR_AUDIT](./spec_sources/VISION_FOW_REFACTOR_AUDIT.md)

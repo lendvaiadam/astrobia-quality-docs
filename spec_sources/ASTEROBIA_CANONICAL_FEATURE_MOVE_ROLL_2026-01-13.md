@@ -1,5 +1,5 @@
-# Astrobia Feature Spec — MOVE_ROLL (Rolling / Wheeled Locomotion)
-**Project:** Astrobia Demo 1.0  
+﻿# Asterobia Feature Spec — MOVE_ROLL (Rolling / Wheeled Locomotion)
+**Project:** Asterobia Demo 1.0  
 **Doc Type:** Feature Implementation Specification (Claude Code reference)  
 **Feature ID:** `MOVE_ROLL`  
 **Status:** CANONICAL (behavior) + *Suggested* implementation notes clearly marked  
@@ -14,7 +14,7 @@
 
 ### Non‑Goals
 - This doc does **not** define other movement features (`MOVE_SWIM`, `MOVE_FLY`, `MOVE_TUNNEL`, `MOVE_CLIMB`, `MOVE_CARRY`) except for interface expectations and cross‑references.
-- This doc does **not** define the full GRFTrDPU pipeline; it references it. See: `ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`.
+- This doc does **not** define the full GRFTrDPU pipeline; it references it. See: `ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`.
 
 ---
 
@@ -323,7 +323,7 @@ These are suggestions only. They can be changed.
 ---
 
 ## 13) Cross‑References
-- **Central system spec:** `ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
+- **Central system spec:** `ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
   - GRFTrDPU pipeline, Training, Extend, Specialization bonus, Energy model, Dark Side, Trading, Social.
   - **Command Queue Timeline:** §8.6 defines waypoint scheduling, gummy editing, repeat markers, and PLAY/PAUSE per-unit.
 - **Related movement features (to be authored next):**

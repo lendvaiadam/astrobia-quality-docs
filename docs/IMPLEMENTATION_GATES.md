@@ -1,4 +1,4 @@
-# IMPLEMENTATION_GATES — Astrobia (Canonical Quality Gates)
+﻿# IMPLEMENTATION_GATES — Asterobia (Canonical Quality Gates)
 
 **Purpose:** This file defines hard quality gates that every PR must satisfy when touching:
 - Movement / pathing / physics
@@ -353,39 +353,39 @@ If a gate is violated post-merge:
 **Purpose:** Links each gate rule to its canonical source document.
 
 ### Core Invariants (Section 1)
-- **1.1 Determinism:** "Identical inputs must yield identical outputs within a single tick for all authoritative logic." — Source: ASTROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md § Core Invariants
-- **1.2 Lane Scheduling:** "Action features use command queue lanes: LOCOMOTION, TOOL, WEAPON, or PERCEPTION." — Source: ASTROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md § Scheduling Rules + Lane Assignment Reference Table
-- **1.3 Perception Ownership:** "Local player units reveal fog-of-war exclusively to that player; allies only if explicitly enabled." — Source: ASTROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md § Perception Ownership
-- **1.4 Seam Wrapping:** "Existing ±180° wrapping behavior preserved as-is." — Source: ASTROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md § Seam Wrapping & Throttling
-- **1.5 maxSources Cap:** "Config Key: `config.maxSources` (Default: 64)" + "Hardcoded: 256" — Source: ASTROBIA_CANONICAL_VISION_MAX_SOURCES_POLICY_2026-01-13.md § Source Limits & Caps
-- **1.5 Deterministic Ordering:** "Apply unit ID comparison when distance difference is negligible (< 0.001 threshold suggested)" — Source: ASTROBIA_CANONICAL_VISION_MAX_SOURCES_POLICY_2026-01-13.md § Deterministic Ordering Requirements
-- **1.6 Command Queue:** "Per-unit play/pause affects only that unit's queue." + "Elastic clip extension: clip endpoints never cross 'Now' prematurely." — Source: ASTROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md § Command Queue Integrity
-- **1.7 Throttle:** "Current update throttle (30Hz example) remains unless formally revised." — Source: ASTROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md § Seam Wrapping & Throttling
+- **1.1 Determinism:** "Identical inputs must yield identical outputs within a single tick for all authoritative logic." — Source: ASTEROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md § Core Invariants
+- **1.2 Lane Scheduling:** "Action features use command queue lanes: LOCOMOTION, TOOL, WEAPON, or PERCEPTION." — Source: ASTEROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md § Scheduling Rules + Lane Assignment Reference Table
+- **1.3 Perception Ownership:** "Local player units reveal fog-of-war exclusively to that player; allies only if explicitly enabled." — Source: ASTEROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md § Perception Ownership
+- **1.4 Seam Wrapping:** "Existing ±180° wrapping behavior preserved as-is." — Source: ASTEROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md § Seam Wrapping & Throttling
+- **1.5 maxSources Cap:** "Config Key: `config.maxSources` (Default: 64)" + "Hardcoded: 256" — Source: ASTEROBIA_CANONICAL_VISION_MAX_SOURCES_POLICY_2026-01-13.md § Source Limits & Caps
+- **1.5 Deterministic Ordering:** "Apply unit ID comparison when distance difference is negligible (< 0.001 threshold suggested)" — Source: ASTEROBIA_CANONICAL_VISION_MAX_SOURCES_POLICY_2026-01-13.md § Deterministic Ordering Requirements
+- **1.6 Command Queue:** "Per-unit play/pause affects only that unit's queue." + "Elastic clip extension: clip endpoints never cross 'Now' prematurely." — Source: ASTEROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md § Command Queue Integrity
+- **1.7 Throttle:** "Current update throttle (30Hz example) remains unless formally revised." — Source: ASTEROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md § Seam Wrapping & Throttling
 
 ### Feature vs. World Service (Section 2)
-- **Feature Responsibility:** "Features provide data structures (VisionSource, action structs) to world services; they do not own rendering infrastructure." — Source: ASTROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md § Feature vs. World Service Ownership
-- **World Service Responsibility:** "FogOfWar render target ownership and stamping" + "VisionSystem aggregation orchestration" — Source: ASTROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md § World Service Responsibility (Non-Delegable)
+- **Feature Responsibility:** "Features provide data structures (VisionSource, action structs) to world services; they do not own rendering infrastructure." — Source: ASTEROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md § Feature vs. World Service Ownership
+- **World Service Responsibility:** "FogOfWar render target ownership and stamping" + "VisionSystem aggregation orchestration" — Source: ASTEROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md § World Service Responsibility (Non-Delegable)
 
 ### Terrain Thresholds (Section 3)
-- **Slope Bands:** "0–10° Stable", "10–40° Penalty", "40–60° Critical", ">60° Blocked" — Source: ASTROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md § Terrain Constraint Thresholds (Canonical)
+- **Slope Bands:** "0–10° Stable", "10–40° Penalty", "40–60° Critical", ">60° Blocked" — Source: ASTEROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md § Terrain Constraint Thresholds (Canonical)
 
 ### State Machine (Section 4)
-- **Transition Sequence:** "STOPPED → ROLLING → STALLING → SLIDING → (recovery or BLOCKED)" — Source: ASTROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md § State Machine Ordering
+- **Transition Sequence:** "STOPPED → ROLLING → STALLING → SLIDING → (recovery or BLOCKED)" — Source: ASTEROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md § State Machine Ordering
 
 ### Event Emission (Section 5)
-- **Required Events:** "`COLLISION_WATER`, `BLOCKED_BY_SLOPE`, `BLOCKED_BY_ROCK`" — Source: ASTROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md § Event Emission Checkpoints
+- **Required Events:** "`COLLISION_WATER`, `BLOCKED_BY_SLOPE`, `BLOCKED_BY_ROCK`" — Source: ASTEROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md § Event Emission Checkpoints
 
 ### Allocation Gates (Section 6)
-- **25% Minimum:** "allocation must be ≥ 25% (configurable minimum)" — Source: ASTROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md § Feature Inclusion Gates
+- **25% Minimum:** "allocation must be ≥ 25% (configurable minimum)" — Source: ASTEROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md § Feature Inclusion Gates
 
 ### Acceptance Tests (Section 8)
-- **Six Must-Pass Tests:** "Flat Movement", "Water Blocking", "Slope Blocking", "Critical Uphill", "Waypoint Integrity", "Training Visibility" — Source: ASTROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md § Must-Pass Tests
+- **Six Must-Pass Tests:** "Flat Movement", "Water Blocking", "Slope Blocking", "Critical Uphill", "Waypoint Integrity", "Training Visibility" — Source: ASTEROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md § Must-Pass Tests
 
 ### Anti-Patterns (Section 9)
-- **9.1–9.6:** Compiled from prohibited patterns across all three source documents — Sources: ASTROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md § Anti-Patterns Prohibited + ASTROBIA_CANONICAL_VISION_MAX_SOURCES_POLICY_2026-01-13.md § Ownership & Team Filtering
+- **9.1–9.6:** Compiled from prohibited patterns across all three source documents — Sources: ASTEROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md § Anti-Patterns Prohibited + ASTEROBIA_CANONICAL_VISION_MAX_SOURCES_POLICY_2026-01-13.md § Ownership & Team Filtering
 
 ### Component Ownership (Section 10)
-- **Ownership Table:** StatsEngine, PathFollower, MOVE_ROLL module, TerrainQuery, GoalManager responsibilities — Source: ASTROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md § Ownership Assignments & Responsibilities
+- **Ownership Table:** StatsEngine, PathFollower, MOVE_ROLL module, TerrainQuery, GoalManager responsibilities — Source: ASTEROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md § Ownership Assignments & Responsibilities
 
 ---
 

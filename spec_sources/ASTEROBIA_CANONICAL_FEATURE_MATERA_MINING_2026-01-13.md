@@ -1,4 +1,4 @@
-# Astrobia — Feature Spec: Matera Mining
+﻿# Asterobia — Feature Spec: Matera Mining
 **Status:** CANONICAL  
 **Date:** 2026-01-13  
 **Applies to:** Demo 1.0
@@ -7,10 +7,10 @@
 This document is the **canonical** behavior spec for the **Matera Mining** feature.
 
 ### 0.1 Related canonical documents
-- `ASTROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md`
-- `ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
-- `ASTROBIA_CANONICAL_FEATURE_PERCEPTION_SUBSURFACE_SCAN_2026-01-13.md` (discovery of deposits)
-- `ASTROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md` (movement + timeline concepts)
+- `ASTEROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md`
+- `ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
+- `ASTEROBIA_CANONICAL_FEATURE_PERCEPTION_SUBSURFACE_SCAN_2026-01-13.md` (discovery of deposits)
+- `ASTEROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md` (movement + timeline concepts)
 
 ---
 

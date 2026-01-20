@@ -1,18 +1,18 @@
-# Canonical Sources Index
+﻿# Canonical Sources Index
 
 > **Status:** STABLE / PRE-REFACTOR
 > **Purpose:** Trusted entry points for the System Refactor.
 
 ## 🏗️ Core Canonical Specifications
-These files define the **Binding Requirements** for the Astrobia Engine.
+These files define the **Binding Requirements** for the Asterobia Engine.
 
-- [**MASTER_BIBLE**](../publish/quality_docs_snapshot_2026-01-14/spec_sources/ASTROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md)  
+- [**MASTER_BIBLE**](../publish/quality_docs_snapshot_2026-01-14/spec_sources/ASTEROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md)  
   *Project definitions, Precedence rules, and Phase 0 Netcode Requirements.*
 
-- [**GRFDTRDPU_SYSTEM**](../publish/quality_docs_snapshot_2026-01-14/spec_sources/ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md)  
+- [**GRFDTRDPU_SYSTEM**](../publish/quality_docs_snapshot_2026-01-14/spec_sources/ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md)  
   *Engine contract, Action pipeline, and Networking Appendix.*
 
-- [**REFACTOR_PROCESS**](../publish/quality_docs_snapshot_2026-01-14/spec_sources/ASTROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md)  
+- [**REFACTOR_PROCESS**](../publish/quality_docs_snapshot_2026-01-14/spec_sources/ASTEROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md)  
   *Implementation rules, Step-0 Netcode Injection instructions.*
 
 ## 🛡️ Netcode & Quality Audits
@@ -34,9 +34,9 @@ These documents justify the "Phase 0" constraints.
 
 ## Absolute Raw Links (for raw-view compatibility)
 Core Canonical Specifications (Binding):
-- MASTER_BIBLE: https://raw.githubusercontent.com/lendvaiadam/asterobia/baseline/pre-claude-stable/publish/quality_docs_snapshot_2026-01-14/spec_sources/ASTROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md
-- GRFDTRDPU_SYSTEM: https://raw.githubusercontent.com/lendvaiadam/asterobia/baseline/pre-claude-stable/publish/quality_docs_snapshot_2026-01-14/spec_sources/ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md
-- REFACTOR_PROCESS: https://raw.githubusercontent.com/lendvaiadam/asterobia/baseline/pre-claude-stable/publish/quality_docs_snapshot_2026-01-14/spec_sources/ASTROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md
+- MASTER_BIBLE: https://raw.githubusercontent.com/lendvaiadam/asterobia/baseline/pre-claude-stable/publish/quality_docs_snapshot_2026-01-14/spec_sources/ASTEROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md
+- GRFDTRDPU_SYSTEM: https://raw.githubusercontent.com/lendvaiadam/asterobia/baseline/pre-claude-stable/publish/quality_docs_snapshot_2026-01-14/spec_sources/ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md
+- REFACTOR_PROCESS: https://raw.githubusercontent.com/lendvaiadam/asterobia/baseline/pre-claude-stable/publish/quality_docs_snapshot_2026-01-14/spec_sources/ASTEROBIA_CANONICAL_REFACTOR_PROCESS_2026-01-13.md
 
 Netcode & Quality Audits:
 - NETCODE_READINESS_AUDIT: https://raw.githubusercontent.com/lendvaiadam/asterobia/baseline/pre-claude-stable/quality/NETCODE_READINESS_AUDIT.md

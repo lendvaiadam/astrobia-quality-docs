@@ -1,8 +1,4 @@
-﻿Status: Archived/Report (NON-CANONICAL unless explicitly referenced)
-Origin: recovered from local quality/save
-Recovery date: 2026-01-19
-
-# LOCAL vs GITHUB DIFF: Canonical Docs Publish Folder
+﻿# LOCAL vs GITHUB DIFF: Canonical Docs Publish Folder
 
 **Target:** `publish/quality_docs_snapshot_2026-01-14/spec_sources`
 **Date:** 2026-01-15

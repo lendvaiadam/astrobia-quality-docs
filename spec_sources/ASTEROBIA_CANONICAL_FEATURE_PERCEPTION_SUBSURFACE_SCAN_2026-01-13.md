@@ -1,4 +1,4 @@
-# Astrobia — Feature Spec: Perception / Subsurface Scan (formerly “Radar”)
+﻿# Asterobia — Feature Spec: Perception / Subsurface Scan (formerly “Radar”)
 **Status:** CANONICAL  
 **Date:** 2026-01-13  
 **Applies to:** Demo 1.0 refactor + forward-compatible design
@@ -10,10 +10,10 @@ If any older document or code comment conflicts with this file, **this file wins
 This file intentionally contains **no engine-specific code**. Where implementation approaches are described, they are **non-binding suggestions** intended to help Claude implement a correct system.
 
 ### 0.1 Related canonical documents
-- `ASTROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md` (project-level canonical rules)
-- `ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md` (allocation + research/extend + training + specialization bonus)
-- `ASTROBIA_CANONICAL_FEATURE_PERCEPTION_OPTICAL_VISION_2026-01-13.md` (Optical Vision + Optical FoW semantics)
-- `ASTROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md` (movement + command queue concepts)
+- `ASTEROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md` (project-level canonical rules)
+- `ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md` (allocation + research/extend + training + specialization bonus)
+- `ASTEROBIA_CANONICAL_FEATURE_PERCEPTION_OPTICAL_VISION_2026-01-13.md` (Optical Vision + Optical FoW semantics)
+- `ASTEROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md` (movement + command queue concepts)
 
 ---
 

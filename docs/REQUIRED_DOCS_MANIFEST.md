@@ -1,4 +1,4 @@
-# Required Documentation Manifest
+﻿# Required Documentation Manifest
 
 > [!IMPORTANT]
 > This file serves as the SOURCE OF TRUTH for document existence. 
@@ -19,5 +19,5 @@
 - [x] [quality/MULTIPLAYER_TARGET_CHOICE.md](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/quality/MULTIPLAYER_TARGET_CHOICE.md)
 
 ## Critical Specs (spec_sources/)
-- [x] [spec_sources/ASTROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/spec_sources/ASTROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md)
-- [x] [spec_sources/ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/spec_sources/ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md)
+- [x] [spec_sources/ASTEROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/spec_sources/ASTEROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md)
+- [x] [spec_sources/ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/spec_sources/ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md)

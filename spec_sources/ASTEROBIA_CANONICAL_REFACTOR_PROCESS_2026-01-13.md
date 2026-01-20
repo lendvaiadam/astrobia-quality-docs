@@ -1,4 +1,4 @@
-# ASTROBIA — REFACTOR PROCESS: SPLIT SYSTEMS INTO FEATURE FILES
+﻿# Asterobia — REFACTOR PROCESS: SPLIT SYSTEMS INTO FEATURE FILES
 **Version:** CANONICAL_SET_2026-01-13  
 **Date:** 2026-01-13  
 **Status:** CANONICAL PROCESS DOC  
@@ -9,8 +9,8 @@
 ## 0) Canonical precedence
 
 If this process doc conflicts with:
-- `ASTROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md` or
-- `ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md` or
+- `ASTEROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md` or
+- `ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md` or
 - a feature spec file,
 
 then the higher-precedence file wins.
@@ -19,7 +19,7 @@ then the higher-precedence file wins.
 
 ## 1) Goal of the refactor
 
-Astrobia is moving to a **feature-first architecture**:
+Asterobia is moving to a **feature-first architecture**:
 
 - Each gameplay capability is implemented as an **independent feature module** (one code file + one spec file).
 - World/runtime services remain separate (FogOfWar, VisionSystem aggregator, SimCore loop).
