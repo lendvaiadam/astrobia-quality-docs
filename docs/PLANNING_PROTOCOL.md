@@ -11,7 +11,19 @@
 - **Claude Code**: **Implementer**. Proposes concrete approaches, decomposes into small PRs, implements, provides test scripts.
 - **Ádám**: **Decision-Maker & Tester**. Forwards messages, approves decisions, runs tests.
 
-## C. Planning Steps (Binding)
+## C. DOC-ANSWER GATE (BINDING)
+Before any plan OR before any blocking question, the agent MUST:
+1) Paste “Sources Read (RAW links)” of what was actually opened.
+2) Paste “Doc Search Performed” (where it searched + keywords).
+3) Only if still unresolved: create/append an “OPEN DECISIONS” entry in STATUS_WALKTHROUGH with:
+   - Decision ID
+   - Options (A/B/…)
+   - Recommended default + rationale
+   - Impact (S/M/L)
+   - Who decides (Ádám)
+- Prohibit asking for decisions already specified in RELEASE_PLAN unless proposing a change (then must cite the existing rule).
+
+## D. Planning Steps (Binding)
 
 ### Step 1 — ChatGPT Sprint Proposal
 State:

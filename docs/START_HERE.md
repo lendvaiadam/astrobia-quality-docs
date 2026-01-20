@@ -22,6 +22,7 @@ Current engineering priority: Refactor toward Phase 0 “Netcode Readiness” (h
 ### Antigravity (Gemini) — Auditor & Snapshot Operator
 - Audits, repo mapping, risk registers, documentation snapshots, link indexing, preflight checks.
 - Docs operator (creates/edits markdown files) unless explicitly stated otherwise.
+- **NO UNSOLICITED DOC EDITS (BINDING)**: Antigravity MUST NOT directly modify docs unless STATUS_WALKTHROUGH explicitly requires it OR ChatGPT provides an exact patch. Otherwise: propose changes only.
 
 ### Claude / Claude Code — Implementer
 - Implements code changes in small PRs strictly following binding canonical specs.
@@ -58,6 +59,7 @@ If an agent creates a new repo file that ChatGPT must read and it is not yet lis
 1) `docs/STATUS_WALKTHROUGH.md` (execute ## NOW after reading)
 2) `docs/IMPLEMENTATION_GATES.md`
 3) `docs/CANONICAL_SOURCES_INDEX.md` (use the “Absolute Raw Links” section if raw-view breaks relative links)
+4) `docs/RELEASE_PLAN.md`
 
 ### Canonical Spec Sources (BINDING)
 You MUST read these binding specs from `publish/quality_docs_snapshot_2026-01-14/spec_sources/`:
