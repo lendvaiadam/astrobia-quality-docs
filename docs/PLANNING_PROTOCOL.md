@@ -7,8 +7,8 @@
 
 ## B. Roles (Binding)
 - **ChatGPT**: **Spec Guardian & Prompt Writer**. Synthesizes plans, drives iteration, producing the final "Decision Packet" for Ádám.
-- **Antigravity**: **Architect/Auditor**. Identifies risks, proposes minimal architecture, checks repo reality, applies doc/code patches (commit+push).
-- **Claude Code**: **Implementer**. Proposes concrete approaches, decomposes into small PRs, implements, provides test scripts.
+- **Antigravity**: **Repo Operator / Quality**. Reviews plans, enforces gates, creates releases, manages the repo state.
+- **Claude Code**: **Coder-of-Record**. Authors implementation plans, writes the code, delivers PRs for review.
 - **Ádám**: **Decision-Maker & Tester**. Forwards messages, approves decisions, runs tests.
 
 ## C. DOC-ANSWER GATE (BINDING)

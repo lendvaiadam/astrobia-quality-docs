@@ -19,15 +19,16 @@ Current engineering priority: Refactor toward Phase 0 “Netcode Readiness” (h
 - Executes HU test scenarios and reports results in Hungarian.
 - Approves acceptance decisions (PASS/FAIL); agents perform merges after explicit approval.
 
-### Antigravity (Gemini) — Auditor & Snapshot Operator
-- Audits, repo mapping, risk registers, documentation snapshots, link indexing, preflight checks.
-- Docs operator (creates/edits markdown files) unless explicitly stated otherwise.
-- **NO UNSOLICITED DOC EDITS (BINDING)**: Antigravity MUST NOT directly modify docs unless STATUS_WALKTHROUGH explicitly requires it OR ChatGPT provides an exact patch. Otherwise: propose changes only.
+### Antigravity (Gemini) — Repo Operator / Integrator / Quality Gatekeeper
+- **Repo Operator**: PR packaging, releases, git operations, doc updates.
+- **Integrator**: Reviews Claude's code, runs compliance checks (determinism, sizing), manages the merge process.
+- **Quality**: Enforces gates, rollbacks, and delivers evidence (commit SHA, RAW links).
+- **Escalation Rule**: If a PR is risky/complex → Claude codes, Antigravity reviews/packages. If mechanical → Antigravity may code.
 
-### Claude / Claude Code — Implementer
-- Implements code changes in small PRs strictly following binding canonical specs.
-- Keeps game playable after each PR.
-- May update its own notes file after PRs.
+### Claude / Claude Code — Coder-of-Remember
+- **Primary Coder**: Implements complex features and core systems.
+- **Planner**: Authors concrete plan packages and PR sequences.
+- **Focus**: Pure implementation velocity within the constraints set by Antigravity.
 
 ### ChatGPT — Spec Guardian & Prompt Writer
 - Produces prompts for Claude and Antigravity.
@@ -112,6 +113,10 @@ You MUST read these binding specs from `publish/quality_docs_snapshot_2026-01-14
 ---
 
 ## Workflow (how we work)
+1. **Plan Phase**: Claude authors Plan/PR packages. Antigravity audits.
+2. **Implementation**: Claude (default) or Antigravity (if mechanical) executes implementation.
+3. **Integration**: Antigravity enforces quality gates, runs tests, and packages the Commit.
+4. **Approval**: Ádám provides PASS/FAIL.
 - Agents communicate through Ádám (copy/paste relay).
 - Canonical docs are binding. If anything conflicts: Canonical > Audit notes > Chat.
 - Implementation is done as small PR branches (prX-...). Merged to main by Antigravity or the implementing agent AFTER Ádám’s- Implementation is done as small PR branches (prX-...). Merged to main by Antigravity or the implementing agent AFTER Ádám’s explicit PASS/approval in chat. Ádám never performs Git operations.
