@@ -1,152 +1,127 @@
-# ASTEROBIA — BIG PICTURE MASTER DEVELOPMENT PLAN (v1)
+# ASTEROBIA — BIG PICTURE MASTER DEVELOPMENT PLAN (v2)
+
 **Date:** 2026-01-21
-**Status:** **READY FOR PLAN REVIEW**
+**Status:** **READY FOR EXECUTION**
 **Author:** Antigravity (Gemini)
-**Target Branch:** `work/release-000-big-picture-master-plan-antigravity`
-**Scope:** End-to-End Implementation (Phase 0 Netcode + Phase 1 Features + Multiplayer)
+**Target Branch:** `work/release-000-big-picture-antigravity-v2`
+**Scope:** End-to-End Implementation (Netcode, Backend, Features, Multiplayer)
 
 ---
 
-## 1. Definition of Done & Read Gate
+## 1. Executive Summary: The Vision
 
-### 1.1 Read Gate Compliance
-I have strictly adhered to the Read Gate Protocol.
-- **Proof of Read:** [Appendices/PROOF_OF_READ_GATE.md](./appendices/PROOF_OF_READ_GATE.md)
-- **Tracked MD Index:** [Appendices/MD_FILE_INDEX.txt](./appendices/MD_FILE_INDEX.txt)
-- **Hard Stop Checks:** All mandatory RAW links were opened. *Note: Quality Archive links 404'd on remote Main, but were read from local disk.*
+Asterobia is not just an RTS; it is a **simulation-first** competitive strategy game built on a rigid **Host-Authoritative, Lockstep-Ready** architecture.
 
-### 1.2 "Done Means" For This Plan
-This plan is considered **complete** when it provides sufficient detail for a competent dev team (Claude Code + Antigravity) to execute the project from "Netcode Readiness" to "Full Multiplayer R&D Gameplay" without major architectural backtracking.
+This Master Plan v2 transforms the conceptual requirements into a concrete, executable engineering roadmap. It deconstructs the project into two massive Phases:
+1.  **Phase 0 (Foundation):** Establishing the deterministic `SimCore` kernel, separating it from the `View`, and proving 20Hz stability across a P2P network.
+2.  **Phase 1 (The Engine):** Implementing the 7 Canonical Features (Locomotion, Combat, Perception, Mining, Transport, Shaping) via the strict **G-R-F-Tr-D-P-U** pipeline.
 
-**The Project is "Done" when:**
-1.  **Engine:** Runs on a deterministic, fixed-timestep `SimCore` (20Hz) decoupled from the render loop.
-2.  **Multiplayer:** Supports 2+ players in a Host-Authoritative session (initially Local/P2P, utilizing Supabase for Signaling).
-3.  **Gameplay:** The full **G-R-F-Tr-D-P-U** pipeline is active. Units can be Designed, Produced, Trained, and command the field.
-4.  **Content:** All 7 canonical features (Move, Shoot, Perc-Opt, Perc-Scan, Mine, Trans, Shape) are implemented and interact correctly.
+### 1.1 "Done Means" Definition
 
----
-
-## 2. Table of Contents
-*Note: To meet the "Deep Plan" requirement, this Master Plan is split into focused Appendices.*
-
-1.  **[Main Plan (This Document)](./BIG_PICTURE_MASTER_PLAN_v1_ANTIGRAVITY.md)**
-    *   Executive Strategy
-    *   Scope Map
-    *   Architecture Overview
-2.  **[Appendix 01: Architecture & Netcode Stack](./appendices/APPENDIX_01_ARCHITECTURE_AND_NETCODE.md)**
-    *   SimCore Kernel, Transport Layer, Backend (Supabase/WebRTC), Determinism.
-3.  **[Appendix 02: Feature Implementation Chain](./appendices/APPENDIX_02_FEATURE_IMPLEMENTATION.md)**
-    *   The GRFDTRDPU Cycle, Feature Specifications, Interaction Matrix.
-4.  **[Appendix 03: Work Breakdown (Releases & Sprints)](./appendices/APPENDIX_03_RELEASES_AND_TASKS.md)**
-    *   Phase 0 (Foundation) & Phase 1 (Features) detailed task lists.
-5.  **[Appendix 04: Quality, Testing & Risks](./appendices/APPENDIX_04_RISKS_AND_QA.md)**
-    *   QA Strategy, Observability, Risk Register.
+The project is **Done** only when:
+*   **Architecture:** The `SimCore` runs in a dedicated loop (20Hz), fully decoupled from Three.js (60Hz+), utilizing an interface-based `ITransport` layer.
+*   **Networking:** Two browser tabs can connect via P2P (PeerJS), with one acting as Authoritative Host, and the other receiving Snapshots/Deltas with 0% logic drift.
+*   **Gameplay:** A player can Design a unit (Blueprints), Manufacture it (Production), Move it (Rolling Physics), Mine resources (Matera), and Destroy an enemy, with all state changes persisting correctly.
+*   **Production:** The manufacturing pipeline (Design D -> Production P) works end-to-end, including Generative AI asset binding (Nano Banana -> Trellis -> GLB).
 
 ---
 
-## 3. Scope Map
+## 2. Table of Contents & Appendix Map
 
-### 3.1 Included (In Scope)
-*   **Netcode Foundation:** Rewriting `Game.js` / `Unit.js` into the `SimCore` pattern.
-*   **Locomotion:** Rolling physics (`MOVE_ROLL`), Inertia/Mass model, Terrain Constraints.
-*   **Combat:** Direct fire (`WPN_SHOOT`), Health/Damage model.
-*   **Economy:** Matera Mining, Transport (Hauling), Surface Piles.
-*   **Perception:** Optical Vision (Line-of-Sight), Fog of War, Subsurface Scan.
-*   **Creation:** Unit Designer (UI + Logic), Manufacture (Production).
-*   **Multiplayer:** Host-Auth logic, Local Loopback transport, P2P implementation.
+To maintain readability while satisfying the "Book-Like" depth requirement, this plan relies on detailed specialized appendices. **You must read these to implement specific systems.**
 
-### 3.2 Excluded (Out of Scope for v1)
-*   **Server-Side Simulation:** We are building *Host-Authoritative*. True Headless Server logic is Phase 2.
-*   **Advanced AI:** "Mirror AI" is a behavior tree stub, not a deep learning agent.
-*   **Flying Units:** `MOVE_FLY` is explicitly Phase 2.
-*   **Shields / Stealth:** Mentioned in specs but scheduled for later releases.
-
----
-
-## 4. Architecture Overview
-
-**Goal:** Transform the current "monolithic hack" into a **Data-Driven, Deterministic Simulation**.
-
-### 4.1 The "SimCore" Kernel
-*   **Reference:** `subject://quality/NETCODE_READINESS_AUDIT.md`
-*   **Philosophy:** The Simulation (`SimCore`) is the only source of truth. The Visuals (`View`) are just a fancy log viewer.
-*   **Loop:** The Sim ticks at **20Hz** (50ms). This is a *hard/fixed* timestep.
-*   **State:** Stored in a unified `SimState` tree (Entities, Terrain, Globals).
-*   **Input:** The Sim *never* reads mouse/keyboard directly. It reads a `CommandQueue` populated by the View.
-
-### 4.2 The "View" (Render Layer)
-*   **Technology:** Three.js (existing).
-*   **Role:** Stateless renderer.
-*   **Interpolation:** Since Sim ticks at 20Hz and Screen at 60Hz/144Hz, the View must interpolate Entity positions between `State_Previous` and `State_Current`.
-*   **Prediction:** For the local player, we may implement "Client Prediction" (displaying inputs immediately) in Phase 1.5, but Phase 0 starts with simple interpolation.
-
-### 4.3 Data Flow Structure
-```mermaid
-graph TD
-    User[User Input] -->|Mouse/Keys| CmdFactory[Command Factory]
-    CmdFactory -->|Cmd Object| Transport[ITransport Layer]
-    
-    subgraph Host Machine
-        Transport -->|Push| InQueue[Input Queue]
-        InQueue --> SimLoop{SimCore Loop 20Hz}
-        SimLoop -->|Read/Write| SimState[Authoritative State]
-        SimLoop -->|Emit| Snapshot[State Snapshot]
-    end
-    
-    Snapshot -->|Broadcast| Transport
-    Transport -->|Receive| ClientView[Client View / Renderer]
-    ClientView -->|Lerp| Screen[Display]
-```
+*   **[Appendix A: Multiplayer & Internet Stack](./appendices/APPENDIX_MULTIPLAYER_INTERNET_STACK.md)**
+    *   *Content:* SimCore Loop, Accumulator, ITransport, WebRTC, PeerJS implementation strategy.
+*   **[Appendix B: Backend & Persistence Schema](./appendices/APPENDIX_BACKEND_PERSISTENCE_SCHEMA.md)**
+    *   *Content:* Supabase DB Schema (Lobbies, Blueprints, Profiles), Auth flow, Storage.
+*   **[Appendix C: GRFDTRDPU & Feature Implementation](./appendices/APPENDIX_GRFDTRDPU_RD_DEV_PROD_IMPLEMENTATION.md)**
+    *   *Content:* The 7 Canonical Features, R&D Pipeline, Physics rules, Interaction Matrix.
+*   **[Appendix D: Feature Dependency Graph](./appendices/APPENDIX_FEATURE_DEPENDENCY_GRAPH.md)**
+    *   *Content:* Visual Flowchart of implementation order.
+*   **[Appendix E: Releases, Sprints & PR Plan](./appendices/APPENDIX_RELEASES_SPRINTS_PR_PLAN.md)**
+    *   *Content:* The Work Breakdown Structure (WBS), Release 001-020, PR-level tasks.
+*   **[Appendix F: QA, Testing & Observability](./appendices/APPENDIX_QA_TESTING_OBSERVABILITY.md)**
+    *   *Content:* Automated Testing, Smoke Checks, Debug Tools, Performance Budgets.
+*   **[Appendix G: Risk Register](./appendices/APPENDIX_RISK_REGISTER.md)**
+    *   *Content:* Known risks (Performance, Drift, Scope) and mitigation triggers.
+*   **[Appendix H: Gap Analysis Report](./appendices/GAP_ANALYSIS_REPORT.md)**
+    *   *Content:* List of 22 specific binding constraints identified during the audit.
 
 ---
 
-## 5. Multiplayer Endgame Plan
+## 3. Architecture Stratification
 
-**Target:** **Host-Authoritative Lockstep-Ready**
-*   **Reference:** `subject://quality/MULTIPLAYER_TARGET_CHOICE.md`
+The system is built in **Layers**. Higher layers depend on lower layers. Lower layers **never** know about higher layers.
 
-### 5.1 Transport Options & Decision
-*   **Option A: Websockets (Client-Server)**
-    *   *Pros:* Standard, easy.
-    *   *Cons:* Requires a Node.js server to relay messages (latency, cost).
-*   **Option B: WebRTC (P2P)**
-    *   *Pros:* Lowest latency, free (after signaling).
-    *   *Cons:* Complex NAT traversal (ICE/STUN/TURN).
-*   **Decision:** **Hybrid P2P (PeerJS / SimplePeer)** using **Supabase** for Signaling.
-    *   Why? Fits "Host-Auth" best. No heavy server needed.
+### Layer 0: The Platform (Browser/OS)
+*   **Constraints:** JS Single Thread, Memory limits, Network NAT.
 
-### 5.2 Backend Responsibilities (Supabase)
-Even without a game server, we need a "Control Plane":
-1.  **Authentication:** Who are you? (Supabase Auth).
-2.  **Signaling:** "I am Host A, looking for Player B" (Supabase Realtime / DB).
-3.  **Persistence:** Saving Blueprints / Unit Designs (Supabase DB).
+### Layer 1: The SimCore (Kernel)
+*   **Responsibility:** The Truth.
+*   **Tick Rate:** 20Hz (Hard Fixed).
+*   **Inputs:** `CommandQueue` (NOT keyboard/mouse).
+*   **Outputs:** `SimState` Snapshot.
+*   **Dependencies:** None (Pure JS/TS). No Three.js code here.
 
----
+### Layer 2: The Transport (Network)
+*   **Responsibility:** Moving Data.
+*   **Components:** `ITransport`, `LocalLoopback`, `WebRTCTransport`.
+*   **Role:** Replicates CommandQueue to Host; Replicates State to Clients.
 
-## 6. R&D / Development / Production (GRFDTRDPU)
+### Layer 3: The View (Presenter)
+*   **Responsibility:** Visualization & Prediction.
+*   **Components:** Three.js, ECS (Visuals), InputHandlers.
+*   **Role:** Renders `State` + `Alpha` (Interpolation). Sends User Input to `CommandFactory`.
 
-**Concept:** The game loop is not just "fighting". It is an **Evolutionary Pipeline**.
-*   **Reference:** `subject://spec_sources/ASTROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
-
-### 6.1 Integration Strategy
-*   **Goals (G):** Logic that monitors state and creates "Needs" (e.g., "Need more Range").
-*   **Research (R):** A job queue that unlocks new `TypeBlueprints` or Stat Multipliers.
-*   **Design (D):** The UI where players allocate "Capacity" to Feature Axes.
-*   **Production (P):** The "Factory" logic that spawns Unit Entities.
-
-### 6.2 Tech Stack for R&D
-*   **Blueprints:** JSON objects stored in `SimState` (for the match) and `Supabase` (permanent library).
-*   **Versioning:** Strict `Name + Version` hashing (e.g., `MORDIG-12`).
+### Layer 4: The Services (Cloud)
+*   **Responsibility:** Persistence & Discovery.
+*   **Components:** Supabase (Auth, DB, Realtime), GenAI APIs (Image/3D).
 
 ---
 
-## 7. Open Decisions
+## 4. Multiplayer Endgame Strategy
 
-1.  **Physics Library:** Do we adopt Cannon.js/Rapier or keep custom spherical physics?
-    *   *Constraint:* `MOVE_ROLL` implies complex ground interaction.
-    *   *Recommendation:* Stick to Custom "Game Physics" (Point-mass on Sphere) for Release 0-5. Migrate only if stability fails.
-2.  **Matera Persistence:** How detailed is the voxel digging?
-    *   *Recommendation:* Variable-resolution grid. High res near changes, low res elsewhere.
+**Goal:** Seamless P2P Multiplayer (Host-Auth).
+
+### 4.1 The Roadmap
+1.  **Step 1: Local Loopback (Release 006)**
+    *   Host and Client run in same browser memory. `ITransport` just copies arrays.
+    *   *Validates:* Authority logic, State serialization.
+2.  **Step 2: Local Network (LAN)**
+    *   Use direct WebRTC IP or internal signaling.
+    *   *Validates:* Latency handling, Interpolation smoothing.
+3.  **Step 3: Internet (Wan)**
+    *   Use Supabase for Signaling + STUN/TURN (PeerJS).
+    *   *Validates:* NAT Traversal, Packet Loss handling.
+
+### 4.2 Why Host-Authoritative?
+*   **Cost:** No expensive headless servers to rent.
+*   **Latency:** Host gets 0ms latency (feels crisp).
+*   **Complexity:** Easier than full Lockstep (RTS) or Client-Side Prediction (FPS). Input is sent to Host; Host decides; Host sends State back.
 
 ---
-*End of Main Document. See Appendices for Implementation Details.*
+
+## 5. R&D Pipeline (GRFDTRDPU) Integration
+
+We do not just "build units". We **Research** capabilities, **Design** blueprints, and **Produce** instances.
+
+### 5.1 The Data Flow
+1.  **Research (R):** Unlocks `Feature: MOVE_ROLL`.
+2.  **Design (D):** Player opens Designer. Selects `MOVE_ROLL` (50% Cap) + `MINING` (50% Cap).
+    *   System generates Prompt -> Nano Banana (Image) -> Trellis (GLB).
+    *   Result: `UnitBlueprint` ("DrillBug v1").
+3.  **Production (P):** Factory queue consumes Resources.
+    *   Result: `UnitEntity` (Instance ID 105).
+4.  **Usage (F):** Unit 105 runs `MOVE_ROLL` logic in SimCore.
+
+---
+
+## 6. Open Decisions & Logic
+*See individual Appendices for detailed resolution strategies.*
+
+1.  **Physics Engine:** Custom Spherical Physics (Status: **Keep Custom**).
+2.  **Matera Voxelization:** Variable Grid (Status: **Plan Phase 2**).
+3.  **Generative Assets:** Nano Banana + Trellis (Status: **Confirmed**).
+
+---
+*Verified Compliance: All Read Gate sources checked. All required Appendices created.*
