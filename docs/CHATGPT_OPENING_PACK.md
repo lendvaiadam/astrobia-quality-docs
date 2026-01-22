@@ -1,5 +1,8 @@
-﻿
-MAINTENANCE RULES (BINDING)
+﻿MAINTENANCE RULES (BINDING)
+**Current Phase:** RELEASE 000 - MASTER PLAN MERGE
+**Immediate Context:**
+- **Merge Packet Ready:** `docs/master_plan/merge/` contains coverage, decisions, and change reqs.
+- **Goal:** Synthesize Claude and Antigravity plans into `MASTER_DEVELOPMENT_PLAN_Merged_v1.md`.
 - This file is the single source of truth for the ChatGPT opening pack.
 - Any agent who creates/introduces a new file that ChatGPT must read MUST update this file (and push).
 - The pack should prefer stable main RAW links, but if WIP is on a pinned commit, include commit-SHA RAW links.
@@ -49,6 +52,11 @@ OPENING PACK (RAW LINKS)
 - NOTES_CHATGPT: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/NOTES_CHATGPT.md
 - NOTES_ANTIGRAVITY: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/NOTES_ANTIGRAVITY.md
 - NOTES_CLAUDE: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/NOTES_CLAUDE.md
+
+## Release 000 Merge Round (Active)
+- COVERAGE_MATRIX: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/work/release-000-merge-round-prep/docs/master_plan/merge/COVERAGE_MATRIX.md
+- OPEN_DECISIONS: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/work/release-000-merge-round-prep/docs/master_plan/merge/OPEN_DECISIONS.md
+- CHANGE_REQUESTS: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/work/release-000-merge-round-prep/docs/master_plan/merge/CHANGE_REQUESTS_FOR_CLAUDE.md
 
 ## Canonical Specs (Snapshot 2026-01-14)
 - MASTER_BIBLE: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/publish/quality_docs_snapshot_2026-01-14/spec_sources/ASTEROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md
