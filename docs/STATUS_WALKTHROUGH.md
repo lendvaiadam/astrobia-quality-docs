@@ -20,6 +20,13 @@
 ### Next After This
 - Release 001 PR-by-PR execution plan + start implementation.
 
+### PUBLISH GATE (MANDATORY)
+- [ ] show git status (paths changed)
+- [ ] git add -A
+- [ ] git commit
+- [ ] git push
+- [ ] output: SHA + RAW links (otherwise NOT DONE)
+
 ## WORK PACKAGE ROLE MAP (BINDING)
 - Antigravity MUST assign and publish the Role Map for each Work Package.
 - Ádám MAY override role assignments by explicit instruction.

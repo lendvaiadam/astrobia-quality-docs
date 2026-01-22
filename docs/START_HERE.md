@@ -130,25 +130,12 @@ You MUST read these binding specs from `publish/quality_docs_snapshot_2026-01-14
 - **Bugbook Rule**: When a recurring issue is discovered/fixed twice: add it to [BUGBOOK](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/BUGBOOK.md).
 
 ---
-## SYNC & VISIBILITY (BINDING)
-
-If you work locally, ChatGPT cannot see your changes until you SYNC them.
-
-**SYNC is mandatory** before claiming a task/step is done. SYNC means EITHER:
-
-**A) GitHub Sync (preferred)**
-- Push your branch (WIP is OK) and provide:
-  - branch name
-  - commit SHA
-  - RAW links that include the commit SHA for every changed/created file you want ChatGPT to read
-
-**B) Chat Sync Pack (fallback, if you cannot push)**
-Paste into the chat:
-- `git status`
-- `git diff --stat`
-- full `git diff`
-
-**No SYNC = ChatGPT must assume the repo is unchanged.**
+## VISIBILITY & PUSH GATE (BINDING)
+- **Any EDIT REPO task MUST end with commit+push to GitHub (branch OK)**
+- **“Done” requires commit SHA + commit-SHA RAW links for all changed files**
+- **Local-only changes are not acceptable**; if push fails, STOP and paste exact error.
+- **If prompted “Run command? git push …” you MUST proceed (required step).**
+- **No SYNC = ChatGPT must assume the repo is unchanged.**
 
 ---
 ## AUTO-SYNC DEFAULT (BINDING)
