@@ -578,9 +578,680 @@ keyboardOverrideTimer  ──►    simCore.directControl.idleTimer
 
 ---
 
-*End of Part I + II (Foundation + Architecture)*
+# PART III: FEATURES
 
-*Part III-V continue in subsequent commits.*
+---
+
+## 8. Feature Roadmap
+
+### 8.1 Feature Categories
+
+| Category | Features | Lane |
+|----------|----------|------|
+| **Locomotion** | MOVE_ROLL, MATERA_TRANSPORT, UNIT_CARRIER | LOCOMOTION |
+| **Perception** | OPTICAL_VISION (passive), SUBSURFACE_SCAN | PERCEPTION / N/A |
+| **Tool** | MATERA_MINING, TERRAIN_SHAPING | TOOL |
+| **Weapon** | WPN_SHOOT | WEAPON |
+| **System** | SYS_RESEARCH, SYS_DESIGN, SYS_PRODUCTION | N/A (jobs) |
+
+### 8.2 Demo 1.0 Feature Status
+
+| Feature | Priority | Status | Release |
+|---------|----------|--------|---------|
+| MOVE_ROLL | Required | Planned | 011 |
+| OPTICAL_VISION | Required | Partial (FOW exists) | 012 |
+| SUBSURFACE_SCAN | Required | Planned | 016 |
+| MATERA_MINING | Required | Planned | 013 |
+| MATERA_TRANSPORT | Required | Planned | 014 |
+| WPN_SHOOT | Required | Planned | 015 |
+| TERRAIN_SHAPING | Stretch | Planned | 017 |
+| UNIT_CARRIER | Stretch | Planned | 018 |
+
+### 8.3 Feature Unlock Sequence (Canonical)
+
+**Source:** `spec_sources/ASTEROBIA_CANONICAL_MASTER_BIBLE_2026-01-13.md` Section: Goal/Need → Feature Unlock Mappings
+
+| Order | Trigger | Need Label | Unlocked Feature |
+|-------|---------|------------|------------------|
+| 1 | Central Unit cannot move | "Explore" | MOVE_ROLL |
+| 2 | Mobile unit sees surface Matera | "Discover Matera" | SUBSURFACE_SCAN |
+| 3 | Subsurface Scan finds underground mass | "Gather Matera" | MATERA_MINING |
+| 4 | Mining creates pile | "Collect Matera" | MATERA_TRANSPORT |
+| 5 | Height difference encountered | "Surface Control" | TERRAIN_SHAPING |
+| 6 | Non-mobile design created | "Deploy Unit" | UNIT_CARRIER |
+| 7 | First enemy appears | "Combat Capability" | WPN_SHOOT |
+
+### 8.4 Feature Dependency Graph
+
+```
+                         ┌─────────────────┐
+                         │   GAME START    │
+                         │  Central Unit   │
+                         └────────┬────────┘
+                                  │
+          ┌───────────────────────┼───────────────────────┐
+          │                       │                       │
+          ▼                       ▼                       ▼
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│ OPTICAL_VISION  │     │  SYS_RESEARCH   │     │   SYS_DESIGN    │
+│  (Pre-unlocked) │     │  (Pre-unlocked) │     │  (Pre-unlocked) │
+└────────┬────────┘     └─────────────────┘     └─────────────────┘
+         │
+         │ "Cannot explore"
+         ▼
+┌─────────────────┐
+│   MOVE_ROLL     │
+│   (Unlock #1)   │
+└────────┬────────┘
+         │
+         │ "See surface Matera"
+         ▼
+┌─────────────────┐
+│ SUBSURFACE_SCAN │
+│   (Unlock #2)   │
+└────────┬────────┘
+         │
+         │ "Find underground"
+         ▼
+┌─────────────────┐
+│  MATERA_MINING  │
+│   (Unlock #3)   │
+└────────┬────────┘
+         │
+         │ "Pile accumulates"
+         ▼
+┌─────────────────┐
+│MATERA_TRANSPORT │
+│   (Unlock #4)   │
+└────────┬────────┘
+         │
+    ┌────┴────┐
+    │         │
+    ▼         ▼
+┌───────┐ ┌───────┐
+│TERRAIN│ │  WPN  │
+│SHAPING│ │ SHOOT │
+│(#5)   │ │(#7)   │
+└───────┘ └───────┘
+```
+
+**Full dependency graph:** See [Appendix E: Feature Dependency Graph](appendices/APPENDIX_E_FEATURE_DEPENDENCY_GRAPH.md)
+
+---
+
+## 9. G-R-F-Tr-D-P-U Pipeline
+
+### 9.1 Pipeline Overview
+
+**Source:** `spec_sources/ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md`
+
+```
+┌───────┐    ┌──────────┐    ┌─────────┐    ┌──────────┐
+│   G   │───►│    R     │───►│    F    │───►│    Tr    │
+│ Goal  │    │ Research │    │ Feature │    │ Training │
+└───────┘    └──────────┘    └─────────┘    └──────────┘
+                                                  │
+                                                  ▼
+┌───────┐    ┌──────────┐    ┌─────────┐    ┌──────────┐
+│   U   │◄───│    P     │◄───│    D    │◄───│          │
+│ Unit  │    │Production│    │ Design  │    │          │
+└───────┘    └──────────┘    └─────────┘    └──────────┘
+```
+
+### 9.2 G - Goal System (Need Generator)
+
+**Purpose:** Convert GameEvents into Need Cards for player action.
+
+| Component | Responsibility |
+|-----------|----------------|
+| EventBus | Emits canonical events (COLLISION_WATER, BLOCKED_BY_SLOPE, etc.) |
+| GoalManager | Subscribes to EventBus, maps events to Goals, deduplicates |
+| Need Card UI | Displays goals as draggable cards |
+
+**Canonical events (Demo 1.0):**
+- `UNIT_STUCK` → Need "Explore" → Invent MOVE_ROLL
+- `SURFACE_MATERA_VISIBLE` → Need "Discover" → Invent SUBSURFACE_SCAN
+- `UNDERGROUND_MATERA_FOUND` → Need "Gather" → Invent MATERA_MINING
+- `MATERA_PILE_EXISTS` → Need "Collect" → Invent MATERA_TRANSPORT
+- `ENEMY_DETECTED` → Need "Combat" → Invent WPN_SHOOT
+
+### 9.3 R - Research (Invent & Extend)
+
+**Two research types:**
+
+| Type | Effect | Cap |
+|------|--------|-----|
+| **Invent** | Unlocks new feature (`LOCKED` → `UNLOCKED`) | N/A |
+| **Extend** | Improves constraint by level | Level 5 max |
+
+**Extend formula (canonical):**
+```
+ExtendMultiplier(Level) = 1.0 + (Level * 0.5)
+Max Level = 5 → Max Multiplier = 3.5x
+```
+
+**Source:** `spec_sources/ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md` Section 3.1
+
+**Interaction:**
+1. Player drags Need Card to Research-capable unit (has SYS_RESEARCH)
+2. Research job created with energy/time cost
+3. On completion: FeatureRegistry updated
+
+### 9.4 F - Feature Runtime
+
+**Each feature is an independent module with:**
+- Feature ID and category
+- Base stats and constraints
+- Status (LOCKED/UNLOCKED)
+- Extend levels per constraint
+- Code module path
+
+**Feature Registry entry:**
+```javascript
+{
+  id: "MOVE_ROLL",
+  category: "locomotion",
+  status: "LOCKED",
+  baseStats: {
+    maxSpeed: 10,        // m/s
+    acceleration: 5,     // m/s²
+    grip: 0.8,
+    torque: 50
+  },
+  constraints: {
+    maxClimbAngle: 40    // degrees (extendable to 60)
+  },
+  extend: {
+    levelByConstraint: {
+      maxClimbAngle: 0
+    }
+  }
+}
+```
+
+### 9.5 Tr - Training (Outcome Slider)
+
+**Status:** Per Human Owner Q6 - implement **Training Outcome Slider** instead of mini-games.
+
+**Phase 1 implementation:**
+- Training screen shows slider: -50% to +50%
+- User sets desired outcome
+- Outcome stored as `highScore` (mapped: -50% = 0, 0% = 50, +50% = 100)
+- Multiplier computed: `1.0 + (highScore / 100)`
+
+**Formula (canonical):**
+```
+TrainingMultiplier = 1.0 + (HighScore / 100)
+Range: 0.5x to 2.0x
+```
+
+**Scope:** Per user, per feature (global across all units using that feature)
+
+**Source:** `spec_sources/ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md` Section 6.3, Human Owner Q6.
+
+### 9.6 D - Design (Type Blueprints)
+
+**Rules (canonical):**
+- Sum of allocations = 100%
+- 0% allocation = feature not included
+- Minimum included allocation = 25% (configurable via `MIN_FEATURE_ALLOCATION`)
+- Designer unit slot capacity = `floor(DesignAllocation / 25%)`
+
+**Specialization bonus (fewer features → higher bonus):**
+
+| Features | Bonus |
+|----------|-------|
+| 1 | +100% (2.0x) |
+| 2 | +50% (1.5x) |
+| 3 | +20% (1.2x) |
+| 4+ | +0% (1.0x) |
+
+**Source:** `spec_sources/ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md` Section 3.4
+
+### 9.7 P - Production (Build & Refit)
+
+**Locality rule:** Production occurs at world position of producer unit (SYS_PRODUCTION).
+
+| Operation | Description |
+|-----------|-------------|
+| **Build** | Create new unit from Type blueprint |
+| **Refit** | Update existing unit to newer Type version (cost = delta) |
+
+**Production queue:** Each producer maintains own queue; parallel production requires multiple producers.
+
+### 9.8 U - Unit Lifecycle
+
+**Unit instance contains:**
+- `typeId` + `typeVersion`
+- HP, energy buffer
+- Per-feature tuning modifiers
+- Effective stats cache
+
+**Wreck state:** When HP = 0, unit becomes WRECK (interactable for capture/repair).
+
+**Full implementation guide:** See [Appendix D: GRFDTRDPU Implementation](appendices/APPENDIX_D_GRFDTRDPU_IMPLEMENTATION.md)
+
+---
+
+## 10. Core Features (Demo 1.0)
+
+### 10.1 MOVE_ROLL (Locomotion)
+
+**Source:** `spec_sources/ASTEROBIA_CANONICAL_FEATURE_MOVE_ROLL_2026-01-13.md`
+
+| Property | Value |
+|----------|-------|
+| Lane | LOCOMOTION |
+| Type | Action |
+| Base Stats | maxSpeed: 10 m/s, acceleration: 5 m/s², grip: 0.8, torque: 50 |
+| Constraint | maxClimbAngle: 40° (extendable to 60°) |
+
+**Slope bands (canonical):**
+| Slope | Behavior |
+|-------|----------|
+| 0-10° | Flat (no penalty) |
+| 10-40° | Standard (speed penalty: `speed *= cos(slope)`) |
+| 40-60° | Critical (requires torque check) |
+| >60° | Blocked (unless extended or different locomotion) |
+
+**Done When:**
+- [ ] Unit moves along path with correct physics
+- [ ] Slope bands respected (blocked >60°)
+- [ ] Speed penalty on slopes
+- [ ] Extend increases maxClimbAngle
+
+### 10.2 OPTICAL_VISION (Perception - Passive)
+
+**Source:** `spec_sources/ASTEROBIA_CANONICAL_FEATURE_PERCEPTION_OPTICAL_VISION_2026-01-13.md`
+
+| Property | Value |
+|----------|-------|
+| Lane | N/A (passive) |
+| Type | Passive (always-on) |
+| Base Stat | visionRange: 30m |
+| Max Sources | 64 (per `VISION_MAX_SOURCES_POLICY`) |
+
+**FOW integration:**
+- Vision sources stamped to FOW render target
+- CPU-serializable explored state for persistence
+- Only player's own units reveal FOW (ownership filter)
+
+**Done When:**
+- [ ] Unit reveals FOW based on visionRange
+- [ ] Range scales with allocation %
+- [ ] Explored state persists across save/load
+
+### 10.3 SUBSURFACE_SCAN (Perception - Action)
+
+**Source:** `spec_sources/ASTEROBIA_CANONICAL_FEATURE_PERCEPTION_SUBSURFACE_SCAN_2026-01-13.md`
+
+| Property | Value |
+|----------|-------|
+| Lane | PERCEPTION |
+| Type | Action (toggleable) |
+| Base Stat | scanRange: 20m |
+
+**Behavior:**
+- Reveals underground Matera deposits within scanRange
+- Toggleable on/off (consumes energy while active)
+- Triggers UNDERGROUND_MATERA_FOUND event
+
+**Done When:**
+- [ ] Scan reveals underground deposits
+- [ ] Toggle on/off works
+- [ ] Range scales with allocation %
+
+### 10.4 MATERA_MINING (Tool)
+
+**Source:** `spec_sources/ASTEROBIA_CANONICAL_FEATURE_MATERA_MINING_2026-01-13.md`
+
+| Property | Value |
+|----------|-------|
+| Lane | TOOL |
+| Type | Action |
+| Base Stat | extractionRate: 5 units/s |
+| Constraint | requiresStationary: true |
+
+**Behavior:**
+- Unit must be stationary to mine
+- Extracts Matera from deposit
+- Creates surface pile at deposit location
+
+**Done When:**
+- [ ] Mining extracts Matera
+- [ ] Surface pile created
+- [ ] Rate scales with allocation %
+- [ ] Cannot mine while moving
+
+### 10.5 MATERA_TRANSPORT (Locomotion)
+
+**Source:** `spec_sources/ASTEROBIA_CANONICAL_FEATURE_MATERA_TRANSPORT_2026-01-13.md`
+
+| Property | Value |
+|----------|-------|
+| Lane | LOCOMOTION |
+| Type | Action |
+| Base Stat | cargoCapacity: 100 units |
+| Speed Penalty | 50% when loaded |
+
+**Behavior:**
+- Collect Matera from pile
+- Deliver to base/storage
+- Speed reduced when carrying cargo
+
+**Done When:**
+- [ ] Can collect from pile
+- [ ] Can deliver to base
+- [ ] Speed penalty when loaded
+- [ ] Capacity scales with allocation %
+
+### 10.6 WPN_SHOOT (Weapon)
+
+**Source:** `spec_sources/ASTEROBIA_CANONICAL_FEATURE_WPN_SHOOT_2026-01-13.md`
+
+| Property | Value |
+|----------|-------|
+| Lane | WEAPON |
+| Type | Action |
+| 4-Axis System | Power, Rate, Range, Accuracy |
+
+**4-axis allocation (nested):**
+| Axis | Effect |
+|------|--------|
+| Power | Damage per shot |
+| Rate | Shots per second |
+| Range | Effective distance |
+| Accuracy | Hit probability |
+
+**Default split:** 25% each (auto-managed unless user edits)
+
+**Done When:**
+- [ ] Unit can damage targets
+- [ ] 4-axis system affects behavior
+- [ ] Wreck state triggers on HP=0
+
+### 10.7 TERRAIN_SHAPING (Tool) - Stretch
+
+**Source:** `spec_sources/ASTEROBIA_CANONICAL_FEATURE_TERRAIN_SHAPING_2026-01-13.md`
+
+| Property | Value |
+|----------|-------|
+| Lane | TOOL |
+| Type | Action |
+| Constraint | requiresStationary: true |
+
+**Behavior:**
+- Set target height at waypoints
+- Height converges over multiple passes
+- Mutual exclusion with MATERA_MINING (same lane)
+
+### 10.8 UNIT_CARRIER (Locomotion) - Stretch
+
+**Source:** `spec_sources/ASTEROBIA_CANONICAL_FEATURE_UNIT_CARRIER_2026-01-13.md`
+
+| Property | Value |
+|----------|-------|
+| Lane | LOCOMOTION |
+| Type | Action |
+
+**Behavior:**
+- Load/unload other units
+- Transport non-mobile units
+- Speed penalty when loaded
+
+---
+
+# PART IV: MULTIPLAYER & BACKEND
+
+---
+
+## 11. Multiplayer Architecture
+
+### 11.1 Topology (Binding)
+
+**Decision:** Per Human Owner Q10 - **Host-authoritative star topology**
+
+```
+        ┌─────────────┐
+        │    HOST     │
+        │  (Server-   │
+        │   shaped)   │
+        └──────┬──────┘
+               │
+    ┌──────────┼──────────┐
+    │          │          │
+    ▼          ▼          ▼
+┌───────┐  ┌───────┐  ┌───────┐
+│Client1│  │Client2│  │Client3│
+└───────┘  └───────┘  └───────┘
+```
+
+**Properties:**
+- Host runs authoritative SimCore
+- Clients send commands to host
+- Host broadcasts state snapshots
+- 2-4 players supported
+- Host is "server-shaped" for future dedicated server migration
+
+### 11.2 Connection Flow
+
+```
+1. LOBBY CREATION
+   Host → Supabase: Create lobby row
+   Host → Supabase: Subscribe to lobby channel
+
+2. CLIENT JOIN
+   Client → Supabase: Find lobby, subscribe
+   Client ↔ Host: WebRTC signaling via Supabase Realtime
+   Client ↔ Host: DataChannel established
+
+3. GAMEPLAY
+   Client → Host: Commands (via DataChannel)
+   Host: Process commands in SimCore
+   Host → Clients: State snapshots (every N ticks)
+   Clients: Apply snapshots, interpolate
+
+4. LATE JOIN
+   New Client → Host: Request full state
+   Host → New Client: Full state snapshot
+   New Client: Initialize from snapshot
+```
+
+### 11.3 Staging Path
+
+| Stage | Scope | Transport |
+|-------|-------|-----------|
+| **Local** | Single player | LocalTransport (sync) |
+| **LAN** | Same network | WebRTC (no TURN) |
+| **Internet** | Any network | WebRTC + TURN relay |
+| **Matchmaking** | Public lobbies | Supabase + WebRTC |
+
+### 11.4 State Synchronization
+
+**Snapshot frequency:** Every 3 ticks (150ms at 20Hz)
+
+**Snapshot contents:**
+```javascript
+{
+  tick: 1234,
+  seed: 42,
+  nextId: 567,
+  entities: { /* all entity state */ },
+  terrain: { /* modified terrain */ },
+  players: { /* research/design/production state */ },
+  commandLog: [ /* commands since last snapshot */ ]
+}
+```
+
+**Desync detection:**
+- Host computes state hash every 60 ticks
+- Clients compute local hash, compare
+- Mismatch → request full resync
+
+**Full spec:** See [Appendix A: Multiplayer Deep Spec](appendices/APPENDIX_A_MULTIPLAYER_DEEP_SPEC.md)
+
+---
+
+## 12. Backend & Persistence
+
+### 12.1 Supabase Architecture
+
+**Decision:** Per Human Owner Q12 - **Supabase Pro acceptable** with degrade paths
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      SUPABASE                                │
+├─────────────────┬─────────────────┬─────────────────────────┤
+│      Auth       │    Realtime     │        Storage          │
+│                 │   (Signaling)   │      (Snapshots)        │
+├─────────────────┼─────────────────┼─────────────────────────┤
+│   PostgreSQL    │    Channels     │    Object Storage       │
+│   (User data)   │    (Pub/Sub)    │    (Game saves)         │
+└─────────────────┴─────────────────┴─────────────────────────┘
+```
+
+### 12.2 Schema (Demo 1.0)
+
+```sql
+-- Users (managed by Supabase Auth)
+-- profiles table for game-specific data
+CREATE TABLE profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id),
+  display_name TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Game saves
+CREATE TABLE game_saves (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES profiles(id),
+  name TEXT NOT NULL,
+  snapshot JSONB NOT NULL,
+  command_log JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Lobbies (for matchmaking)
+CREATE TABLE lobbies (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  host_id UUID REFERENCES profiles(id),
+  name TEXT NOT NULL,
+  max_players INT DEFAULT 4,
+  current_players INT DEFAULT 1,
+  status TEXT DEFAULT 'waiting', -- waiting, in_game, finished
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Lobby members
+CREATE TABLE lobby_members (
+  lobby_id UUID REFERENCES lobbies(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES profiles(id),
+  joined_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (lobby_id, user_id)
+);
+```
+
+### 12.3 Row Level Security (RLS)
+
+```sql
+-- Profiles: users can only read/update their own
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view own profile" ON profiles
+  FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Users can update own profile" ON profiles
+  FOR UPDATE USING (auth.uid() = id);
+
+-- Game saves: users can only access their own
+ALTER TABLE game_saves ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can manage own saves" ON game_saves
+  FOR ALL USING (auth.uid() = user_id);
+```
+
+### 12.4 Cost Management (Degrade Paths)
+
+| Tier | Limits | Mitigation |
+|------|--------|------------|
+| Free | 500MB DB, 1GB storage | Snapshot compression, cleanup old saves |
+| Pro | 8GB DB, 100GB storage | Monitor usage, alert at 80% |
+
+**Degrade triggers:**
+- Storage > 80%: Auto-delete saves older than 30 days
+- Realtime connections > limit: Queue lobby joins
+
+**Full spec:** See [Appendix B: Backend & Persistence Deep Spec](appendices/APPENDIX_B_BACKEND_PERSISTENCE_DEEP_SPEC.md)
+
+---
+
+## 13. Replay System
+
+### 13.1 Purpose
+
+**Decision:** Per Human Owner Q1 - **Include basic command-log replay**
+
+**Use cases:**
+1. **Debug:** Reproduce bugs by replaying command log
+2. **Anti-cheat foundation:** Verify game outcomes
+3. **Analysis:** Review gameplay decisions
+
+### 13.2 Architecture
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   RECORDING     │     │    STORAGE      │     │    PLAYBACK     │
+├─────────────────┤     ├─────────────────┤     ├─────────────────┤
+│ CommandLog.js   │────►│ game_saves.     │────►│ ReplayPlayer.js │
+│ - Capture cmds  │     │ command_log     │     │ - Feed cmds     │
+│ - Tick stamp    │     │ (JSONB)         │     │ - Verify state  │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+```
+
+### 13.3 Command Log Format
+
+```javascript
+{
+  version: "1.0",
+  seed: 42,
+  initialState: { /* snapshot at tick 0 */ },
+  commands: [
+    { tick: 10, type: "MOVE", playerId: "p1", unitIds: ["u1"], payload: { target: [100,0,0] } },
+    { tick: 25, type: "ATTACK", playerId: "p1", unitIds: ["u1"], payload: { targetId: "e1" } },
+    // ...
+  ]
+}
+```
+
+### 13.4 Playback Verification
+
+```javascript
+// Replay verification
+const original = loadSnapshot("game_end.json");
+const replay = new SimCore({ seed: original.seed });
+replay.loadState(commandLog.initialState);
+
+for (const cmd of commandLog.commands) {
+  while (replay.tick < cmd.tick) {
+    replay.step();
+  }
+  replay.commandQueue.enqueue(cmd);
+}
+
+// Run to same tick as original
+while (replay.tick < original.tick) {
+  replay.step();
+}
+
+// Verify
+assert.deepEqual(replay.getStateHash(), original.stateHash);
+```
+
+**Full spec:** See [Appendix C: Replay System Spec](appendices/APPENDIX_C_REPLAY_SYSTEM_SPEC.md)
+
+---
+
+*End of Part III + IV*
+
+*Part V (Execution) continues in next commit.*
 
 ---
 
@@ -589,7 +1260,4 @@ keyboardOverrideTimer  ──►    simCore.directControl.idleTimer
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 2.0.0 | 2026-01-24 | Claude Code + Adam | Initial v2 from reconciled sources |
-
----
-
-*Continued in next commit: Part III (Features), Part IV (Multiplayer & Backend), Part V (Execution)*
+| 2.0.1 | 2026-01-24 | Claude Code | Added Part III (Features) + Part IV (MP/Backend) |
