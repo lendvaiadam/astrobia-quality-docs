@@ -61,6 +61,11 @@ Purpose:
 - **Instruct Claude to be concise:** "Focus on high-quality code. Do not waste tokens on long chat explanations. Be precise."
 - **Code first:** Chat output should focus on decisions and verification, not philosophical ramblings.
 
+### Meta-Rules (Binding)
+- **Rule Recording:** Any new binding rule discovered must be written into the agent-specific `docs/NOTES_*.md` file **immediately**.
+- **Remote Discipline:** Code -> `code` remote. Docs -> `origin` remote.
+
+
 
 - Authority must be deterministic: fixed tick, command-stream only, deterministic IDs, seeded PRNG.
 - Clear separation: authoritative state vs render-only state (do not sync render artifacts).

@@ -4,6 +4,12 @@
 This document represents the **current implementations state** of the `asterobia` repository.
 **Precedence Rule:** If this document conflicts with Canonical Specs, **Canonical Specs win**. This document describes *what is*, while specs describe *what must be*.
 
+## 1.1 Determinism Invariant (Binding)
+*   **Effective:** Post-Release 001 (Fixed Timestep).
+*   **Rule:** The Simulation Loop MUST be purely deterministic.
+*   **Forbidden:** `Date.now()`, `Math.random()`, `dt` variance in logic.
+
+
 ## 2. Runtime Architecture Snapshot
 *   **Game Loop:** Monolithic `Game.js` controls initialization, render loop `requestAnimationFrame`, and input handling.
     *   *Evidence:* `src/Game.js` (GOD CLASS, see `quality/NETCODE_READINESS_AUDIT.md`)

@@ -12,7 +12,14 @@
 
 ## 2. Workflows
 *   **Master Plan:** Follow `docs/master_plan/MASTER_DEVELOPMENT_PLAN_Merged_v1.md` (once created).
-*   **Gates:** Strictly adhere to `docs/IMPLEMENTATION_GATES.md`.
+## 4. Binding Rules
+*   **Remote Discipline:**
+    *   **Code** (`src/`, `package.json`): Push to `code` remote (`lendvaiadam/asterobia`).
+    *   **Docs** (`docs/`, `quality/`): Push to `origin` remote (`lendvaiadam/asterobia-quality-docs`).
+*   **Determinism Invariant:**
+    *   After **Release 001** (Fixed Timestep) is merged: **ZERO** non-deterministic code allowed.
+    *   Forbidden: `Date.now()` (logic), `Math.random()` (unseeded), `requestAnimationFrame` (sim).
+
 
 ## 3. Communication
 *   **Mailbox:** `docs/MAILBOX.md` is for agent-to-agent syncing. Do not ask Ádám to read it.
