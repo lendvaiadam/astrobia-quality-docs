@@ -9,6 +9,13 @@ This document represents the **current implementations state** of the `asterobia
 *   **Rule:** The Simulation Loop MUST be purely deterministic.
 *   **Forbidden:** `Date.now()`, `Math.random()`, `dt` variance in logic.
 
+## 1.2 Rule Discovery Protocol (Binding)
+*   **Protocol:** Rule Discovery → Documentation (`docs/NOTES_*.md`) → Notification.
+*   **Mandatory:** Rules must never live only in chat.
+*   **Operator:** Antigravity is the preferred agent for rule documentation.
+*   **Scope:** Applies to all future work packages.
+
+
 
 ## 2. Runtime Architecture Snapshot
 *   **Game Loop:** Monolithic `Game.js` controls initialization, render loop `requestAnimationFrame`, and input handling.

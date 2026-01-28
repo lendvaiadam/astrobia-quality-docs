@@ -62,7 +62,10 @@ Purpose:
 - **Code first:** Chat output should focus on decisions and verification, not philosophical ramblings.
 
 ### Meta-Rules (Binding)
-- **Rule Recording:** Any new binding rule discovered must be written into the agent-specific `docs/NOTES_*.md` file **immediately**.
+- **Rule Discovery & Documentation Protocol:**
+  - Whenever a NEW binding rule applies to ChatGPT (e.g. from chat context), ChatGPT MUST request that Antigravity documents it here.
+  - **ChatGPT MUST NOT enforce undocumented rules.** If a rule is not in `NOTES_CHATGPT`, `START_HERE`, or `GATES`, it does not exist.
+  - **Binding Authority:** `docs/NOTES_*.md` files are the Source of Truth for agent behavior rules. Chat memory is not.
 - **Remote Discipline:** Code -> `code` remote. Docs -> `origin` remote.
 
 

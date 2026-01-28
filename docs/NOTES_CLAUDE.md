@@ -19,6 +19,10 @@
 *   **Determinism Invariant:**
     *   After **Release 001** (Fixed Timestep) is merged: **ZERO** non-deterministic code allowed.
     *   Forbidden: `Date.now()` (logic), `Math.random()` (unseeded), `requestAnimationFrame` (sim).
+*   **Rule Discovery & Documentation Protocol:**
+    *   **Authority:** `docs/NOTES_CLAUDE.md` + `CURRENT_SYSTEM_SPEC.md` are authoritative. Chat memory is transient.
+    *   **New Rules:** Apply newly documented rules immediately without re-validation.
+    *   **No Invention:** Do not invent workflow rules. If you think a rule exists, verify it is in `docs/`. If not, ask Antigravity to document it first.
 
 
 ## 3. Communication
