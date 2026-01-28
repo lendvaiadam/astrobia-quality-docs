@@ -1,6 +1,45 @@
 # STATUS WALKTHROUGH (Living Document)
 
+<<<<<<< Updated upstream
 ## NOW
+=======
+Last updated: 2026-01-15 (Europe/Budapest)
+
+---
+
+## Current baseline
+- Stable starting ref: baseline/pre-claude-stable
+- Canonical index (stable): https://raw.githubusercontent.com/lendvaiadam/asterobia/baseline/pre-claude-stable/docs/CANONICAL_SOURCES_INDEX.md
+- Preflight: https://raw.githubusercontent.com/lendvaiadam/asterobia/baseline/pre-claude-stable/quality/NETCODE_PREFLIGHT.md
+
+---
+
+## Direction (what we are building toward)
+Phase 0 “Netcode Readiness” (binding):
+- Fixed-timestep authority loop (no dt-based authority).
+- Command-stream input only.
+- Deterministic IDs + seeded PRNG.
+- Authoritative snapshot surface export.
+- ITransport abstraction (Local now, later multiplayer/backend).
+
+- Host-authoritative as MVP; backend Phase 1 = Auth + Lobby/Signaling.
+
+---
+
+## CURRENT STATE / HANDOFF (2026-01-28)
+*   **R001 (Fixed Timestep) DONE:**
+    *   Merged to `code/main` (SHA: `6d7a168`).
+    *   Status: Fixed 50ms SimLoop + renderUpdate separation verified. Smoke Pass.
+*   **R002 (Command Buffer) IN PROGRESS:**
+    *   Active Branch: `work/r002-command-buffer` (Tip: `0b237af` on `code` remote).
+    *   **Scope:** Discrete click actions (SELECT, DESELECT, SET_PATH, ADD_WAYPOINT) are now **Command-Only**.
+    *   **Scope Guard (Binding):** Keyboard/WASD input remains **POLLED** in `simTick` (deterministic enough for 20Hz V0). UI Panel actions deferred to R002b.
+    *   **Architecture:** `InteractionManager` -> `CommandQueue` -> `simTick` -> `CommandProcessor`.
+*   **Testing Rule (Binding):** Every implementation step/commit MUST include a **HU (Human-Usable) Test Script** in the commit/PR description.
+*   **Console Note:** "Async response channel closed" errors are currently benign (browser extension noise) unless gameplay is affected.
+
+--- ## NOW
+>>>>>>> Stashed changes
 ### Current Work Package
 - **RELEASE 002 — COMMAND BUFFER**
   Implement the Command Queue Shim to stop direct state mutation.

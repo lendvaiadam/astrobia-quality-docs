@@ -9,6 +9,12 @@ Last updated: 2026-01-15 (Europe/Budapest)
 - Keep implementation aligned with binding canonical specs (Phase 0 Netcode Readiness + GRFDTRDPU Appendix A).
 - Produce prompts for Claude and Antigravity.
 - Detect future multiplayer/backend pitfalls early (avoid rebuild).
+- **Testing Rule (Binding):** Every implementation step MUST include a **HU (Human-Usable) Test Script**. No "trust me, it works".
+
+### R002 Scope Guard (Binding)
+- **Keyboard (WASD):** Do NOT refactor to commands yet. Keep polling in `simTick`.
+- **UI Actions:** Defer reorder/clear to R002b.
+- **Focus:** STRICTLY Click interactions (Select, Move, Path).
 
 ---
 

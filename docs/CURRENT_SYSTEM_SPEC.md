@@ -50,10 +50,13 @@ This document represents the **current implementations state** of the `asterobia
     *   *Evidence:* `quality/NETCODE_READINESS_AUDIT.md` Section 2C.
 
 ## 4. Command Pipeline Status
-*   **Mechanism:** Direct Method Calls (e.g., `unit.setTarget()`).
-*   **Command Objects:** Missing. No localized Command pattern yet.
-*   **Input Entry:** `Input.js` directly mutates state.
-    *   *Evidence:* `quality/NETCODE_READINESS_AUDIT.md` Section 4.
+*   **Mechanism:** Hybrid (Transitioning).
+    *   **Clicks (R002):** `CommandQueue` -> `CommandProcessor` (Authorize-First).
+    *   **Keyboard:** Direct Poll in `simTick` (Legacy/Scope Guard).
+*   **Command Objects:** `src/SimCore/commands/Command.js` (Implemented).
+*   **Input Entry:** `InteractionManager` emits commands; `Input.js` still polled.
+    *   *Evidence:* `work/r002-command-buffer` branch.
+
 
 ## 5. State Surface Map
 *   **Authoritative State:** Mixed with Render state.
