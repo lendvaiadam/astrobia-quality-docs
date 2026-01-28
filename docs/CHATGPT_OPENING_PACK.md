@@ -1,8 +1,8 @@
 ﻿MAINTENANCE RULES (BINDING)
-**Current Phase:** RELEASE 000 - MASTER PLAN MERGE
+**Current Phase:** POST-PLAN EXECUTION (Master Plan v2 Merged)
 **Immediate Context:**
-- **Merge Packet Ready:** `docs/master_plan/merge/` contains coverage, decisions, and change reqs.
-- **Goal:** Synthesize Claude and Antigravity plans into `MASTER_DEVELOPMENT_PLAN_Merged_v1.md`.
+- **Authoritative Plan:** `docs/master_plan/final_v2/`
+- **Goal:** Execute Work Packages as defined in the Final Plan.
 - This file is the single source of truth for the ChatGPT opening pack.
 - Any agent who creates/introduces a new file that ChatGPT must read MUST update this file (and push).
 - The pack should prefer stable main RAW links, but if WIP is on a pinned commit, include commit-SHA RAW links.

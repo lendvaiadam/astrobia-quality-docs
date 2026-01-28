@@ -1,9 +1,8 @@
 # STATUS WALKTHROUGH (Living Document)
 
-<<<<<<< Updated upstream
-## NOW
-=======
-Last updated: 2026-01-15 (Europe/Budapest)
+STATE (2026-01-29): Final Master Plan v2 is merged to main. Do NOT request new plans. Use docs/master_plan/final_v2/ as authoritative.
+
+Last updated: 2026-01-29 (Europe/Budapest)
 
 ---
 
@@ -39,40 +38,19 @@ Phase 0 “Netcode Readiness” (binding):
 *   **Console Note:** "Async response channel closed" errors are currently benign (browser extension noise) unless gameplay is affected.
 
 --- ## NOW
->>>>>>> Stashed changes
+
+**POST-PLAN PHASE**
+1. **Sync**: Ensure you are on `main` or a feature branch off `main`.
+2. **Read**: The authoritative source is `docs/master_plan/final_v2/`.
+3. **Execute**: Proceed with the active Work Package (currently R002 Command Buffer) as defined in the Final Plan.
+4. **Docs**: If you find discrepancies, update the docs to match the Final Plan, do NOT request a new plan.
+
 ### Current Work Package
-- **RELEASE 002 — COMMAND BUFFER**
-  Implement the Command Queue Shim to stop direct state mutation.
-
-### Tasks
-- [x] **Release 001** (Fixed Timestep) COMPLETE (Merged to `code/main` / Smoke Test PASS).
-- [ ] **Release 002** (Command Object/Queue) STARTING.
-
-### Deliverables
-- `src/SimCore/CommandQueue.js`
-- `src/Core/Input.js` (Refactor to emit commands)
-
-### Previous Blocks (Done)
-- [x] SimLoop.js created (50ms fixed tick)
-- [x] Game.js wired
-- [x] Smoke Test PASS (see `docs/TEST_LOGS/R001_SMOKE_TEST.md`)
-
-
-### Commits (on code remote)
-- `eea9311` r001: add SimLoop fixed 50ms accumulator
-- `6d7a168` r001: wire SimLoop fixed tick into Game loop
-
-### Migration Note
-R001 code was initially pushed to `origin` (quality-docs) by mistake. Commits have been cherry-picked to `code` remote (asterobia.git) on branch `work/r001-determinism-wiring`. Quality-docs history remains intact (no destructive ops).
-
-### Next Blockers (Determinism Scan Results)
-- **E2: Unseeded Randomness** — 10 BLOCKER sites in src/ (Math.random in IDs, spawn positions, replanning)
-- **E3: Non-Deterministic Timestamps** — 5 BLOCKER sites (Date.now in command IDs, TypeBlueprint)
+- **RELEASE 002 — COMMAND BUFFER** (See `docs/master_plan/final_v2/` for details)
 
 ### Done When
-- PR merged to code/main
-- Determinism scan shows E1 (variable timestep) resolved
-- Game still runs (smoke test)
+- R002 Implementation Complete
+- Smoke Test PASS
 
 ---
 

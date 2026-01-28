@@ -74,6 +74,8 @@ Only after both Master Plans exist and are synthesized/approved do we request PR
 
 ## Fresh Session Bootstrap (BINDING)
 > **On a fresh session:** DO NOT ask questions. First read the Required Reading Set below. Then open `docs/STATUS_WALKTHROUGH.md` and execute **## NOW**. Ask only if a required link/input is missing.
+>
+> **NOTE (2026-01-29):** The "Request Master Plan" phase is OVER. Master Plan v2 is merged. Do NOT generate new plans. Execute the existing one.
 
 ### Required Reading Set (BINDING)
 1) `docs/STATUS_WALKTHROUGH.md` (execute ## NOW after reading)
