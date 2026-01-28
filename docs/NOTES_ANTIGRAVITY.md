@@ -47,3 +47,5 @@ Default output: MD files under /quality or /docs.
 - **Releases**: Suggest release when milestone matches `docs/RELEASE_PLAN.md` (YES/NO + reason).
 - **Release Execution**: If approved, tag + update `public/versions.json`.
 - **Prompt Delivery**: If generating a prompt for Claude, return it **directly in chat**. Do not tell Ádám to read MAILBOX.
+- **Ádám Test Checklist (Mandatory)**: After every implementation step, output a checklist (Steps + Expected + Risk Focus).
+

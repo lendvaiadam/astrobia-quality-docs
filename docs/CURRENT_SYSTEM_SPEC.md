@@ -15,6 +15,15 @@ This document represents the **current implementations state** of the `asterobia
 *   **Operator:** Antigravity is the preferred agent for rule documentation.
 *   **Scope:** Applies to all future work packages.
 
+## 1.3 Implementation Checklist (Binding)
+*   **Mandatory:** After EVERY implementation step (commit/PR), the implementer MUST output an "**Ádám Test Checklist**".
+*   **Trigger:** Any change to behavior (logic, features, fixes).
+*   **Format:**
+    *   3–10 concrete steps.
+    *   "Expected Result" for each step.
+    *   "Risk Focus": 1-line summary of what might have broken.
+
+
 
 
 ## 2. Runtime Architecture Snapshot

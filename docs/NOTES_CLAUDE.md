@@ -23,6 +23,10 @@
     *   **Authority:** `docs/NOTES_CLAUDE.md` + `CURRENT_SYSTEM_SPEC.md` are authoritative. Chat memory is transient.
     *   **New Rules:** Apply newly documented rules immediately without re-validation.
     *   **No Invention:** Do not invent workflow rules. If you think a rule exists, verify it is in `docs/`. If not, ask Antigravity to document it first.
+*   **Ádám Test Checklist (Mandatory):**
+    *   After EVERY implementation step, output a "Test Checklist (Ádám)" section.
+    *   Includes: 3-10 steps + Expected Results + Risk Focus.
+
 
 
 ## 3. Communication
