@@ -57,6 +57,10 @@ Purpose:
 - **Never send multiple unrelated paste-items in one message.** One payload per message.
 - If the receiver reports missing END marker or an abrupt cutoff, **assume truncation** and resend using chunking.
 
+### Claude Guidelines (Binding for Prompts)
+- **Instruct Claude to be concise:** "Focus on high-quality code. Do not waste tokens on long chat explanations. Be precise."
+- **Code first:** Chat output should focus on decisions and verification, not philosophical ramblings.
+
 
 - Authority must be deterministic: fixed tick, command-stream only, deterministic IDs, seeded PRNG.
 - Clear separation: authoritative state vs render-only state (do not sync render artifacts).
