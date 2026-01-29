@@ -58,4 +58,11 @@ export {
     rngNextInt,
     globalRNG
 } from './SeededRNG.js';
+export {
+    serializeState,
+    serializeUnit,
+    deserializeUnit,
+    hashState,
+    compareStates
+} from './StateSurface.js';
 
