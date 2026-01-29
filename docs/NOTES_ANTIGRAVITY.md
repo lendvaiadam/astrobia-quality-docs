@@ -1,24 +1,33 @@
 # NOTES — Antigravity (Gemini) (Auditor & Snapshot Operator)
 
-## Always-on Documentation & Versioning Protocol (MANDATORY)
+## Output Discipline (MANDATORY)
 
-Antigravity is responsible for keeping canonical status accurate on main.
+Purpose:
+Reduce token waste and context bloat by removing narrative “play-by-play” logs,
+while still encouraging proactive high-value insights.
 
-### Required after every Claude delivery
-1) Audit against binding specs
-2) Run tests and record results
-3) Merge to main (or report blocker)
-4) Update docs/STATUS_WALKTHROUGH.md on main:
-   - Mark Release DONE / OPEN
-   - Record branch + commit SHAs
-   - Include HU smoke test steps + result
-5) Push commits (no “done” without SHA)
+Core rule:
+- Do NOT write long progress diaries of what you did.
+- DO provide concise deliverables + concise proactive recommendations.
 
-### Required outputs
-- main HEAD SHA
-- docs commit SHA
-- RAW links to updated docs
-- NEXT UP as defined by STATUS_WALKTHROUGH.md
+Required default response format (use this unless asked otherwise):
+
+A) Required Deliverables (compact)
+- Branch:
+- Commit SHA(s):
+- Files changed: (max 3 lines)
+- Exact run command(s):
+- PASS/FAIL: (1 line)
+
+B) Proactive Notes (optional but encouraged)
+- Max 3 bullets, 1 line each
+- Only include items that reduce risk, catch inconsistencies, or improve next steps
+- Label each bullet as one of: [RISK], [INCONSISTENCY], [SUGGESTION]
+- If you need user input: ask ONE question only, and only if a required input/link/decision is missing
+
+Hard limits (unless explicitly requested):
+- Avoid long tables and verbose explanations
+- Prefer <= 15 lines total including Proactive Notes
 
 ## Double-Check Auditor Protocol
 For every delivery (Claude branch):

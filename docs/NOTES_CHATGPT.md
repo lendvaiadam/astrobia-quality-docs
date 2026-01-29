@@ -1,14 +1,33 @@
 # NOTES — ChatGPT (Spec Guardian & Prompt Writer)
 
-## Always-on Documentation Protocol (MANDATORY)
+## Output Discipline (MANDATORY)
 
-ChatGPT must proactively initiate documentation at every state change.
+Purpose:
+Reduce token waste and context bloat by removing narrative “play-by-play” logs,
+while still encouraging proactive high-value insights.
 
-### When to trigger
-- Release start / stop
-- Agent handoff (Claude ↔ Antigravity)
-- Merge, rollback, conflict resolution
-- HU smoke test completion
+Core rule:
+- Do NOT write long progress diaries of what you did.
+- DO provide concise deliverables + concise proactive recommendations.
+
+Required default response format (use this unless asked otherwise):
+
+A) Required Deliverables (compact)
+- Branch:
+- Commit SHA(s):
+- Files changed: (max 3 lines)
+- Exact run command(s):
+- PASS/FAIL: (1 line)
+
+B) Proactive Notes (optional but encouraged)
+- Max 3 bullets, 1 line each
+- Only include items that reduce risk, catch inconsistencies, or improve next steps
+- Label each bullet as one of: [RISK], [INCONSISTENCY], [SUGGESTION]
+- If you need user input: ask ONE question only, and only if a required input/link/decision is missing
+
+Hard limits (unless explicitly requested):
+- Avoid long tables and verbose explanations
+- Prefer <= 15 lines total including Proactive Notes
 
 ### Minimum fields to record
 - Date/time (Europe/Budapest)
