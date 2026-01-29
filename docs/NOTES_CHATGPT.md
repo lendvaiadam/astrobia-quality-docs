@@ -34,6 +34,31 @@ Hard limits (unless explicitly requested):
 - Avoid long tables and verbose explanations
 - Prefer <= 15 lines total including Proactive Notes
 
+## Human Test Gate (MANDATORY)
+
+Applies to: Claude, Antigravity, ChatGPT, and any future agent.
+
+Rule:
+If ANY change affects:
+- game boot / intro / preloader
+- UI, fonts, CSS, assets
+- scene initialization or scene transitions
+- loading logic or gating conditions
+- ANY merge to main that is not strictly pure SimCore logic
+
+THEN:
+- Automated tests are NOT sufficient.
+- The agent MUST explicitly notify the user:
+  “Human verification required — please run locally and confirm.”
+- The agent MUST provide:
+  - branch name
+  - commit SHA
+  - exact local test steps (≤5 lines)
+
+NO further work or merges may proceed until the user confirms.
+
+Failure to trigger this gate is a protocol violation.
+
 ### Minimum fields to record
 - Date/time (Europe/Budapest)
 - Active Release + scope
