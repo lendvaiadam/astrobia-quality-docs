@@ -71,6 +71,11 @@ Multiplayer target:
 - **Head**: `d59cc58`
 - **Summary**: `Game.js` A-class RNG fixes applied (3); B-class visuals audited.
 
+**E2E Determinism Test — PASS**
+- **File**: [src/SimCore/__tests__/e2e-determinism.test.js](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/src/SimCore/__tests__/e2e-determinism.test.js)
+- **Command**: `node --experimental-vm-modules src/SimCore/__tests__/e2e-determinism.test.js`
+- **Result**: PASSED (Identical states across 2 instances)
+
 ---
 
 ## NOW
