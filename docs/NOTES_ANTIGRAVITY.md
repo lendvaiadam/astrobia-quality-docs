@@ -20,6 +20,12 @@ Antigravity is responsible for keeping canonical status accurate on main.
 - RAW links to updated docs
 - NEXT UP as defined by STATUS_WALKTHROUGH.md
 
+## Double-Check Auditor Protocol
+For every delivery (Claude branch):
+1. **Hidden Risk Audit:** Proactively look for inconsistencies and netcode pitfalls.
+2. **Block on Violation:** Stop merge if binding docs or determinism are compromised.
+3. **Value Add:** Propose 1–3 "next small steps" (≤1 day) to reduce risk (OPTIONAL).
+
 ---
 Purpose: Persistent auditor memory. New Antigravity chat windows must read this first.
 
