@@ -1,6 +1,6 @@
-# STATUS WALKTHROUGH (Living Document)
-
-STATE (2026-01-29): Final Master Plan v2 is merged to main. Do NOT request new plans. Use docs/master_plan/final_v2/ as authoritative.
+# STATUS_WALKTHROUGH — Live Project State
+Purpose: This is the living walkthrough of "where we are now", what is next, and who is doing what.
+Stable rules live in docs/START_HERE.md. Canonical specs are indexed elsewhere.
 
 Last updated: 2026-01-29 (Europe/Budapest)
 
@@ -14,92 +14,83 @@ Last updated: 2026-01-29 (Europe/Budapest)
 ---
 
 ## Direction (what we are building toward)
-Phase 0 “Netcode Readiness” (binding):
+Phase 0 "Netcode Readiness" (binding):
 - Fixed-timestep authority loop (no dt-based authority).
 - Command-stream input only.
 - Deterministic IDs + seeded PRNG.
 - Authoritative snapshot surface export.
 - ITransport abstraction (Local now, later multiplayer/backend).
 
+Multiplayer target:
 - Host-authoritative as MVP; backend Phase 1 = Auth + Lobby/Signaling.
 
 ---
 
-## CURRENT STATE / HANDOFF (2026-01-28)
-*   **R001 (Fixed Timestep) DONE:**
-    *   Merged to `code/main` (SHA: `6d7a168`).
-    *   Status: Fixed 50ms SimLoop + renderUpdate separation verified. Smoke Pass.
-*   **R002 (Command Buffer) IN PROGRESS:**
-    *   Active Branch: `work/r002-command-buffer` (Tip: `0b237af` on `code` remote).
-    *   **Scope:** Discrete click actions (SELECT, DESELECT, SET_PATH, ADD_WAYPOINT) are now **Command-Only**.
-    *   **Scope Guard (Binding):** Keyboard/WASD input remains **POLLED** in `simTick` (deterministic enough for 20Hz V0). UI Panel actions deferred to R002b.
-    *   **Architecture:** `InteractionManager` -> `CommandQueue` -> `simTick` -> `CommandProcessor`.
-*   **Testing Rule (Binding):** Every implementation step/commit MUST include a **HU (Human-Usable) Test Script** in the commit/PR description.
-*   **Console Note:** "Async response channel closed" errors are currently benign (browser extension noise) unless gameplay is affected.
+## Release Status
 
---- ## NOW
+### Release 001: Fixed Timestep Authority — DONE
+- **Branch**: `work/r001-determinism-wiring` (merged to main)
+- **Commits**: SimLoop.js (50ms tick), Game.js simTick/renderUpdate split
+- **HU Test**: PASS (2026-01-28)
 
-**POST-PLAN PHASE**
-1. **Sync**: Ensure you are on `main` or a feature branch off `main`.
-2. **Read**: The authoritative source is `docs/master_plan/final_v2/`.
-3. **Execute**: Proceed with the active Work Package (currently R002 Command Buffer) as defined in the Final Plan.
-4. **Docs**: If you find discrepancies, update the docs to match the Final Plan, do NOT request a new plan.
+### Release 002: Command Buffer Shim — DONE
+- **Branch**: `work/r002-command-buffer`
+- **Commits**: `2f3a1d0..9a8b11e` (9 commits)
+- **Head**: `9a8b11e` r002: add CommandDebugOverlay for queue inspection
+- **Raw link**: https://raw.githubusercontent.com/lendvaiadam/asterobia/work/r002-command-buffer/src/SimCore/commands/index.js
+- **HU Test**: PASS (2026-01-29)
+  - Command flow: tick/seq stamping verified (no nulls)
+  - Determinism tests: 5/5 PASS
+  - Debug overlay: Shift+C toggle working
 
-### Current Work Package
-- **RELEASE 002 — COMMAND BUFFER** (See `docs/master_plan/final_v2/` for details)
+---
+
+## NOW
+### Release 003: Deterministic IDs
+- **Objective**: Remove `Date.now` / `Math.random` from ID generation.
+- **Canonical Source**: `NETCODE_READINESS_AUDIT`
+- **Definition of Done**:
+  - [ ] `Unit.id` generation uses `sim.nextId++` (integer counter)
+  - [ ] No `uuid` or random strings in authority state
+  - [ ] All entity IDs are deterministic integers
+
+### Tasks
+- [ ] Audit current ID generation in Unit.js and other entities
+- [ ] Create `SimCore.nextEntityId()` counter
+- [ ] Replace all `Date.now()`/`Math.random()` ID patterns
+- [ ] Add determinism test for ID generation
+- [ ] HU Smoke Test
 
 ### Done When
-- R002 Implementation Complete
-- Smoke Test PASS
+- All entity IDs are deterministic integers from SimCore counter
+- No `Date.now`/`Math.random`/`uuid` in authority-state ID paths
+- HU Smoke Test PASS
 
 ---
 
-## COMPLETED
-
-### RELEASE 000 — MERGE ROUND (COMPLETE)
-Synthesized the Final Executable Master Plan from Claude and Antigravity drafts.
-
-**Deliverables (all committed):**
-- `docs/master_plan/merged/MASTER_PLAN_MERGED_v1.md`
-- `docs/master_plan/final_v2/MASTER_PLAN_FINAL_v2.md` (with 9 appendices)
-- `docs/master_plan/merge/` artifacts (Coverage Matrix, Open Decisions, Change Requests)
-
-**Approval Checkpoint:** Ádám acknowledged Master Plan v2 direction (DATE_TBD).
+## Who is doing what (roles)
+- Ádám: Hungarian ideas + decisions + testing + relaying messages between AIs (no Git ops).
+- Agents (Antigravity/Claude): branches/PRs, push changes, merge to main after Ádám explicit approval.
+- Antigravity (Gemini): audits, repo mapping, preflight checks, doc snapshots (no deep refactors unless asked).
+- Claude Code: implements code PRs per canonical Phase 0 rules.
+- ChatGPT: writes prompts + checks plans against canonical docs.
 
 ---
 
-## WORK PACKAGE ROLE MAP (BINDING)
-- Antigravity MUST assign and publish the Role Map for each Work Package.
-- Ádám MAY override role assignments by explicit instruction.
-- Execution MUST NOT start until the Role Map is published here.
-- Roles are dynamic per Work Package; do not force tasks into fixed specialties.
-- Required format:
-  - Worker-1: <role> — <scope>
-  - Worker-2: <role> — <scope>
-  - Worker-3: <role> — <scope>
-  - Worker-4: <role> — <scope>
-  - Worker-5: <role> — <scope>
-- Each worker output MUST include:
-  (a) summary, (b) files touched, (c) acceptance criteria, (d) compact HU test scenario for Ádám.
-
-### RELEASE 002 ROLE MAP (SimCore Command Buffer)
-*   **Worker-1: ARCHITECT — Command Infrastructure**
-    *   Scope: `CommandTypes.js`, `CommandQueue.js`, `CommandProcessor.js`
-    *   Goal: Create the "plumbing" for commands to exist and be queued.
-*   **Worker-2: REFACTORER — Input Factory**
-    *   Scope: `InputFactory.js`, `InteractionManager.js`
-    *   Goal: Convert mouse clicks from "direct mutation" to "Command Object creation".
-*   **Worker-3: INTEGRATOR — Game Loop Wiring**
-    *   Scope: `Game.js`, `index.js` (SimCore)
-    *   Goal: Ensure `CommandProcessor.process()` runs exactly once per tick in `GameLoop`.
-*   **Worker-4: QA — Determinism Verification**
-    *   Scope: `tests/SimCore/commands.test.js`
-    *   Goal: Verify commands execute in strict order and timestamp is respected.
-*   **Worker-5: UI — Visual Debugger**
-    *   Scope: `DebugOverlay.js`
-    *   Goal: Visualize the queue size and current command execution (simple text).
+## Blockers / Decisions needed from Ádám
+- (none currently)
 
 ---
 
-## LATER
-- (See IDEA_LOG.md for triage)
+## How to resume (new chat window)
+1) Open docs/CHATGPT_OPENING_PACK.md and paste the "COPY/PASTE INTO A NEW CHAT" block.
+2) Read docs/STATUS_WALKTHROUGH.md + docs/MAILBOX.md.
+3) Read your agent notes file (docs/NOTES_*.md).
+4) Continue from the top item in NOW.
+
+---
+
+## Release Registry
+- **Manifest**: [public/versions.json](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/public/versions.json)
+- **Release Plan**: [docs/RELEASE_PLAN.md](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/RELEASE_PLAN.md)
+- **Current target release**: Release 003 (Deterministic IDs)
