@@ -40,7 +40,15 @@
   - [ ] Export contains ONLY gameplay data (pos, hp, queue).
   - [ ] Export excludes meshes, materials, audio.
 
-## Release 006: Local Transport Shim
+## Release 006: Input Factory (Command Abstraction)
+- **Objective**: Refactor `Input` to produce command structs via `InputFactory` (delegated from Input).
+- **Canonical Sources**: `GRFDTRDPU_SYSTEM` (Appendix A), `STATUS_WALKTHROUGH` (binding execution order)
+- **Definition of Done**:
+  - [ ] `InputFactory` creates deterministic command structs.
+  - [ ] `Input` class delegates to Factory.
+  - [ ] Command Queue receives clean objects (no raw events).
+
+## Release 007: Local Transport Shim
 - **Objective**: Interface abstraction for networking.
 - **Canonical Sources**: `GRFDTRDPU_SYSTEM` (Appendix A)
 - **Definition of Done**:
@@ -48,28 +56,28 @@
   - [ ] `LocalTransport` implementation (loopback).
   - [ ] SimCore uses `transport.send/receive`.
 
-## Release 007: Snapshot Interpolation
+## Release 008: Snapshot Interpolation
 - **Objective**: Render loop interpolates between two authoritative snapshots.
 - **Canonical Sources**: `MASTER_BIBLE` (Netcode)
 - **Definition of Done**:
   - [ ] Visuals lag slightly behind authority (buffer).
   - [ ] Movement is smooth even at 10Hz tick.
 
-## Release 008: Pathfinding Determinism
+## Release 009: Pathfinding Determinism
 - **Objective**: Ensure pathfinder returns identical paths on all clients.
 - **Canonical Sources**: `NETCODE_READINESS_AUDIT`
 - **Definition of Done**:
   - [ ] Pathfinding runs inside `SimCore.step`.
   - [ ] No async pathfinding that races with tick.
 
-## Release 009: Full Determinism Verification
+## Release 010: Full Determinism Verification
 - **Objective**: Prove determinism.
 - **Canonical Sources**: `NETCODE_PREFLIGHT`
 - **Definition of Done**:
   - [ ] Auto-run 2 instances with same inputs.
   - [ ] Hashes of `serializeState` match 100% of ticks.
 
-## Release 010: Backend Readiness (Phase 0 Complete)
+## Release 011: Backend Readiness (Phase 0 Complete)
 - **Objective**: Ready for Supabase/WebRTC.
 - **Definition of Done**:
   - [ ] All "Netcode Readiness" audits passing.
