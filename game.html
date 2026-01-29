@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asterobia V2 (Dev)</title>
+    <!-- Use the CSS from the version snapshot or root if available. 
+         Root has no 'css' folder in the listing earlier? 
+         Step 1290: list_dir assets -> audio, textures.
+         Step 1229: index.html links 'index.css'.
+         The reference file links 'css/style.css'.
+         I must check if 'css/style.css' exists in root.
+         Step 1230 listing showed 'docs', 'assets', 'quality', 'src', 'versions'. NO 'css' folder in root.
+         BUT `index.html` uses `index.css`. Wait, check Step 1231 snippet of index.html.
+         It DOES NOT link a css file in the snippet. It has inline styles.
+         Reference file uses 'css/style.css'.
+         I need the STYLES for the UI (loader, panel) or it will look broken.
+         If root lacks 'css/style.css', I must INLINE the critical CSS or find it.
+         I'll inline the styles from the reference file approach or look for a css file.
+         Wait, Step 1290 was 'assets'. Step 1230 showed root.
+         There is NO css folder in root.
+         I will use the styles from the reference index.html as a template and inline them or create a css file.
+         Actually, Step 1289 snippet shows <link rel="stylesheet" href="css/style.css">.
+         I will assume I need to fetch that CSS content to make it look right. 
+         OR, simply point to the 'versions/v1.0.0-pathfinding-fix/css/style.css' temporarily? No, that's brittle.
+         I will inline the CSS to ensure it works.
+    -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+                "simplex-noise": "https://unpkg.com/simplex-noise@4.0.1/dist/esm/simplex-noise.js",
+                "tweakpane": "https://unpkg.com/tweakpane@4.0.1/dist/tweakpane.js"
+            }
+        }
+    </script>
+    <style>
+        /* CRITICAL STYLES REPLICATED FROM MISSING css/style.css */
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 1s ease-out;
+            pointer-events: none;
+            opacity: 1;
+            /* Default visible */
+        }
+
+        #loader.hidden {
+            opacity: 0;
+        }
+
+        .loader-title {
+            font-size: 40px;
+            letter-spacing: 5px;
+            color: #00bcd4;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .loader-subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .mode-selection h2 {
+            color: #fff;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+
+        .mode-buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .mode-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #444;
+            padding: 20px 40px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 150px;
+        }
+
+        .mode-btn:hover {
+            background: rgba(0, 188, 212, 0.2);
+            border-color: #00bcd4;
+            transform: translateY(-5px);
+        }
+
+        .btn-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .btn-desc {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        #bottom-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.8);
+            border-top: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+        }
+
+        #bottom-panel.visible {
+            transform: translateY(0);
+        }
+
+        #unit-tabs {
+            display: flex;
+            height: 30px;
+            background: #222;
+        }
+
+        .tab {
+            padding: 0 20px;
+            color: #888;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            border-right: 1px solid #333;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .tab:hover {
+            background: #333;
+            color: #fff;
+        }
+
+        .tab.active {
+            background: #00bcd4;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .panel-content {
+            padding: 20px;
+            color: #ddd;
+            font-family: monospace;
+        }
+
+        #visibility-indicator {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #0f0;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        #visibility-indicator.visible {
+            opacity: 1;
+        }
+
+        .visibility-dot {
+            width: 8px;
+            height: 8px;
+            background: #0f0;
+            border-radius: 50%;
+            margin-right: 8px;
+            box-shadow: 0 0 5px #0f0;
+        }
+
+        .visibility-text {
+            color: #0f0;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* Spinner */
+        .spinner-container {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            margin-bottom: 30px;
+        }
+
+        .spinner-asteroid {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 20px;
+            height: 20px;
+            background: #555;
+            border-radius: 50%;
+        }
+
+        .spinner-orbit {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px solid transparent;
+            border-top-color: #00bcd4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Visibility indicator -->
+    <div id="visibility-indicator">
+        <span class="visibility-dot"></span>
+        <span class="visibility-text">VISIBLE</span>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen">
+        <div class="start-content">
+            <div class="mode-selection">
+                <h2>SELECT GRAPHICS MODE</h2>
+                <div class="mode-buttons">
+                    <button id="start-btn-basic" class="mode-btn basic">
+                        <span class="btn-title">BASIC</span>
+                        <span class="btn-desc">Low Spec (Faster)</span>
+                    </button>
+                    <button id="start-btn-high" class="mode-btn high">
+                        <span class="btn-title">HIGH</span>
+                        <span class="btn-desc">Full Quality</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loader -->
+    <div id="loader">
+        <div class="loader-content">
+            <div class="spinner-container">
+                <div class="spinner-asteroid"></div>
+                <div class="spinner-orbit"></div>
+            </div>
+            <div class="loader-title">ASTEROBIA</div>
+            <div class="loader-subtitle">
+                <div>Evolving asteroid worlds in deep space, each ruled by</div>
+                <div>a mindforged robotic civilization of one's own making.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Panel -->
+    <div id="bottom-panel">
+        <div id="unit-tabs">
+            <!-- Tabs generated by JS -->
+        </div>
+        <div class="panel-content">
+            <div class="placeholder-text">Select a unit.</div>
+        </div>
+    </div>
+
+    <!-- Main Entry Point -->
+    <script type="module" src="./src/Main.js"></script>
+
+</body>
+
+</html>
