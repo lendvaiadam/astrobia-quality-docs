@@ -46,25 +46,21 @@ Multiplayer target:
 ---
 
 ## NOW
-### Release 003: Deterministic IDs
-- **Objective**: Remove `Date.now` / `Math.random` from ID generation.
-- **Canonical Source**: `NETCODE_READINESS_AUDIT`
-- **Definition of Done**:
-  - [ ] `Unit.id` generation uses `sim.nextId++` (integer counter)
-  - [ ] No `uuid` or random strings in authority state
-  - [ ] All entity IDs are deterministic integers
+### Release 003: Deterministic IDs — DONE
+- **Branch**: `work/r003-deterministic-ids` (merged to main)
+- **Commits**: `8ed2aba..21750f4`
+- **Head**: `21750f4` r003: implement deterministic entity ID generation
+- **Raw link**: https://raw.githubusercontent.com/lendvaiadam/asterobia/work/r003-deterministic-ids/src/SimCore/runtime/IdGenerator.js
+- **HU Test**: PASS (2026-01-29)
+  - `game.units.map(u => u.id)` -> integers confirmed
+  - `idGenerator.test.js` -> 5/5 PASS
 
-### Tasks
-- [ ] Audit current ID generation in Unit.js and other entities
-- [ ] Create `SimCore.nextEntityId()` counter
-- [ ] Replace all `Date.now()`/`Math.random()` ID patterns
-- [ ] Add determinism test for ID generation
-- [ ] HU Smoke Test
+---
 
-### Done When
-- All entity IDs are deterministic integers from SimCore counter
-- No `Date.now`/`Math.random`/`uuid` in authority-state ID paths
-- HU Smoke Test PASS
+## NOW
+### Release 004: Unit Spawner Refactor (Blueprint System)
+- **Objective**: Formalize `UnitFactory` separate from `Game.js`.
+- **Status**: TO DO
 
 ---
 
@@ -93,4 +89,4 @@ Multiplayer target:
 ## Release Registry
 - **Manifest**: [public/versions.json](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/public/versions.json)
 - **Release Plan**: [docs/RELEASE_PLAN.md](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/RELEASE_PLAN.md)
-- **Current target release**: Release 003 (Deterministic IDs)
+- **Current target release**: Release 004 (Blueprint System)
