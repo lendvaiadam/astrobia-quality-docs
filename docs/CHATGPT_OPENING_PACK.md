@@ -33,7 +33,7 @@ OPENING PACK (RAW LINKS)
 - CANONICAL_SOURCES_INDEX: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/CANONICAL_SOURCES_INDEX.md
 - CURRENT_SYSTEM_SPEC: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/CURRENT_SYSTEM_SPEC.md
 - BUGBOOK: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/BUGBOOK.md
-- REPO_REALITY_MAP: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/quality/REPO_REALITY_MAP.md
+- REPO_REALITY_MAP: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/quality/archive/REPO_REALITY_MAP.md
 - RELEASE_PLAN: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/RELEASE_PLAN.md
 - [docs/WORKER_POOL_RUNBOOK.md](https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/WORKER_POOL_RUNBOOK.md)
 

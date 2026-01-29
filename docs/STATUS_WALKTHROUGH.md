@@ -82,6 +82,23 @@ Synthesized the Final Executable Master Plan from Claude and Antigravity drafts.
 - Each worker output MUST include:
   (a) summary, (b) files touched, (c) acceptance criteria, (d) compact HU test scenario for Ádám.
 
+### RELEASE 002 ROLE MAP (SimCore Command Buffer)
+*   **Worker-1: ARCHITECT — Command Infrastructure**
+    *   Scope: `CommandTypes.js`, `CommandQueue.js`, `CommandProcessor.js`
+    *   Goal: Create the "plumbing" for commands to exist and be queued.
+*   **Worker-2: REFACTORER — Input Factory**
+    *   Scope: `InputFactory.js`, `InteractionManager.js`
+    *   Goal: Convert mouse clicks from "direct mutation" to "Command Object creation".
+*   **Worker-3: INTEGRATOR — Game Loop Wiring**
+    *   Scope: `Game.js`, `index.js` (SimCore)
+    *   Goal: Ensure `CommandProcessor.process()` runs exactly once per tick in `GameLoop`.
+*   **Worker-4: QA — Determinism Verification**
+    *   Scope: `tests/SimCore/commands.test.js`
+    *   Goal: Verify commands execute in strict order and timestamp is respected.
+*   **Worker-5: UI — Visual Debugger**
+    *   Scope: `DebugOverlay.js`
+    *   Goal: Visualize the queue size and current command execution (simple text).
+
 ---
 
 ## LATER
