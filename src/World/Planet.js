@@ -346,6 +346,7 @@ export class Planet {
         const positions = new Float32Array(count * 3);
 
         // Place stars on terrain surface
+        // visual-only randomness, nondeterministic allowed (starfield cosmetics)
         for (let i = 0; i < count; i++) {
             const theta = Math.random() * Math.PI * 2;
             const phi = Math.acos(2 * Math.random() - 1);

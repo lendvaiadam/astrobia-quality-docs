@@ -209,6 +209,7 @@ export class NavMeshDebug {
         }
         
         // Pick two random nodes
+        // visual-only randomness, nondeterministic allowed (debug UI testing)
         const startIdx = walkableIndices[Math.floor(Math.random() * walkableIndices.length)];
         let goalIdx = startIdx;
         while (goalIdx === startIdx) {
