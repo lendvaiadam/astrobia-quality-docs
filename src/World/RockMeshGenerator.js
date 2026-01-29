@@ -161,6 +161,7 @@ export class RockMeshGenerator {
             let logicCenterIndex = -1;
             
             // Find valid center
+            // visual-only randomness, nondeterministic allowed (mesh generation)
             while (attempt < 50) {
                 // Random LOGICAL index
                 const randLid = Math.floor(Math.random() * logicCount);

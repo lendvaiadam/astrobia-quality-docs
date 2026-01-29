@@ -66,6 +66,11 @@ Multiplayer target:
   - `seededRNG.test.js` -> 8/8 PASS
   - `TypeBlueprint` fallback patched to use SeededRNG (deterministic)
 
+**Determinism Consolidation Pass — DONE**
+- **Branch**: `work/determinism-consolidation` (merged to main)
+- **Head**: `d59cc58`
+- **Summary**: `Game.js` A-class RNG fixes applied (3); B-class visuals audited.
+
 ---
 
 ## NOW

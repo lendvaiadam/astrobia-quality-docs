@@ -19,6 +19,7 @@ import { AudioManager } from './AudioManager.js';
 import { PathPlanner } from '../Navigation/PathPlanner.js';
 import { SimLoop } from '../SimCore/runtime/SimLoop.js';
 import { nextEntityId } from '../SimCore/runtime/IdGenerator.js';
+import { rngNext } from '../SimCore/runtime/SeededRNG.js';
 
 import { WaypointDebugOverlay } from '../UI/WaypointDebugOverlay.js';
 
@@ -51,6 +52,7 @@ export class Game {
         const starCount = 10000;
         const positions = new Float32Array(starCount * 3);
 
+        // visual-only randomness, nondeterministic allowed (starfield cosmetics)
         for (let i = 0; i < starCount; i++) {
             const theta = Math.random() * Math.PI * 2;
             const phi = Math.acos(2 * Math.random() - 1);
@@ -285,8 +287,9 @@ export class Game {
                     const maxRetries = 15;
 
                     for (let r = 0; r < maxRetries; r++) {
-                        const theta = Math.random() * Math.PI * 2;
-                        const phi = Math.acos(2 * Math.random() - 1);
+                        // R004: seeded RNG for deterministic spawn positions
+                        const theta = rngNext() * Math.PI * 2;
+                        const phi = Math.acos(2 * rngNext() - 1);
                         const radius = this.planet.terrain.params.radius + 10;
 
                         randomPos.set(
@@ -959,8 +962,8 @@ export class Game {
     // === UNIFIED COMMAND QUEUE METHODS ===
 
     addCommand(unit, type, params = {}) {
-        // Generate robust ID
-        const id = 'cmd_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        // R004: deterministic command ID from entity counter
+        const id = 'cmd_' + nextEntityId();
         
         const command = {
             id: id,
@@ -973,7 +976,8 @@ export class Game {
         // This replicates legacy behavior where the first waypoint is the start position.
         const moveCommands = unit.commands.filter(c => c.type === 'Move');
         if (moveCommands.length === 0 && type === 'Move') {
-             const startCmdId = 'cmd_start_' + Date.now().toString(36);
+             // R004: deterministic start command ID
+             const startCmdId = 'cmd_start_' + nextEntityId();
              const startCmd = {
                  id: startCmdId,
                  type: 'Move',

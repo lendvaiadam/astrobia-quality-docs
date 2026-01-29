@@ -1872,7 +1872,7 @@ export class Unit {
                       m.makeBasis(right, adjForward, up);
                       dummy.quaternion.setFromRotationMatrix(m);
                       
-                      // Random Rotation
+                      // visual-only randomness, nondeterministic allowed
                       dummy.rotateZ(Math.random() * Math.PI * 2);
                       dummy.updateMatrix();
                       
@@ -1917,6 +1917,7 @@ export class Unit {
             const dist = Math.sqrt((x - 32) ** 2 + (y - 32) ** 2);
 
             // Add noise to outer regions for fluffy edge
+            // visual-only randomness, nondeterministic allowed
             if (dist > 16) {
                 const noise = (Math.random() - 0.5) * 0.3;
                 data[i + 3] = Math.max(0, Math.min(255, data[i + 3] * (1 + noise)));
@@ -1945,6 +1946,7 @@ export class Unit {
         }
 
         // Initialize shake state
+        // visual-only randomness, nondeterministic allowed
         if (this.shakeSeed === undefined) {
             this.shakeSeed = Math.random();
             this.shakeTime = 0;
@@ -2561,6 +2563,7 @@ export class Unit {
         if (distToCam > 80) return;
 
         // Create particles at both wheel positions
+        // visual-only randomness, nondeterministic allowed (entire spawnParticle function)
         const spawnParticle = (pos) => {
             const offset = new THREE.Vector3(
                 (Math.random() - 0.5) * 0.3,
