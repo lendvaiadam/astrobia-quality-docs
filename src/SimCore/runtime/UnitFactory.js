@@ -10,6 +10,7 @@ import { Unit } from '../../Entities/Unit.js';
 import { getBlueprint } from './BlueprintStorage.js';
 import { bindUnitToBlueprint } from './UnitTypeBinder.js';
 import { nextEntityId } from './IdGenerator.js';
+import { rngNext } from './SeededRNG.js';
 
 /**
  * Get a spawn position near a reference point on spherical terrain.
@@ -66,8 +67,8 @@ export function getSpawnPosition(game, options = {}) {
     tangent1.crossVectors(radialDir, tangent1).normalize();
     const tangent2 = new THREE.Vector3().crossVectors(radialDir, tangent1).normalize();
     
-    // Random angle on tangent plane
-    const angle = Math.random() * Math.PI * 2;
+    // Random angle on tangent plane (R004: seeded RNG for determinism)
+    const angle = rngNext() * Math.PI * 2;
     const offsetVec = tangent1.clone().multiplyScalar(Math.cos(angle) * offset)
         .add(tangent2.clone().multiplyScalar(Math.sin(angle) * offset));
     

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { SphericalMath } from '../Math/SphericalMath.js';
+import { rngNext, rngNextInt } from '../SimCore/runtime/SeededRNG.js';
 
 export class Unit {
     /**
@@ -145,8 +146,8 @@ export class Unit {
 
         // Unit identity (R003: deterministic integer ID from SimCore)
         if (id === undefined || id === null) {
-            console.warn('[Unit] No ID provided - using fallback. This breaks determinism!');
-            this.id = Math.floor(Math.random() * 10000);
+            console.warn('[Unit] No ID provided - using seeded RNG fallback.');
+            this.id = rngNextInt(10000); // R004: seeded RNG for determinism
         } else {
             this.id = id;
         }
@@ -160,8 +161,8 @@ export class Unit {
     generateStationId(userId = "0000") {
         const prefix = "ST";
         const userPart = userId.substring(0, 4).padEnd(4, '0');
-        // Simple random hash for uniqueness in this session
-        const hash = Math.random().toString(36).substring(2, 10).toUpperCase().padEnd(8, 'X');
+        // R004: seeded RNG for deterministic hash
+        const hash = rngNext().toString(36).substring(2, 10).toUpperCase().padEnd(8, 'X');
         return `${prefix}-${userPart}-${hash}`;
     }
 
@@ -548,11 +549,12 @@ export class Unit {
         // === DYNAMIC REPLANNING (User Request) ===
         // Check for obstacles appearing in FOW or dynamic changes
         if (pathPlanner && this.isFollowingPath && !this.isInTransition) {
-            this.replanningTimer = (this.replanningTimer || Math.random() * 2.0); // Stagger init
+            // R004: seeded RNG for deterministic stagger
+            this.replanningTimer = (this.replanningTimer || rngNext() * 2.0); // Stagger init
             this.replanningTimer -= dt;
-            
+
             if (this.replanningTimer <= 0) {
-                this.replanningTimer = 2.0 + Math.random() * 2.0; // Check every 2-4 seconds
+                this.replanningTimer = 2.0 + rngNext() * 2.0; // Check every 2-4 seconds
                 this.scanForObstacles(pathPlanner);
             }
         }

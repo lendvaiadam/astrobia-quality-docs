@@ -49,4 +49,13 @@ export {
     resetEntityIdCounter,
     setEntityIdCounter
 } from './IdGenerator.js';
+export {
+    SeededRNG,
+    createRNG,
+    getGlobalRNG,
+    resetGlobalRNG,
+    rngNext,
+    rngNextInt,
+    globalRNG
+} from './SeededRNG.js';
 

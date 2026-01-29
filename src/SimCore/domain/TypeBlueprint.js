@@ -1,14 +1,17 @@
 /**
  * TypeBlueprint - Unit Type Definition Model
- * 
+ *
  * Represents a unit type's feature allocation.
  * JSON-serializable for persistence and network sync.
- * 
+ *
  * NO Three.js or rendering dependencies.
  */
 
+import { rngNextInt } from '../runtime/SeededRNG.js';
+
 /**
  * Generate a UUID v4
+ * R004: Fallback uses seeded RNG for determinism.
  * @returns {string}
  */
 function generateUUID() {
@@ -16,9 +19,9 @@ function generateUUID() {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
         return crypto.randomUUID();
     }
-    // Fallback for older environments
+    // Fallback for older environments (R004: seeded RNG)
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-        const r = Math.random() * 16 | 0;
+        const r = rngNextInt(16);
         const v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });

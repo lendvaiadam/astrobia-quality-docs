@@ -1,17 +1,20 @@
 /**
  * UnitModel - Pure State Container for a Unit
- * 
+ *
  * Engine-agnostic, serializable unit state.
  * NO Three.js or rendering code allowed here.
- * 
+ *
  * This is the "truth" of a unit's state. The visual representation
  * (mesh, materials, effects) lives in Adapters/three/UnitView.js.
- * 
+ *
  * @example
  * const model = new UnitModel({ id: 'unit-001', name: 'Scout' });
  * model.position = { x: 10, y: 5, z: 0 };
  * const json = model.serialize(); // Safe for localStorage/network
  */
+
+import { nextEntityId } from '../runtime/IdGenerator.js';
+
 export class UnitModel {
     /**
      * @param {Object} config - Initial configuration
@@ -86,13 +89,12 @@ export class UnitModel {
     }
 
     /**
-     * Generate a unique ID for this unit
+     * Generate a unique ID for this unit.
+     * R003/R004: Uses deterministic ID generator, not Date.now/Math.random.
      * @private
      */
     _generateId() {
-        const timestamp = Date.now().toString(36);
-        const random = Math.random().toString(36).substring(2, 8);
-        return `unit-${timestamp}-${random}`;
+        return `unit-${nextEntityId()}`;
     }
 
     // === POSITION HELPERS ===
