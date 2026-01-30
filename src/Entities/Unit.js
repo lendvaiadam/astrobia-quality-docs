@@ -55,6 +55,10 @@ export class Unit {
         this.snapToSurface();
         this.alignToSurfaceInitial();
 
+        // R008: Sync mesh position immediately after construction
+        // This ensures the mesh is positioned correctly before first render/interpolation
+        this.mesh.position.copy(this.position);
+
         // === PER-UNIT COMMAND QUEUE (Independent waypoints) ===
         this.waypointControlPoints = [];
         this.waypointMarkers = []; // Visual markers
@@ -152,6 +156,15 @@ export class Unit {
             this.id = id;
         }
         this.name = `Unit ${this.id}`;
+
+        // === R008: RENDER INTERPOLATION STATE ===
+        // Stores authoritative position/quaternion at tick boundaries for smooth rendering.
+        // These are RENDER-ONLY and do NOT affect sim state.
+        this._interpPrevPos = new THREE.Vector3();
+        this._interpCurrPos = new THREE.Vector3();
+        this._interpPrevQuat = new THREE.Quaternion();
+        this._interpCurrQuat = new THREE.Quaternion();
+        this._interpInitialized = false; // First tick needs both prev/curr set to same
     }
 
     /**
@@ -1703,11 +1716,12 @@ export class Unit {
         const m = new THREE.Matrix4().makeBasis(right, up, forward);
         const targetQuat = new THREE.Quaternion().setFromRotationMatrix(m);
 
-        // Smoothly rotate mesh towards target
+        // Smoothly rotate mesh towards target (visual smoothing during sim tick)
         this.mesh.quaternion.slerp(targetQuat, 0.2);
 
-        // Sync mesh position
-        this.mesh.position.copy(this.position);
+        // R008: Removed direct mesh.position.copy(this.position)
+        // Mesh position is now set by applyInterpolatedRender() for smooth 60fps motion.
+        // The authoritative this.position is snapshotted before/after update() by Game.
 
         // Update logical quaternion for Camera (Sphere Aligned)
         this.quaternion.copy(this.headingQuaternion);
@@ -1721,6 +1735,58 @@ export class Unit {
         // Calculate Actual Speed (for Audio)
         const moveDist = this.position.distanceTo(startPos);
         this.currentSpeed = moveDist / Math.max(dt, 0.001);
+    }
+
+    // === R008: RENDER INTERPOLATION METHODS ===
+    // These are called by Game to enable smooth 60fps rendering while sim runs at 20Hz.
+
+    /**
+     * R008: Snapshot the PREVIOUS authoritative state BEFORE sim tick.
+     * Called at start of Game.simTick().
+     */
+    snapshotPrevAuthState() {
+        if (!this._interpInitialized) {
+            // First tick: initialize both to current position
+            this._interpPrevPos.copy(this.position);
+            this._interpCurrPos.copy(this.position);
+            this._interpPrevQuat.copy(this.mesh.quaternion);
+            this._interpCurrQuat.copy(this.mesh.quaternion);
+            this._interpInitialized = true;
+        } else {
+            // Subsequent ticks: prev = old curr
+            this._interpPrevPos.copy(this._interpCurrPos);
+            this._interpPrevQuat.copy(this._interpCurrQuat);
+        }
+    }
+
+    /**
+     * R008: Snapshot the CURRENT authoritative state AFTER sim tick.
+     * Called at end of Game.simTick().
+     */
+    snapshotCurrAuthState() {
+        this._interpCurrPos.copy(this.position);
+        this._interpCurrQuat.copy(this.mesh.quaternion);
+    }
+
+    /**
+     * R008: Apply interpolated position/rotation to mesh for smooth rendering.
+     * Called every frame by Game.applyInterpolatedRender(alpha).
+     *
+     * @param {number} alpha - Interpolation factor [0, 1] from SimLoop accumulator
+     */
+    applyInterpolatedRender(alpha) {
+        if (!this._interpInitialized) {
+            // Fallback: just use authoritative position if not yet initialized
+            this.mesh.position.copy(this.position);
+            return;
+        }
+
+        // Lerp position between prev and curr
+        this.mesh.position.lerpVectors(this._interpPrevPos, this._interpCurrPos, alpha);
+
+        // Slerp quaternion between prev and curr
+        this.mesh.quaternion.copy(this._interpPrevQuat);
+        this.mesh.quaternion.slerp(this._interpCurrQuat, alpha);
     }
 
     // === DUST PARTICLE SYSTEM ===

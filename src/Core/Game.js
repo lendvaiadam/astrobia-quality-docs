@@ -40,6 +40,8 @@ export class Game {
         // R001: Fixed-timestep simulation loop (50ms tick)
         this.simLoop = new SimLoop({ fixedDtMs: 50 });
         this.simLoop.onSimTick = (dt, tick) => this.simTick(dt, tick);
+        // R008: Hook render callback for interpolation
+        this.simLoop.onRender = (alpha) => this._applyInterpolatedRender(alpha);
         this.container = document.body;
 
         // Renderer
@@ -2653,6 +2655,9 @@ export class Game {
         this.units.forEach(unit => {
             if (!unit) return;
 
+            // R008: Snapshot PREV state BEFORE update (for render interpolation)
+            unit.snapshotPrevAuthState();
+
             // Sync params
             unit.speed = this.unitParams.speed;
             unit.turnSpeed = this.unitParams.turnSpeed;
@@ -2664,10 +2669,27 @@ export class Game {
             } else {
                 unit.update({ forward: false, backward: false, left: false, right: false }, fixedDt, this.pathPlanner);
             }
+
+            // R008: Snapshot CURR state AFTER update (for render interpolation)
+            unit.snapshotCurrAuthState();
         });
 
         // Handle path looping (sim state mutation)
         this.handlePathLooping();
+    }
+
+    /**
+     * R008: Apply interpolated positions to all units for smooth rendering.
+     * Called by SimLoop.onRender after sim ticks, at 60fps.
+     * This is RENDER-ONLY and does NOT mutate authoritative sim state.
+     *
+     * @param {number} alpha - Interpolation factor [0, 1] from SimLoop accumulator
+     */
+    _applyInterpolatedRender(alpha) {
+        this.units.forEach(unit => {
+            if (!unit) return;
+            unit.applyInterpolatedRender(alpha);
+        });
     }
 
     /**
