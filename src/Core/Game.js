@@ -2667,6 +2667,9 @@ export class Game {
             } else {
                 unit.update({ forward: false, backward: false, left: false, right: false }, fixedDt, this.pathPlanner);
             }
+
+            // R006: Snapshot post-update state for interpolation
+            unit.snapshotCurrAuthState();
         });
 
         // Handle path looping (sim state mutation)

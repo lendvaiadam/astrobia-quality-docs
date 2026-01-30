@@ -155,20 +155,33 @@ export class Unit {
 
         // R006: Render interpolation state (reusable vectors - no per-frame allocs)
         this._prevPosition = new THREE.Vector3();
-        this._prevQuaternion = new THREE.Quaternion();
+        this._currMeshQuaternion = new THREE.Quaternion(); // post-update authoritative orientation
+        this._prevMeshQuaternion = new THREE.Quaternion(); // pre-update orientation for interpolation
         this._interpPosition = new THREE.Vector3(); // scratch for lerp result
         this._interpQuaternion = new THREE.Quaternion(); // scratch for slerp result
         this._prevPosition.copy(this.position);
-        this._prevQuaternion.copy(this.quaternion);
+        if (this.mesh) {
+            this._prevMeshQuaternion.copy(this.mesh.quaternion);
+            this._currMeshQuaternion.copy(this.mesh.quaternion);
+        }
     }
 
     /**
-     * R006: Snapshot current authoritative state as "previous" for interpolation.
+     * R006: Snapshot current state as "previous" for interpolation.
      * Call at START of simTick, BEFORE unit.update().
      */
     snapshotPrevAuthState() {
         this._prevPosition.copy(this.position);
-        this._prevQuaternion.copy(this.quaternion);
+        // Copy current authoritative mesh quaternion to prev (for next interpolation)
+        this._prevMeshQuaternion.copy(this._currMeshQuaternion);
+    }
+
+    /**
+     * R006: Store post-update authoritative mesh quaternion.
+     * Call at END of simTick, AFTER unit.update().
+     */
+    snapshotCurrAuthState() {
+        if (this.mesh) this._currMeshQuaternion.copy(this.mesh.quaternion);
     }
 
     /**
@@ -183,11 +196,10 @@ export class Unit {
         this._interpPosition.lerpVectors(this._prevPosition, this.position, alpha);
         this.mesh.position.copy(this._interpPosition);
 
-        // Slerp quaternion for mesh orientation
-        this._interpQuaternion.copy(this._prevQuaternion);
-        this._interpQuaternion.slerp(this.quaternion, alpha);
-        // Note: mesh.quaternion is already updated in update() for surface alignment
-        // We only interpolate the logical quaternion here for consistency
+        // Slerp mesh quaternion between prev and curr authoritative values
+        this._interpQuaternion.copy(this._prevMeshQuaternion);
+        this._interpQuaternion.slerp(this._currMeshQuaternion, alpha);
+        this.mesh.quaternion.copy(this._interpQuaternion);
     }
 
     /**
