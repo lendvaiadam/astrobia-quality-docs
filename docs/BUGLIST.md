@@ -53,3 +53,26 @@ Route tab UI selection through InputFactory or emit a SELECT command into the qu
 - Likely missing cleanup in particle spawn/despawn cycle
 
 ---
+
+## BUG-20260130-003
+**Title:** Vehicle/unit movement + headlight/light movement stutters (non-continuous)
+**Area:** Render/Interpolation
+**Where:** `src/Entities/Unit.js` (Visual Update)
+**Repro steps:**
+1. Boot game (http://localhost:8081/game.html)
+2. Move unit via right-click
+3. Observe movement of vehicle body and headlight cone
+**Expected:** Smooth continuous motion (interpolated between ticks)
+**Actual:** Visible stepping/stuttering in both mesh and light position
+**Severity:** Medium (Ruins "premium feel" but gameplay works)
+**Determinism Impact:** No (Visual-only)
+**Suggested Fix:**
+- Verify if `renderUpdate` interpolation logic is correctly applied to both Mesh position AND Light target/position.
+- Check if `alpha` is being calculated correctly in `SimLoop`.
+
+**Notes/Links:**
+- Classified as **PRE-EXISTING** (observed on main before R007 merge).
+- Target fix: **R008 Verify & Tune**.
+
+
+---
