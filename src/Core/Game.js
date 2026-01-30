@@ -1899,9 +1899,12 @@ export class Game {
         }
     }
 
+    /**
+     * Start path drawing mode (visual-only, uses direct steering).
+     * Intentionally NOT routed through InputFactory/CommandQueue.
+     */
     startPathDrawing(unit) {
         // Direct Steering Start
-        // Maybe show a line to cursor?
         if (this.pathLine) this.scene.add(this.pathLine);
 
         // Start Moving Slowly (User requirement: "lassan induljon el")
@@ -1942,8 +1945,14 @@ export class Game {
         }
     }
 
+    /**
+     * Finish path drawing mode (visual-only, no commands).
+     * Path drawing uses direct steering during drag - waypoints are NOT created.
+     * This is intentionally NOT routed through InputFactory/CommandQueue.
+     * @param {Unit} unit
+     */
     finishPathDrawing(unit) {
-        // Stop Steering
+        // Stop Steering (visual-only)
         if (unit) {
             unit.stopSteering();
         }
@@ -2876,6 +2885,14 @@ export class Game {
     animate() {
         // R001: Run fixed-timestep sim ticks, then render
         this.simLoop.step(performance.now());
+
+        // R006-fix: Process any pending input commands immediately after simLoop
+        // This ensures commands enqueued this frame are applied without waiting
+        // for the next simTick (reduces input latency from 0-50ms to 0-16ms)
+        if (globalCommandQueue.pendingCount > 0) {
+            this._processInputCommands(this.simLoop.tickCount);
+        }
+
         this.renderUpdate();
         this.renderer.render(this.scene, this.camera);
 
