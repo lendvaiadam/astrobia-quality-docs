@@ -104,11 +104,16 @@ Multiplayer target:
 - **Status**: **DONE** (SHA: 4cd448d).
 - **Ref**: `docs/RELEASE_PLAN.md` (Release 008).
 
-### Release 009: Pathfinding Determinism — NEXT
+### Release 009: Pathfinding Determinism — DONE
 - **Objective**: Ensure pathfinding runs strictly inside `SimCore.step`.
+- **Status**: **DONE** (SHA: 3d3cf42).
 - **Ref**: `docs/RELEASE_PLAN.md` (Release 009).
 
-### Current target release: Release 009 (Pathfinding Determinism)
+### Release 010: Full Determinism Verification — NEXT
+- **Objective**: Prove determinism via dual-run hash match.
+- **Ref**: `docs/RELEASE_PLAN.md` (Release 010).
+
+### Current target release: Release 010 (Full Determinism Verification)
 
 ---
 
