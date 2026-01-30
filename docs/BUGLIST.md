@@ -10,25 +10,19 @@ This file is the single source of truth for known bugs that are not yet fixed.
 
 ## BUG-20260130-001
 **Title:** Unit selection via bottom tabs does not emit SELECT command in overlay history
-**Area:** UI / Input
-**Where:** `game.html` (Main Game Loop)
+**Area:** Input/UI
+**Where:** game.html → bottom unit tabs; CMD overlay history
 **Repro steps:**
-1. Open `/game.html`
-2. Toggle CMD overlay (`Shift+C`)
-3. Click unit on canvas -> Verify SELECT command appears in overlay
-4. Click unit in bottom panel unit tabs -> Observe unit is selected locally (visuals)
-5. Check overlay history -> **No SELECT command appears**
-
-**Expected:**
-SELECT command should be generated and processed via `Input` -> `CommandQueue` regardless of selection method (canvas click vs GUI tab click).
-
-**Actual:**
-Tab click likely bypasses `Input.js` / `CommandQueue` and calls `Game.selectUnit` directly or via a non-command event handler.
-
-**Severity:** Medium (Inconsistency in determinism/command log)
-**Determinism Impact:** Yes. Selection state drift if inputs are not normalized to commands.
+1. Open http://localhost:8081/game.html
+2. Toggle CMD overlay ON (`Shift+C`)
+3. Click unit on canvas → SELECT appears in history
+4. Click the same unit via bottom unit tabs → NO SELECT appears
+**Expected:** tab selection also emits SELECT command (visible in overlay history)
+**Actual:** tab selection changes selection visually, but command history does not reflect it
+**Severity:** Minor (unless you consider this a determinism/input unification requirement)
+**Determinism Impact:** No (debug visibility / inconsistent input pipeline)
 **Suggested Fix:**
-Refactor `BottomPanel.js` or `Game.js` tab click handler to route through `Input` or generate a `SELECT` command instead of direct method call.
+Route tab UI selection through InputFactory or emit a SELECT command into the queue.
 
 **Notes/Links:**
 - `src/UI/BottomPanel.js`
