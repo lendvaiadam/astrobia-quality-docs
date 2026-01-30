@@ -74,3 +74,14 @@ export {
     InputFactory,
     globalInputFactory
 } from './InputFactory.js';
+
+// R007: Transport layer exports
+export {
+    TransportBase,
+    TransportState,
+    LocalTransport,
+    globalLocalTransport,
+    initializeTransport,
+    getGlobalTransport,
+    disconnectTransport
+} from '../transport/index.js';

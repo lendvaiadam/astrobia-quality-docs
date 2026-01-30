@@ -2,6 +2,8 @@
  * InputFactory - DOM Event to Command Translator
  *
  * R006: Converts DOM input events into deterministic Command structs.
+ * R007: Commands are sent through Transport layer (not directly to queue).
+ *
  * No time-based or random values - pure input translation.
  *
  * Commands produced:
@@ -11,23 +13,55 @@
  * - SET_PATH: { type: 'SET_PATH', unitId, points: [{x,y,z}...] }
  * - CLOSE_PATH: { type: 'CLOSE_PATH', unitId }
  *
+ * Architecture (R007):
+ *   DOM Event → InputFactory.select/move/etc → Transport.send → CommandQueue
+ *
  * Usage:
  *   import { InputFactory } from './InputFactory.js';
- *   const factory = new InputFactory(commandQueue);
- *   factory.select(unitId);  // Creates and enqueues SELECT command
+ *   import { initializeTransport } from '../transport/index.js';
+ *   const transport = initializeTransport();
+ *   const factory = new InputFactory(transport);
+ *   factory.select(unitId);  // Sends SELECT command through transport
  */
 
-import { CommandType, globalCommandQueue } from './CommandQueue.js';
+import { CommandType } from './CommandQueue.js';
+import { getGlobalTransport } from '../transport/index.js';
 
 /**
  * InputFactory converts user input into deterministic commands.
+ * R007: Uses transport layer for command delivery.
  */
 export class InputFactory {
     /**
-     * @param {CommandQueue} [queue] - Command queue to use (default: global)
+     * @param {TransportBase} [transport] - Transport to use (default: global transport)
      */
-    constructor(queue = null) {
-        this._queue = queue || globalCommandQueue;
+    constructor(transport = null) {
+        this._transport = transport;
+    }
+
+    /**
+     * Get the transport, falling back to global if not set.
+     * @returns {TransportBase}
+     * @private
+     */
+    _getTransport() {
+        return this._transport || getGlobalTransport();
+    }
+
+    /**
+     * Send a command through the transport.
+     * @param {Object} command - Command to send
+     * @returns {Object} The command that was sent
+     * @private
+     */
+    _send(command) {
+        const transport = this._getTransport();
+        if (!transport) {
+            console.error('[InputFactory] No transport available. Call initializeTransport() first.');
+            return command;
+        }
+        transport.send(command);
+        return command;
     }
 
     /**
@@ -38,7 +72,7 @@ export class InputFactory {
      * @returns {Object} The created command
      */
     select(unitId, options = {}) {
-        return this._queue.enqueue({
+        return this._send({
             type: CommandType.SELECT,
             unitId: unitId,
             skipCamera: options.skipCamera || false
@@ -50,7 +84,7 @@ export class InputFactory {
      * @returns {Object} The created command
      */
     deselect() {
-        return this._queue.enqueue({
+        return this._send({
             type: CommandType.DESELECT
         });
     }
@@ -62,7 +96,7 @@ export class InputFactory {
      * @returns {Object} The created command
      */
     move(unitId, position) {
-        return this._queue.enqueue({
+        return this._send({
             type: CommandType.MOVE,
             unitId: unitId,
             position: {
@@ -80,7 +114,7 @@ export class InputFactory {
      * @returns {Object} The created command
      */
     setPath(unitId, points) {
-        return this._queue.enqueue({
+        return this._send({
             type: CommandType.SET_PATH,
             unitId: unitId,
             points: points.map(p => ({
@@ -97,22 +131,23 @@ export class InputFactory {
      * @returns {Object} The created command
      */
     closePath(unitId) {
-        return this._queue.enqueue({
+        return this._send({
             type: CommandType.CLOSE_PATH,
             unitId: unitId
         });
     }
 
     /**
-     * Get the underlying command queue.
-     * @returns {CommandQueue}
+     * Get the underlying transport.
+     * @returns {TransportBase}
      */
-    get queue() {
-        return this._queue;
+    get transport() {
+        return this._getTransport();
     }
 }
 
 /**
- * Global InputFactory singleton using global command queue.
+ * Global InputFactory singleton.
+ * R007: Uses global transport (must call initializeTransport() before use).
  */
 export const globalInputFactory = new InputFactory();

@@ -2,12 +2,14 @@
  * InputFactory & CommandQueue Tests
  *
  * R006: Verifies InputFactory produces deterministic commands.
+ * R007: Tests updated to use transport layer architecture.
  *
  * Run: node --experimental-vm-modules src/SimCore/__tests__/inputFactory.test.js
  */
 
 import { CommandQueue, CommandType } from '../runtime/CommandQueue.js';
 import { InputFactory } from '../runtime/InputFactory.js';
+import { LocalTransport } from '../transport/LocalTransport.js';
 import { resetEntityIdCounter } from '../runtime/IdGenerator.js';
 
 // ============ Tests ============
@@ -71,32 +73,48 @@ test('CommandQueue flush clears pending', () => {
     assertEqual(queue.historyCount, 1, 'history after flush');
 });
 
-// Test 4: InputFactory creates SELECT command
-test('InputFactory creates SELECT command', () => {
+/**
+ * R007: Create a test transport wired to a queue.
+ * This simulates how initializeTransport() works.
+ */
+function createTestTransportWithQueue() {
     const queue = new CommandQueue();
-    const factory = new InputFactory(queue);
+    const transport = new LocalTransport();
+    transport.onReceive = (cmd) => queue.enqueue(cmd);
+    transport.connect();
+    return { transport, queue };
+}
+
+// Test 4: InputFactory creates SELECT command via transport
+test('InputFactory creates SELECT command via transport', () => {
+    const { transport, queue } = createTestTransportWithQueue();
+    const factory = new InputFactory(transport);
 
     const cmd = factory.select(42, { skipCamera: true });
 
-    assertEqual(cmd.type, CommandType.SELECT, 'type');
-    assertEqual(cmd.unitId, 42, 'unitId');
-    assertEqual(cmd.skipCamera, true, 'skipCamera');
+    assertEqual(cmd.type, CommandType.SELECT, 'returned type');
+    assertEqual(cmd.unitId, 42, 'returned unitId');
+    assertEqual(cmd.skipCamera, true, 'returned skipCamera');
+
+    // Verify command reached queue via transport
+    assertEqual(queue.pendingCount, 1, 'queue received command');
 });
 
-// Test 5: InputFactory creates DESELECT command
-test('InputFactory creates DESELECT command', () => {
-    const queue = new CommandQueue();
-    const factory = new InputFactory(queue);
+// Test 5: InputFactory creates DESELECT command via transport
+test('InputFactory creates DESELECT command via transport', () => {
+    const { transport, queue } = createTestTransportWithQueue();
+    const factory = new InputFactory(transport);
 
     const cmd = factory.deselect();
 
     assertEqual(cmd.type, CommandType.DESELECT, 'type');
+    assertEqual(queue.pendingCount, 1, 'queue received command');
 });
 
-// Test 6: InputFactory creates MOVE command with position
-test('InputFactory creates MOVE command', () => {
-    const queue = new CommandQueue();
-    const factory = new InputFactory(queue);
+// Test 6: InputFactory creates MOVE command with position via transport
+test('InputFactory creates MOVE command via transport', () => {
+    const { transport, queue } = createTestTransportWithQueue();
+    const factory = new InputFactory(transport);
 
     const cmd = factory.move(1, { x: 10, y: 5, z: 20 });
 
@@ -105,32 +123,37 @@ test('InputFactory creates MOVE command', () => {
     assertEqual(cmd.position.x, 10, 'position.x');
     assertEqual(cmd.position.y, 5, 'position.y');
     assertEqual(cmd.position.z, 20, 'position.z');
+    assertEqual(queue.pendingCount, 1, 'queue received command');
 });
 
 // Test 7: Commands have deterministic IDs
 test('Commands have deterministic IDs', () => {
     resetEntityIdCounter();
-    const queue1 = new CommandQueue();
-    const factory1 = new InputFactory(queue1);
+    const { transport: t1, queue: q1 } = createTestTransportWithQueue();
+    const factory1 = new InputFactory(t1);
 
     const cmd1a = factory1.select(1);
     const cmd1b = factory1.move(1, { x: 0, y: 0, z: 0 });
 
     resetEntityIdCounter();
-    const queue2 = new CommandQueue();
-    const factory2 = new InputFactory(queue2);
+    const { transport: t2, queue: q2 } = createTestTransportWithQueue();
+    const factory2 = new InputFactory(t2);
 
     const cmd2a = factory2.select(1);
     const cmd2b = factory2.move(1, { x: 0, y: 0, z: 0 });
 
-    assertEqual(cmd1a.id, cmd2a.id, 'first command ID');
-    assertEqual(cmd1b.id, cmd2b.id, 'second command ID');
+    // Commands should have deterministic sequence numbers from queue
+    const flushed1 = q1.flush(1);
+    const flushed2 = q2.flush(1);
+
+    assertEqual(flushed1[0].seq, flushed2[0].seq, 'first command seq');
+    assertEqual(flushed1[1].seq, flushed2[1].seq, 'second command seq');
 });
 
-// Test 8: SET_PATH command serializes points
-test('InputFactory creates SET_PATH command', () => {
-    const queue = new CommandQueue();
-    const factory = new InputFactory(queue);
+// Test 8: SET_PATH command serializes points via transport
+test('InputFactory creates SET_PATH command via transport', () => {
+    const { transport, queue } = createTestTransportWithQueue();
+    const factory = new InputFactory(transport);
 
     const points = [
         { x: 0, y: 0, z: 0 },
@@ -143,11 +166,30 @@ test('InputFactory creates SET_PATH command', () => {
     assertEqual(cmd.type, CommandType.SET_PATH, 'type');
     assertEqual(cmd.points.length, 3, 'points count');
     assertEqual(cmd.points[1].x, 10, 'point[1].x');
+    assertEqual(queue.pendingCount, 1, 'queue received command');
+});
+
+// Test 9: Transport must be connected for delivery
+test('Transport queues commands before connect', () => {
+    const queue = new CommandQueue();
+    const transport = new LocalTransport();
+    transport.onReceive = (cmd) => queue.enqueue(cmd);
+    // Note: NOT calling transport.connect() yet
+
+    const factory = new InputFactory(transport);
+    factory.select(1);
+
+    // Command should be queued in transport's pending, not delivered yet
+    assertEqual(queue.pendingCount, 0, 'queue empty before connect');
+
+    // Now connect - should flush pending
+    transport.connect();
+    assertEqual(queue.pendingCount, 1, 'queue has command after connect');
 });
 
 // ============ Summary ============
 
-console.log('\n=== InputFactory Tests ===\n');
+console.log('\n=== InputFactory Tests (R007 Transport) ===\n');
 
 console.log(`\n${passed} passed, ${failed} failed`);
 
