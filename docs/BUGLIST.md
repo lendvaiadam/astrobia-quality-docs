@@ -73,6 +73,28 @@ Route tab UI selection through InputFactory or emit a SELECT command into the qu
 **Notes/Links:**
 - Classified as **PRE-EXISTING** (observed on main before R007 merge).
 - Target fix: **R008 Verify & Tune**.
+- **Status:** FIXED in Release 008 (SHA: 4cd448dde67e3e1cb005c540b93cd3e03d6573eb)
+
+
+---
+
+## BUG-20260130-004
+**Title:** Reordering waypoint keypoints can send unit to wrong position when dragging a point past multiple others
+**Area:** Path/Waypoints UI
+**Where:** game.html → path keypoints editing (drag/reorder)
+**Repro steps:**
+1. Open http://localhost:8081/game.html
+2. Select a unit.
+3. Create a multi-point path (Shift+Left click to place 4–6 waypoints).
+4. Drag/reorder an upcoming waypoint so it crosses over multiple later waypoints (move it beyond 2–3 points).
+5. Observe the unit’s next movement segment.
+**Expected:** The unit follows the updated waypoint order/location after the reorder.
+**Actual:** The unit moves to an unexpected location / does not follow the intended reordered next waypoint.
+**Severity:** Medium (breaks control precision)
+**Determinism Impact:** Unknown (likely No; appears to be path editing logic, but needs localization)
+**Suggested Fix:** Localize waypoint reorder logic (index/order rebuild) and ensure drag past multiple points updates route consistently.
+**Notes/Links:** Pre-existing (reported as old behavior). Needs deeper localization before fix.
+
 
 
 ---
