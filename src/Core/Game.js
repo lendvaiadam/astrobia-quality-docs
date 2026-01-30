@@ -20,13 +20,16 @@ import { PathPlanner } from '../Navigation/PathPlanner.js';
 import { SimLoop } from '../SimCore/runtime/SimLoop.js';
 import { nextEntityId } from '../SimCore/runtime/IdGenerator.js';
 import { rngNext } from '../SimCore/runtime/SeededRNG.js';
+import { globalCommandQueue, CommandType } from '../SimCore/runtime/CommandQueue.js';
 
 import { WaypointDebugOverlay } from '../UI/WaypointDebugOverlay.js';
+import { globalCommandDebugOverlay } from '../UI/CommandDebugOverlay.js';
 
 export class Game {
     constructor() {
         // ... (existing)
         this.debugOverlay = new WaypointDebugOverlay(this);
+        this.commandDebugOverlay = globalCommandDebugOverlay; // R006: Command debug overlay
         window.game = this; // Expose for UI interactions
 
         // R001: Fixed-timestep simulation loop (50ms tick)
@@ -41,6 +44,9 @@ export class Game {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.container.appendChild(this.renderer.domElement);
+
+        // R006-fix: Enable canvas to receive keyboard focus
+        this._setupCanvasFocus();
 
         // Scene
         this.scene = new THREE.Scene();
@@ -2633,6 +2639,9 @@ export class Game {
      * @param {number} tickCount - Current tick number
      */
     simTick(fixedDt, tickCount) {
+        // R006: Process input commands from queue first
+        this._processInputCommands(tickCount);
+
         const keys = this.input.getKeys();
 
         // Update all units on fixed timestep
@@ -2654,6 +2663,90 @@ export class Game {
 
         // Handle path looping (sim state mutation)
         this.handlePathLooping();
+    }
+
+    /**
+     * R006-fix: Setup canvas to receive keyboard focus.
+     * Ensures document.hasFocus() and keyboard events work reliably.
+     */
+    _setupCanvasFocus() {
+        const canvas = this.renderer.domElement;
+
+        // Make canvas focusable
+        canvas.tabIndex = 0;
+        canvas.style.outline = 'none'; // Hide focus ring
+
+        // Focus canvas on first interaction
+        const focusOnce = () => {
+            canvas.focus();
+            canvas.removeEventListener('pointerdown', focusOnce);
+            canvas.removeEventListener('click', focusOnce);
+        };
+        canvas.addEventListener('pointerdown', focusOnce);
+        canvas.addEventListener('click', focusOnce);
+
+        // Also focus when clicking anywhere on body (for edge cases)
+        document.body.addEventListener('click', () => {
+            if (document.activeElement !== canvas) {
+                canvas.focus();
+            }
+        }, { once: false, passive: true });
+    }
+
+    /**
+     * R006: Process input commands from the queue.
+     * Called at the start of each simTick for deterministic command execution.
+     * @param {number} tickCount - Current tick number
+     */
+    _processInputCommands(tickCount) {
+        const commands = globalCommandQueue.flush(tickCount);
+
+        for (const cmd of commands) {
+            switch (cmd.type) {
+                case CommandType.SELECT: {
+                    const unit = this.units.find(u => u && u.id === cmd.unitId);
+                    if (unit) {
+                        this.selectUnit(unit, cmd.skipCamera);
+                    }
+                    break;
+                }
+                case CommandType.DESELECT: {
+                    this.deselectUnit();
+                    break;
+                }
+                case CommandType.MOVE: {
+                    const unit = this.units.find(u => u && u.id === cmd.unitId);
+                    if (unit) {
+                        const pos = new THREE.Vector3(cmd.position.x, cmd.position.y, cmd.position.z);
+                        this.addCommand(unit, 'Move', { position: pos });
+                    }
+                    break;
+                }
+                case CommandType.SET_PATH: {
+                    const unit = this.units.find(u => u && u.id === cmd.unitId);
+                    if (unit && cmd.points && cmd.points.length > 0) {
+                        // Clear existing path and add new waypoints
+                        unit.commands = [];
+                        unit.waypoints = [];
+                        unit.waypointControlPoints = [];
+                        for (const pt of cmd.points) {
+                            const pos = new THREE.Vector3(pt.x, pt.y, pt.z);
+                            this.addCommand(unit, 'Move', { position: pos });
+                        }
+                    }
+                    break;
+                }
+                case CommandType.CLOSE_PATH: {
+                    const unit = this.units.find(u => u && u.id === cmd.unitId);
+                    if (unit && unit === this.selectedUnit) {
+                        this.closePath();
+                    }
+                    break;
+                }
+                default:
+                    console.warn('[Game] Unknown input command type:', cmd.type);
+            }
+        }
     }
 
     /**
