@@ -109,11 +109,16 @@ Multiplayer target:
 - **Status**: **DONE** (SHA: 3d3cf42).
 - **Ref**: `docs/RELEASE_PLAN.md` (Release 009).
 
-### Release 010: Full Determinism Verification — NEXT
+### Release 010: Full Determinism Verification — DONE
 - **Objective**: Prove determinism via dual-run hash match.
+- **Status**: **DONE** (SHA: eeb1bf1).
 - **Ref**: `docs/RELEASE_PLAN.md` (Release 010).
 
-### Current target release: Release 010 (Full Determinism Verification)
+### Release 011: Save/Load System — NEXT
+- **Objective**: Implement save/load via `LocalTransport` and persistence.
+- **Ref**: `docs/RELEASE_PLAN.md` (Release 011).
+
+### Current target release: Release 011 (Save/Load System)
 
 ---
 
