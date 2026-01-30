@@ -94,12 +94,15 @@ Multiplayer target:
   - **Overlay Focus Fix**: `work/r006-overlay-focus-fix` (merged) - HU PASS
   - **Render Interpolation**: `work/r006-render-interpolation` (merged) - HU PASS (Visual smoothing)
 
-### Release 007: Local Transport Shim — NEXT
+### Release 007: Local Transport Shim — DONE
 - **Objective**: Define `ITransport` and `LocalTransport` (loopback).
-- **Status**: **READY FOR IMPLEMENTATION**.
+- **Status**: **DONE**.
 - **Ref**: `docs/RELEASE_PLAN.md` (Release 007).
   
-### Release 008: ... (See RELEASE_PLAN for next steps)
+### Release 008: Snapshot Interpolation (Verify & Tune) — NEXT
+- **Objective**: Verify render interpolation sufficiency; Fix Stutter Bug.
+- **Known Issue**: BUG-20260130-003 (Stutter) — target fix here.
+- **Ref**: `docs/RELEASE_PLAN.md` (Release 008).
 
 ---
 

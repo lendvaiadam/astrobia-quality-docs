@@ -21,12 +21,17 @@ import { SimLoop } from '../SimCore/runtime/SimLoop.js';
 import { nextEntityId } from '../SimCore/runtime/IdGenerator.js';
 import { rngNext } from '../SimCore/runtime/SeededRNG.js';
 import { globalCommandQueue, CommandType } from '../SimCore/runtime/CommandQueue.js';
+import { initializeTransport } from '../SimCore/transport/index.js';
 
 import { WaypointDebugOverlay } from '../UI/WaypointDebugOverlay.js';
 import { globalCommandDebugOverlay } from '../UI/CommandDebugOverlay.js';
 
 export class Game {
     constructor() {
+        // R007: Initialize transport layer FIRST (before any input handling)
+        // This wires InputFactory → Transport → CommandQueue
+        this._transport = initializeTransport();
+
         // ... (existing)
         this.debugOverlay = new WaypointDebugOverlay(this);
         this.commandDebugOverlay = globalCommandDebugOverlay; // R006: Command debug overlay
