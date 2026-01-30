@@ -29,3 +29,27 @@ Route tab UI selection through InputFactory or emit a SELECT command into the qu
 - `src/Core/Input.js`
 
 ---
+
+## BUG-20260130-002
+**Title:** Dust particles accumulate over time, causing FPS drop to 10 or lower
+**Area:** Performance / Particles
+**Where:** `src/Entities/Unit.js` → `updateDustParticles()`
+**Repro steps:**
+1. Open game, move unit along path
+2. Wait 30-60 seconds while unit moves
+3. Observe Performance HUD (Shift+P): renderFPS drops from 60 → 10 → lower
+4. Dust particles visually accumulate instead of fading/despawning
+**Expected:** Old dust particles should fade out and be removed/recycled
+**Actual:** Particles appear to stack/accumulate, progressively slowing render
+**Severity:** High (makes game unplayable after ~1 minute)
+**Determinism Impact:** No (visual-only system)
+**Suggested Fix:**
+- Check particle lifecycle: ensure particles are removed after fade-out
+- Check instanced mesh count cap
+- Possible leak in dustGroup or dustInstancedMesh management
+
+**Notes/Links:**
+- `src/Entities/Unit.js` lines ~1726-1850 (dust system)
+- Likely missing cleanup in particle spawn/despawn cycle
+
+---
