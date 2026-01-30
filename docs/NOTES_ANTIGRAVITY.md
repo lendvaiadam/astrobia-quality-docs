@@ -19,10 +19,17 @@ A) Required Deliverables (compact)
 - Exact run command(s):
 - PASS/FAIL: (1 line)
 
-B) Proactive Notes (optional but encouraged)
-- Max 3 bullets, 1 line each
-- Only include items that reduce risk, catch inconsistencies, or improve next steps
-- Label each bullet as one of: [RISK], [INCONSISTENCY], [SUGGESTION]
+B) Proactive Suggestions (Mandatory if applicable)
+- Max 3 bullets, 1 line each.
+- Include: [RISK], [INCONSISTENCY], [SUGGESTION] (better approach/next small step).
+- Do NOT narrate steps. keep it minimal.
+- Questions are NOT limited: ask as many as needed to clarify inputs/scope.
+
+C) Bug Backlog Protocol (MANDATORY)
+- Canonical Source: `docs/BUGLIST.md`
+- Rule: If a bug is found (dev or HU), record it IMMEDIATELY in BUGLIST.
+- Fixing is optional; recording is mandatory.
+- Use the standard BUGLIST template.
 
 Clarifications / Questions:
 - You may ask any number of questions if they are necessary for correctness.

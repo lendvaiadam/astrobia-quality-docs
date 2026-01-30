@@ -26,6 +26,15 @@
 *   **Ádám Test Checklist (Mandatory):**
     *   After EVERY implementation step, output a "Test Checklist (Ádám)" section.
     *   Includes: 3-10 steps + Expected Results + Risk Focus.
+*   **Bug Backlog Protocol (Mandatory):**
+    *   Canonical Source: `docs/BUGLIST.md`
+    *   If a bug is found, record it IMMEDIATELY in BUGLIST.
+    *   Fixing is optional; recording is mandatory.
+*   **Proactive Suggestions (Mandatory):**
+    *   For every executed instruction, provide "Optional Suggestions (1–3 bullets)".
+    *   Focus on: Risk spotted, Inconsistency, or Alternative/Better approach.
+    *   Do NOT narrate long logs. Keep execution report minimal.
+
 
 
 <<<<<<< Updated upstream
