@@ -152,4 +152,4 @@ Multiplayer target:
 ## Release Registry
 - **Manifest**: [public/versions.json](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/public/versions.json)
 - **Release Plan**: [docs/RELEASE_PLAN.md](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/RELEASE_PLAN.md)
-- **Current target release**: Release 005 (Input Factory)
+- **Current target release**: Release 012 (Supabase Integration)

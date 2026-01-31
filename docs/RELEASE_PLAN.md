@@ -84,3 +84,14 @@
   - [ ] `SaveManager` serializes `SimCore` state to JSON.
   - [ ] Game can be saved, reloaded (F5), and resumed without loss.
   - [ ] `LocalTransport` used to simulate server storage.
+
+## Release 012: Supabase Integration (Phase 1 Start)
+- **Objective**: Replace `LocalTransport` with real-time backend synchronization.
+- **Canonical Sources**: `CLAUDE_CODE_SKILLS` (asterobia-multiplayer-preflight)
+- **Definition of Done**:
+  - [ ] Supabase project connected (URL/Keys in .env).
+  - [ ] `SupabaseTransport` implements `ITransport` interface.
+  - [ ] `SaveManager` can persist/load from Supabase DB (Table: `world_states`).
+  - [ ] Realtime subscription receives updates from other clients (basic echo test).
+  - [ ] **HU Gate**: Multiplayer "Hello World" (Client A moves, Client B sees it).
+
