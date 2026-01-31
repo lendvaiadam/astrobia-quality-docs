@@ -107,6 +107,9 @@ class TestUnit {
         this.position = { x, y, z };
         this.velocity = { x: 0, y: 0, z: 0 };
         this.health = 100;
+        // R011: Quaternion for rotation persistence testing
+        this.quaternion = { x: 0, y: 0, z: 0, w: 1 }; // Identity
+        this.headingQuaternion = { x: 0, y: 0, z: 0, w: 1 }; // Heading
     }
 
     update(rng) {
@@ -115,6 +118,19 @@ class TestUnit {
         const dz = (rng.next() - 0.5) * 0.1;
         this.position.x += dx;
         this.position.z += dz;
+
+        // Deterministic rotation update (simulates turning)
+        const angle = rng.next() * 0.1; // Small rotation
+        const sinHalf = Math.sin(angle / 2);
+        const cosHalf = Math.cos(angle / 2);
+        // Rotate around Y axis (simplified)
+        this.headingQuaternion.y = sinHalf;
+        this.headingQuaternion.w = cosHalf;
+        // Sync authoritative quaternion from heading (like real Unit.js)
+        this.quaternion.x = this.headingQuaternion.x;
+        this.quaternion.y = this.headingQuaternion.y;
+        this.quaternion.z = this.headingQuaternion.z;
+        this.quaternion.w = this.headingQuaternion.w;
     }
 }
 
@@ -180,7 +196,8 @@ function serializeGameState(game) {
             id: u.id,
             position: { ...u.position },
             velocity: { ...u.velocity },
-            health: u.health
+            health: u.health,
+            quaternion: { ...u.quaternion }
         })),
         selectedUnitId: game.selectedUnit?.id ?? null
     };
@@ -249,6 +266,11 @@ class TestSaveManager {
             );
             unit.velocity = { ...unitData.velocity };
             unit.health = unitData.health;
+            // R011: Restore quaternion and headingQuaternion
+            if (unitData.quaternion) {
+                unit.quaternion = { ...unitData.quaternion };
+                unit.headingQuaternion = { ...unitData.quaternion };
+            }
             this.game.units.push(unit);
         }
 
@@ -628,6 +650,66 @@ test('Load with getter-only selectedUnit does not throw', () => {
 
     assertEqual(loadError, null, 'no exception thrown');
     assertEqual(selectionRestored, true, 'setter was called');
+});
+
+test('Quaternion/heading is restored (not identity) after save/load', () => {
+    const game = new TestGame(77777);
+    const storage = new MemoryStorageAdapter();
+    const saveManager = new TestSaveManager(game, storage);
+
+    // Create unit and let it turn/move
+    const unit = game.createUnit(0, 0, 0);
+
+    // Run several ticks to accumulate rotation
+    for (let i = 0; i < 20; i++) game.tick();
+
+    // Capture quaternion state before save
+    const quatBeforeSave = { ...unit.quaternion };
+
+    // Verify quaternion is NOT identity (unit has turned)
+    const isIdentity = (
+        Math.abs(quatBeforeSave.x) < 0.001 &&
+        Math.abs(quatBeforeSave.y) < 0.001 &&
+        Math.abs(quatBeforeSave.z) < 0.001 &&
+        Math.abs(quatBeforeSave.w - 1) < 0.001
+    );
+    assertEqual(isIdentity, false, 'quaternion is not identity before save');
+
+    // Save
+    saveManager.save('rotation_test');
+
+    // Corrupt quaternion (set to identity)
+    unit.quaternion = { x: 0, y: 0, z: 0, w: 1 };
+    unit.headingQuaternion = { x: 0, y: 0, z: 0, w: 1 };
+
+    // Load
+    const result = saveManager.load('rotation_test');
+    assertEqual(result.success, true, 'load succeeds');
+
+    // Verify quaternion restored (matches before save)
+    const restoredUnit = game.units[0];
+    assertEqual(
+        Math.abs(restoredUnit.quaternion.x - quatBeforeSave.x) < 0.0001,
+        true,
+        'quaternion.x restored'
+    );
+    assertEqual(
+        Math.abs(restoredUnit.quaternion.y - quatBeforeSave.y) < 0.0001,
+        true,
+        'quaternion.y restored'
+    );
+    assertEqual(
+        Math.abs(restoredUnit.quaternion.w - quatBeforeSave.w) < 0.0001,
+        true,
+        'quaternion.w restored'
+    );
+
+    // Verify headingQuaternion also restored
+    assertEqual(
+        Math.abs(restoredUnit.headingQuaternion.y - quatBeforeSave.y) < 0.0001,
+        true,
+        'headingQuaternion.y restored'
+    );
 });
 
 // ============ Summary ============

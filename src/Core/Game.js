@@ -2891,6 +2891,11 @@ export class Game {
         }
         if (data.quaternion) {
             unit.quaternion.set(data.quaternion.x, data.quaternion.y, data.quaternion.z, data.quaternion.w);
+            // R011-fix: Also restore headingQuaternion (drives movement direction)
+            // Without this, the next update() tick uses stale headingQuaternion
+            if (unit.headingQuaternion) {
+                unit.headingQuaternion.set(data.quaternion.x, data.quaternion.y, data.quaternion.z, data.quaternion.w);
+            }
             // Also update mesh quaternion for immediate visual
             if (unit.mesh) {
                 unit.mesh.quaternion.set(data.quaternion.x, data.quaternion.y, data.quaternion.z, data.quaternion.w);

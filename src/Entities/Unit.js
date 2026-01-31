@@ -704,6 +704,10 @@ export class Unit {
                 // Use friction to stop smoothly if needed, or hard stop?
                 // User said "Stop and wait".
                 this.velocity.set(0, 0, 0); // Force stop to hold position
+                // R011: Sync authoritative quaternion before early return
+                if (this.headingQuaternion) {
+                    this.quaternion.copy(this.headingQuaternion);
+                }
                 return; // Skip rest of update
             }
         }
@@ -718,6 +722,10 @@ export class Unit {
             // If fully stopped, skip movement but continue visuals
             if (this.speedFactor < 0.01) {
                 this.velocity.set(0, 0, 0);
+                // R011: Sync authoritative quaternion before early return
+                if (this.headingQuaternion) {
+                    this.quaternion.copy(this.headingQuaternion);
+                }
                 return;
             }
             // Otherwise continue with reduced speed (smooth deceleration)
