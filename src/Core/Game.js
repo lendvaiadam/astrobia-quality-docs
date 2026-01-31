@@ -2699,9 +2699,9 @@ export class Game {
     }
 
     /**
-     * R011: Dev-only save/load hotkeys with on-screen HUD.
-     * F9 = Save quicksave, F10 = Load quicksave (primary, AltGr-safe)
-     * Ctrl+Alt+S/L = backup hotkeys
+     * R011: Dev-only save/load with clickable HUD buttons.
+     * Primary: Click [Save] / [Load] buttons in HUD
+     * Keyboard: Ctrl+Shift+K = Save, Ctrl+Shift+J = Load
      * Only active when ?dev=1 or #dev=1 is present.
      */
     _setupDevSaveLoad() {
@@ -2711,40 +2711,51 @@ export class Game {
         const isDevMode = params.has('dev') || hash.includes('dev=1');
         if (!isDevMode) return;
 
-        // Create on-screen HUD indicator (visible even when console logs suppressed)
+        // Create on-screen HUD with clickable buttons
         const hud = document.createElement('div');
         hud.id = 'r011-dev-hud';
         hud.style.cssText = `
             position: fixed;
             top: 8px;
             right: 8px;
-            background: rgba(0,0,0,0.75);
+            background: rgba(0,0,0,0.85);
             color: #0f0;
             font-family: monospace;
             font-size: 12px;
-            padding: 6px 10px;
+            padding: 8px 12px;
             border-radius: 4px;
             z-index: 99999;
-            pointer-events: none;
-            white-space: pre;
+            user-select: none;
         `;
-        hud.textContent = 'DEV SAVE/LOAD: F9=Save  F10=Load';
+
+        // HUD structure with buttons
+        hud.innerHTML = `
+            <div style="margin-bottom:6px;color:#0f0;">DEV SAVE/LOAD</div>
+            <div style="display:flex;gap:8px;margin-bottom:6px;">
+                <button id="r011-btn-save" style="
+                    background:#1a1;color:#fff;border:none;padding:4px 12px;
+                    border-radius:3px;cursor:pointer;font-family:monospace;font-size:12px;
+                ">Save</button>
+                <button id="r011-btn-load" style="
+                    background:#17a;color:#fff;border:none;padding:4px 12px;
+                    border-radius:3px;cursor:pointer;font-family:monospace;font-size:12px;
+                ">Load</button>
+            </div>
+            <div id="r011-status" style="color:#888;font-size:11px;">ready</div>
+        `;
         document.body.appendChild(hud);
 
-        // Feedback display (updates HUD text temporarily)
-        let feedbackTimeout = null;
-        const showFeedback = (msg, isError = false) => {
-            hud.style.color = isError ? '#f44' : '#0f0';
-            hud.textContent = msg;
-            clearTimeout(feedbackTimeout);
-            feedbackTimeout = setTimeout(() => {
-                hud.style.color = '#0f0';
-                hud.textContent = 'DEV SAVE/LOAD: F9=Save  F10=Load';
-            }, 3000);
+        const statusEl = document.getElementById('r011-status');
+        const btnSave = document.getElementById('r011-btn-save');
+        const btnLoad = document.getElementById('r011-btn-load');
+
+        // Update status line (persistent, no timeout reset)
+        const showStatus = (msg, isError = false) => {
+            statusEl.style.color = isError ? '#f44' : '#0f0';
+            statusEl.textContent = msg;
         };
 
         // Create adapter wrapper for SaveManager (maps to global functions)
-        // NOTE: restoreUnits handles the full array to avoid clear-then-search bug
         const gameAdapter = {
             simLoop: this.simLoop,
             get units() { return this._gameRef.units; },
@@ -2759,7 +2770,6 @@ export class Game {
                 peekEntityId: () => peekEntityId(),
                 setEntityIdCounter: (v) => setEntityIdCounter(v)
             },
-            // Called by SaveManager._restoreUnits - we handle full array ourselves
             restoreUnits: (unitDataArray) => this._restoreUnitsFromSave(unitDataArray)
         };
 
@@ -2767,8 +2777,6 @@ export class Game {
         let saveManager = null;
         const getSaveManager = () => {
             if (!saveManager) {
-                gameAdapter.units = this.units;
-                gameAdapter.selectedUnit = this.selectedUnit;
                 saveManager = new SaveManager(gameAdapter, new LocalStorageAdapter());
             }
             return saveManager;
@@ -2776,16 +2784,14 @@ export class Game {
 
         // Save action
         const doSave = () => {
-            gameAdapter.units = this.units;
-            gameAdapter.selectedUnit = this.selectedUnit;
             const mgr = getSaveManager();
             const result = mgr.save('quicksave');
             if (result.success) {
                 const tick = this.simLoop.tickCount;
-                showFeedback(`SAVED at tick ${tick}`);
+                showStatus(`saved at tick ${tick}`);
                 console.log(`[R011] Saved quicksave at tick ${tick}`);
             } else {
-                showFeedback(`SAVE FAILED: ${result.error}`, true);
+                showStatus(`save failed: ${result.error}`, true);
                 console.error(`[R011] Save failed: ${result.error}`);
             }
         };
@@ -2796,46 +2802,56 @@ export class Game {
             const result = mgr.load('quicksave');
             if (result.success) {
                 const tick = this.simLoop.tickCount;
-                showFeedback(`LOADED at tick ${tick}`);
+                showStatus(`loaded at tick ${tick}`);
                 console.log(`[R011] Loaded quicksave at tick ${tick}`);
             } else {
-                showFeedback(`LOAD FAILED: ${result.error}`, true);
+                showStatus(`load failed: ${result.error}`, true);
                 console.error(`[R011] Load failed: ${result.error}`);
             }
         };
 
-        // Window-level keyboard handler (works regardless of canvas focus)
+        // Button click handlers
+        btnSave.addEventListener('click', (e) => {
+            e.stopPropagation();
+            doSave();
+        });
+        btnLoad.addEventListener('click', (e) => {
+            e.stopPropagation();
+            doLoad();
+        });
+
+        // Window-level keyboard handler
         window.addEventListener('keydown', (e) => {
-            // F9 = Save (primary, AltGr-safe)
+            // Ctrl+Shift+K = Save (primary, browser-safe)
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                doSave();
+                return;
+            }
+
+            // Ctrl+Shift+J = Load (primary, browser-safe)
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'j') {
+                e.preventDefault();
+                doLoad();
+                return;
+            }
+
+            // F9 = Save (backup)
             if (e.key === 'F9') {
                 e.preventDefault();
                 doSave();
                 return;
             }
 
-            // F10 = Load (primary, AltGr-safe)
+            // F10 = Load (backup)
             if (e.key === 'F10') {
-                e.preventDefault();
-                doLoad();
-                return;
-            }
-
-            // Ctrl+Alt+S = Save (backup)
-            if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 's') {
-                e.preventDefault();
-                doSave();
-                return;
-            }
-
-            // Ctrl+Alt+L = Load (backup)
-            if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'l') {
                 e.preventDefault();
                 doLoad();
                 return;
             }
         });
 
-        console.log('[R011] Dev save/load enabled: F9=Save, F10=Load (or Ctrl+Alt+S/L)');
+        console.log('[R011] Dev save/load enabled: buttons or Ctrl+Shift+K/J');
     }
 
     /**
