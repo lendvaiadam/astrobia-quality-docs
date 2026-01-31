@@ -77,8 +77,10 @@
   - [ ] Auto-run 2 instances with same inputs.
   - [ ] Hashes of `serializeState` match 100% of ticks.
 
-## Release 011: Backend Readiness (Phase 0 Complete)
-- **Objective**: Ready for Supabase/WebRTC.
+## Release 011: Save/Load System (Phase 0 Complete)
+- **Objective**: Implement persistence to prove backend readiness.
+- **Note**: `STATUS_WALKTHROUGH.md` overrides this plan if conflict arises.
 - **Definition of Done**:
-  - [ ] All "Netcode Readiness" audits passing.
-  - [ ] Codebase clean and commented.
+  - [ ] `SaveManager` serializes `SimCore` state to JSON.
+  - [ ] Game can be saved, reloaded (F5), and resumed without loss.
+  - [ ] `LocalTransport` used to simulate server storage.
