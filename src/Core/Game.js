@@ -2744,10 +2744,13 @@ export class Game {
         };
 
         // Create adapter wrapper for SaveManager (maps to global functions)
+        // NOTE: restoreUnits handles the full array to avoid clear-then-search bug
         const gameAdapter = {
             simLoop: this.simLoop,
-            units: this.units,
-            selectedUnit: null,
+            get units() { return this._gameRef.units; },
+            set units(v) { /* no-op: we update in-place */ },
+            get selectedUnit() { return this._gameRef.selectedUnit; },
+            _gameRef: this,
             rng: {
                 getState: () => getGlobalRNG().getState(),
                 setState: (s) => getGlobalRNG().setState(s)
@@ -2756,7 +2759,8 @@ export class Game {
                 peekEntityId: () => peekEntityId(),
                 setEntityIdCounter: (v) => setEntityIdCounter(v)
             },
-            restoreUnit: (data) => this._restoreUnitFromSave(data)
+            // Called by SaveManager._restoreUnits - we handle full array ourselves
+            restoreUnits: (unitDataArray) => this._restoreUnitsFromSave(unitDataArray)
         };
 
         // Lazy-initialize SaveManager on first use
@@ -2835,31 +2839,76 @@ export class Game {
     }
 
     /**
-     * R011: Restore a unit from serialized save data.
-     * Creates a new Unit instance with saved state.
+     * R011: Restore all units from saved state array.
+     * Updates existing Unit instances in-place and resets interpolation for visual snap.
+     * @param {Array} unitDataArray - Array of serialized unit data
+     */
+    _restoreUnitsFromSave(unitDataArray) {
+        if (!unitDataArray || !this.units) return;
+
+        for (const data of unitDataArray) {
+            const existing = this.units.find(u => u && u.id === data.id);
+            if (existing) {
+                this._restoreUnitFromSave(existing, data);
+            }
+        }
+    }
+
+    /**
+     * R011: Restore a single unit from serialized save data.
+     * Updates existing Unit instance in-place and resets interpolation.
+     * @param {Unit} unit - Existing unit instance to update
      * @param {Object} data - Serialized unit data
      */
-    _restoreUnitFromSave(data) {
-        // Find existing unit or create placeholder
-        // For now, we restore position/state to existing units by ID
+    _restoreUnitFromSave(unit, data) {
+        // Update authoritative state
+        if (data.position) {
+            unit.position.set(data.position.x, data.position.y, data.position.z);
+        }
+        if (data.quaternion) {
+            unit.quaternion.set(data.quaternion.x, data.quaternion.y, data.quaternion.z, data.quaternion.w);
+            // Also update mesh quaternion for immediate visual
+            if (unit.mesh) {
+                unit.mesh.quaternion.set(data.quaternion.x, data.quaternion.y, data.quaternion.z, data.quaternion.w);
+            }
+        }
+        if (data.velocity) {
+            unit.velocity.set(data.velocity.x, data.velocity.y, data.velocity.z);
+        }
+        unit.health = data.health ?? unit.health;
+        unit.currentSpeed = data.currentSpeed ?? 0;
+        unit.pathIndex = data.pathIndex ?? 0;
+        unit.isFollowingPath = data.isFollowingPath ?? false;
+        unit.pausedByCommand = data.pausedByCommand ?? false;
+
+        // R011+R008: Reset interpolation snapshots to loaded position
+        // This makes visuals snap immediately to loaded state
+        if (unit._interpPrevPos && unit._interpCurrPos) {
+            unit._interpPrevPos.copy(unit.position);
+            unit._interpCurrPos.copy(unit.position);
+        }
+        if (unit._interpPrevQuat && unit._interpCurrQuat && unit.mesh) {
+            unit._interpPrevQuat.copy(unit.mesh.quaternion);
+            unit._interpCurrQuat.copy(unit.mesh.quaternion);
+        }
+
+        // Also update mesh position directly for immediate visual feedback
+        if (unit.mesh && data.position) {
+            unit.mesh.position.set(data.position.x, data.position.y, data.position.z);
+        }
+
+        return unit;
+    }
+
+    /**
+     * R011 LEGACY: Restore a unit by ID lookup (kept for compatibility).
+     * @deprecated Use _restoreUnitsFromSave instead
+     * @param {Object} data - Serialized unit data
+     */
+    _restoreUnitFromSaveById(data) {
         const existing = this.units.find(u => u && u.id === data.id);
         if (existing) {
-            // Update existing unit's authoritative state
-            if (data.position) {
-                existing.position.set(data.position.x, data.position.y, data.position.z);
-            }
-            if (data.quaternion) {
-                existing.quaternion.set(data.quaternion.x, data.quaternion.y, data.quaternion.z, data.quaternion.w);
-            }
-            if (data.velocity) {
-                existing.velocity.set(data.velocity.x, data.velocity.y, data.velocity.z);
-            }
-            existing.health = data.health ?? existing.health;
-            existing.currentSpeed = data.currentSpeed ?? 0;
-            existing.pathIndex = data.pathIndex ?? 0;
-            existing.isFollowingPath = data.isFollowingPath ?? false;
-            existing.pausedByCommand = data.pausedByCommand ?? false;
-            return existing;
+            return this._restoreUnitFromSave(existing, data);
         }
         // If unit doesn't exist, store raw data (would need UnitFactory for full hydration)
         return data;

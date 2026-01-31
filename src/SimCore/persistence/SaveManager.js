@@ -202,14 +202,25 @@ export class SaveManager {
     _restoreUnits(unitDataArray, options) {
         const game = this.game;
 
-        // Clear existing units (render cleanup would be game's responsibility)
+        if (!unitDataArray) {
+            unitDataArray = [];
+        }
+
+        // Preferred: If game has restoreUnits (plural), delegate full array handling
+        // This allows game to update existing units in-place without clearing
+        if (game.restoreUnits) {
+            game.restoreUnits(unitDataArray);
+            return;
+        }
+
+        // Legacy path: clear and rebuild
         if (game.units) {
             game.units.length = 0;
         } else {
             game.units = [];
         }
 
-        if (!unitDataArray || unitDataArray.length === 0) {
+        if (unitDataArray.length === 0) {
             return;
         }
 
