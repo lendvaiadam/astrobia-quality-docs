@@ -95,6 +95,35 @@ Route tab UI selection through InputFactory or emit a SELECT command into the qu
 **Suggested Fix:** Localize waypoint reorder logic (index/order rebuild) and ensure drag past multiple points updates route consistently.
 **Notes/Links:** Pre-existing (reported as old behavior). Needs deeper localization before fix.
 
+---
 
+## KNOWN-GAP-R011-001
+**Title:** Fog-of-War / discovered area not included in R011 Save/Load state
+**Area:** Save/Load / FogOfWar
+**Where:** `src/SimCore/persistence/SaveManager.js`, `src/SimCore/runtime/StateSurface.js`
+**Description:**
+R011 Save/Load captures authoritative SimCore state including:
+- Unit positions, velocities, quaternions, health
+- SimLoop tick count & accumulator
+- SeededRNG state (seed, internal state, call count)
+- Entity ID counter
+- Selected unit ID
+
+**NOT included (Known Gap):**
+- Fog-of-War explored/visible textures
+- Discovered map area state
+
+**Why it matters:**
+After Load, the fog-of-war will be reset to initial state (fully unexplored), not the explored state at save time. This means areas the player discovered before saving will appear unexplored after loading.
+
+**Expected behavior (future fix):**
+Save should capture FogOfWar texture data or exploration bitmap; Load should restore it.
+
+**Current workaround:**
+None. HU testers should be aware that fog resets on load.
+
+**Severity:** Low (cosmetic/exploration state, not gameplay-critical)
+**Determinism Impact:** No (FogOfWar is render-only state)
+**Added:** R011
 
 ---

@@ -2761,6 +2761,14 @@ export class Game {
             get units() { return this._gameRef.units; },
             set units(v) { /* no-op: we update in-place */ },
             get selectedUnit() { return this._gameRef.selectedUnit; },
+            set selectedUnit(unit) {
+                // Safely restore selection via Game's API (skipCamera=true during load)
+                if (unit) {
+                    this._gameRef.selectUnit(unit, true);
+                } else {
+                    this._gameRef.deselectUnit();
+                }
+            },
             _gameRef: this,
             rng: {
                 getState: () => getGlobalRNG().getState(),

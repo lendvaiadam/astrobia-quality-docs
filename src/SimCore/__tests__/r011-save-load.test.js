@@ -252,6 +252,14 @@ class TestSaveManager {
             this.game.units.push(unit);
         }
 
+        // Restore selected unit (if setter exists)
+        if (state.game.selectedUnitId !== null && state.game.selectedUnitId !== undefined) {
+            const selected = this.game.units.find(u => u.id === state.game.selectedUnitId);
+            if (selected) {
+                this.game.selectedUnit = selected;
+            }
+        }
+
         return { success: true };
     }
 }
@@ -575,6 +583,51 @@ test('Load nonexistent save fails gracefully', () => {
     const result = saveManager.load('does_not_exist');
     assertEqual(result.success, false, 'fails');
     assertEqual(typeof result.error, 'string', 'has error message');
+});
+
+test('Load with getter-only selectedUnit does not throw', () => {
+    // Simulate game adapter with getter-only selectedUnit (like real Game.js)
+    const baseGame = new TestGame(66666);
+    baseGame.createUnit(0, 0, 0);
+    baseGame.selectedUnit = baseGame.units[0]; // Set selection
+
+    // Create adapter with getter-only selectedUnit (no setter)
+    let selectionRestored = false;
+    const gameWithGetterOnly = {
+        simLoop: baseGame.simLoop,
+        units: baseGame.units,
+        get selectedUnit() { return baseGame.selectedUnit; },
+        set selectedUnit(unit) {
+            // Setter exists but delegates to method (like real Game adapter)
+            selectionRestored = true;
+            baseGame.selectedUnit = unit;
+        },
+        rng: baseGame.rng,
+        idGenerator: baseGame.idGenerator
+    };
+
+    const storage = new MemoryStorageAdapter();
+    const saveManager = new TestSaveManager(gameWithGetterOnly, storage);
+
+    // Save with selection
+    for (let i = 0; i < 5; i++) baseGame.tick();
+    saveManager.save('with_selection');
+
+    // Clear selection
+    baseGame.selectedUnit = null;
+    selectionRestored = false;
+
+    // Load - should not throw
+    let loadError = null;
+    try {
+        const result = saveManager.load('with_selection');
+        assertEqual(result.success, true, 'load succeeds');
+    } catch (e) {
+        loadError = e;
+    }
+
+    assertEqual(loadError, null, 'no exception thrown');
+    assertEqual(selectionRestored, true, 'setter was called');
 });
 
 // ============ Summary ============
