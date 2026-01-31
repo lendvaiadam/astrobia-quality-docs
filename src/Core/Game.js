@@ -304,7 +304,7 @@ export class Game {
                 return;
             }
 
-            this._supabaseUserId = data.user?.id;
+            this._supabaseUserId = (data.user && data.user.id) ? data.user.id : null;
             console.log('[Game] Supabase auth: Signed in anonymously as', this._supabaseUserId);
         } catch (err) {
             console.error('[Game] Supabase auth error:', err);
@@ -1429,7 +1429,10 @@ export class Game {
                     
                     if (newTarget && newTarget.id !== oldTargetId) {
                         unit.targetWaypointId = newTarget.id;
-                        console.log(`[REORDER] Target updated: ${oldTargetId?.slice(-4)} → ${newTarget.id?.slice(-4)} (after lastWaypointId ${unit.lastWaypointId?.slice(-4)})`);
+                        const oldTgtId = oldTargetId ? oldTargetId.slice(-4) : 'null';
+                        const newTgtId = newTarget.id ? newTarget.id.slice(-4) : 'null';
+                        const lastWpId = unit.lastWaypointId ? unit.lastWaypointId.slice(-4) : 'null';
+                        console.log(`[REORDER] Target updated: ${oldTgtId} -> ${newTgtId} (after lastWaypointId ${lastWpId})`);
                         
                         // Update logical states
                         unit.waypoints.forEach(wp => {
@@ -2090,7 +2093,10 @@ export class Game {
 
                 // DEBUG: Log first marker of first unit to see what's happening
                 if (index === 0 && this.units.indexOf(unit) === 0) {
-                    console.log(`[COLOR DEBUG] markerId=${markerId?.slice(-4)} lastId=${unit.lastWaypointId?.slice(-4)} targetId=${unit.targetWaypointId?.slice(-4)}`);
+                    const mId = markerId ? markerId.slice(-4) : 'null';
+                    const lId = unit.lastWaypointId ? unit.lastWaypointId.slice(-4) : 'null';
+                    const tId = unit.targetWaypointId ? unit.targetWaypointId.slice(-4) : 'null';
+                    console.log(`[COLOR DEBUG] markerId=${mId} lastId=${lId} targetId=${tId}`);
                 }
 
                 if (markerId && unit.targetWaypointId && markerId === unit.targetWaypointId) {
@@ -2323,10 +2329,10 @@ export class Game {
 
         // DEBUG LOG
         console.log('[Panel] updatePanelContent', {
-            unit: unit?.name || 'NO UNIT',
-            waypointControlPoints: unit?.waypointControlPoints?.length || 0,
-            focusedUnit: this.focusedUnit?.name || 'none',
-            selectedUnit: this.selectedUnit?.name || 'none',
+            unit: (unit && unit.name) || 'NO UNIT',
+            waypointControlPoints: (unit && unit.waypointControlPoints) ? unit.waypointControlPoints.length : 0,
+            focusedUnit: (this.focusedUnit && this.focusedUnit.name) || 'none',
+            selectedUnit: (this.selectedUnit && this.selectedUnit.name) || 'none',
             panelFound: !!panelContent
         });
 
