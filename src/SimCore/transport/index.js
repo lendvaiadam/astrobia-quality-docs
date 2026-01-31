@@ -7,11 +7,13 @@
  * Exports:
  * - TransportBase, TransportState - Base class and state enum
  * - LocalTransport, globalLocalTransport - Synchronous loopback implementation
+ * - SupabaseTransport - R012: Supabase Realtime broadcast transport
  * - initializeTransport, getGlobalTransport - Setup and access functions
  */
 
 export { TransportBase, TransportState } from './ITransport.js';
 export { LocalTransport, globalLocalTransport } from './LocalTransport.js';
+export { SupabaseTransport } from './SupabaseTransport.js';
 
 import { globalLocalTransport } from './LocalTransport.js';
 import { globalCommandQueue } from '../runtime/CommandQueue.js';

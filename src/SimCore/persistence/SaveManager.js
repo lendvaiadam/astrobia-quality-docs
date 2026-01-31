@@ -337,4 +337,101 @@ export class SaveManager {
             };
         }
     }
+
+    // ============ R012: Async Methods for Supabase ============
+
+    /**
+     * Save current game state to async storage (e.g., Supabase).
+     *
+     * @param {string} slotKey - Save slot identifier
+     * @param {Object} [metadata] - Optional metadata
+     * @returns {Promise<{ success: boolean, data?: Object, error?: string }>}
+     */
+    async saveAsync(slotKey, metadata = {}) {
+        try {
+            const game = this.game;
+
+            // 1. Serialize game state
+            const gameState = serializeState(game);
+
+            // 2. Get SimLoop state
+            const simLoopState = game.simLoop?.getState?.() ?? {
+                tickCount: game.simLoop?.tickCount ?? 0,
+                accumulatorMs: game.simLoop?.accumulatorMs ?? 0
+            };
+
+            // 3. Get RNG state
+            const rngState = game.rng?.getState?.() ?? {
+                seed: 0,
+                state: 0,
+                callCount: 0
+            };
+
+            // 4. Get entity ID counter
+            const entityIdCounter = game.idGenerator?.peekEntityId?.() ??
+                                   game.entityIdCounter ?? 1;
+
+            // 5. Create save envelope
+            const envelope = createSaveEnvelope(
+                gameState,
+                simLoopState,
+                rngState,
+                entityIdCounter,
+                metadata
+            );
+
+            // 6. Persist to async storage
+            const result = await this.storage.save(slotKey, envelope);
+
+            if (!result.success) {
+                return { success: false, error: result.error };
+            }
+
+            return { success: true, data: envelope };
+
+        } catch (err) {
+            return {
+                success: false,
+                error: `Async save failed: ${err.message}`
+            };
+        }
+    }
+
+    /**
+     * Load and apply saved state from async storage.
+     *
+     * @param {string} slotKey - Save slot identifier
+     * @param {Object} [options] - Load options
+     * @returns {Promise<{ success: boolean, data?: Object, error?: string }>}
+     */
+    async loadAsync(slotKey, options = {}) {
+        try {
+            // 1. Load from async storage
+            const loadResult = await this.storage.load(slotKey);
+            if (!loadResult.success) {
+                return loadResult;
+            }
+
+            // 2. Validate
+            const validation = validateSaveEnvelope(loadResult.data);
+            if (!validation.valid) {
+                return { success: false, error: validation.error };
+            }
+
+            // 3. Migrate if needed
+            const envelope = migrateSaveEnvelope(loadResult.data);
+            const state = envelope.state;
+
+            // 4. Apply to game
+            this.applyState(state, options);
+
+            return { success: true, data: envelope };
+
+        } catch (err) {
+            return {
+                success: false,
+                error: `Async load failed: ${err.message}`
+            };
+        }
+    }
 }

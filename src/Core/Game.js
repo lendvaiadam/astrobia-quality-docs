@@ -22,7 +22,7 @@ import { nextEntityId, peekEntityId, setEntityIdCounter } from '../SimCore/runti
 import { rngNext, getGlobalRNG } from '../SimCore/runtime/SeededRNG.js';
 import { globalCommandQueue, CommandType } from '../SimCore/runtime/CommandQueue.js';
 import { initializeTransport, SupabaseTransport } from '../SimCore/transport/index.js';
-import { SaveManager, MemoryStorageAdapter, LocalStorageAdapter } from '../SimCore/persistence/index.js';
+import { SaveManager, MemoryStorageAdapter, LocalStorageAdapter, SupabaseStorageAdapter } from '../SimCore/persistence/index.js';
 import { serializeState } from '../SimCore/runtime/StateSurface.js';
 
 import { WaypointDebugOverlay } from '../UI/WaypointDebugOverlay.js';
@@ -88,6 +88,7 @@ export class Game {
                 if (isValidKey) {
                     console.log('[Game] Initializing Supabase Transport...');
                     const client = supabase.createClient(config.url, config.key);
+                    this._supabaseClient = client; // Store for persistence adapter
 
                     const transport = new SupabaseTransport({
                         supabaseClient: client,
@@ -102,6 +103,9 @@ export class Game {
 
                     // R012: Poll transport state and update HUD
                     this._startRealtimeStatusPolling();
+
+                    // R012: Auto sign-in anonymously for persistence
+                    this._initSupabaseAuth(client);
                 } else {
                     console.warn('[Game] Invalid/Unsafe key. Falling back to Local.');
                     this._transport = initializeTransport();
@@ -276,6 +280,35 @@ export class Game {
         // Poll every 500ms
         this._rtStatusInterval = setInterval(poll, 500);
         poll(); // Initial check
+    }
+
+    // R012: Initialize Supabase auth (anonymous sign-in for persistence)
+    async _initSupabaseAuth(client) {
+        try {
+            // Check if already signed in
+            const { data: { user } } = await client.auth.getUser();
+            if (user) {
+                console.log('[Game] Supabase auth: Already signed in as', user.id);
+                this._supabaseUserId = user.id;
+                return;
+            }
+
+            // Sign in anonymously
+            const { data, error } = await client.auth.signInAnonymously();
+            if (error) {
+                console.error('[Game] Supabase anonymous sign-in failed:', error.message);
+                if (this._devHUD) {
+                    this._devHUD.auth.textContent = 'AUTH FAIL';
+                    this._devHUD.auth.style.color = '#f44336';
+                }
+                return;
+            }
+
+            this._supabaseUserId = data.user?.id;
+            console.log('[Game] Supabase auth: Signed in anonymously as', this._supabaseUserId);
+        } catch (err) {
+            console.error('[Game] Supabase auth error:', err);
+        }
     }
 
         // Starfield
@@ -2958,47 +2991,85 @@ export class Game {
             restoreUnits: (unitDataArray) => this._restoreUnitsFromSave(unitDataArray)
         };
 
-        // Lazy-initialize SaveManager on first use
+        // R012: Choose storage adapter based on transport mode
+        const useSupabase = !!this._supabaseClient;
+        let storageAdapter = null;
         let saveManager = null;
+
+        const getStorageAdapter = () => {
+            if (!storageAdapter) {
+                if (useSupabase) {
+                    storageAdapter = new SupabaseStorageAdapter(this._supabaseClient);
+                    console.log('[R012] Using SupabaseStorageAdapter for persistence');
+                } else {
+                    storageAdapter = new LocalStorageAdapter();
+                    console.log('[R011] Using LocalStorageAdapter for persistence');
+                }
+            }
+            return storageAdapter;
+        };
+
         const getSaveManager = () => {
             if (!saveManager) {
-                saveManager = new SaveManager(gameAdapter, new LocalStorageAdapter());
+                saveManager = new SaveManager(gameAdapter, getStorageAdapter());
             }
             return saveManager;
         };
 
-        // Save action
-        const doSave = () => {
+        // Save action (async for Supabase)
+        const doSave = async () => {
+            showStatus('SAVING...', false);
             const mgr = getSaveManager();
-            const result = mgr.save('quicksave');
-            if (result.success) {
-                const tick = this.simLoop.tickCount;
-                // Try to get save size from localStorage
-                const saveData = localStorage.getItem('asterobia_quicksave');
-                const bytes = saveData ? saveData.length : 0;
-                const kb = (bytes / 1024).toFixed(1);
-                showStatus(`SAVE OK t:${tick} ${kb}KB`);
-                console.log(`[R011] Saved quicksave at tick ${tick} (${kb}KB)`);
-            } else {
-                showStatus(`SAVE FAIL: ${result.error}`, true);
-                console.error(`[R011] Save failed: ${result.error}`);
+
+            try {
+                const result = useSupabase
+                    ? await mgr.saveAsync('quicksave')
+                    : mgr.save('quicksave');
+
+                if (result.success) {
+                    const tick = this.simLoop.tickCount;
+                    // Estimate size from state (localStorage not available for Supabase)
+                    const stateJson = JSON.stringify(result.data || {});
+                    const bytes = stateJson.length;
+                    const kb = (bytes / 1024).toFixed(1);
+                    const backend = useSupabase ? 'CLOUD' : 'LOCAL';
+                    showStatus(`SAVE OK t:${tick} ${kb}KB [${backend}]`);
+                    console.log(`[R012] Saved at tick ${tick} (${kb}KB) via ${backend}`);
+                } else {
+                    showStatus(`SAVE FAIL: ${result.error}`, true);
+                    console.error(`[R012] Save failed: ${result.error}`);
+                }
+            } catch (err) {
+                showStatus(`SAVE ERR: ${err.message}`, true);
+                console.error(`[R012] Save exception:`, err);
             }
         };
 
-        // Load action
-        const doLoad = () => {
+        // Load action (async for Supabase)
+        const doLoad = async () => {
+            showStatus('LOADING...', false);
             const mgr = getSaveManager();
-            const result = mgr.load('quicksave');
-            if (result.success) {
-                const tick = this.simLoop.tickCount;
-                const saveData = localStorage.getItem('asterobia_quicksave');
-                const bytes = saveData ? saveData.length : 0;
-                const kb = (bytes / 1024).toFixed(1);
-                showStatus(`LOAD OK t:${tick} ${kb}KB`);
-                console.log(`[R011] Loaded quicksave at tick ${tick} (${kb}KB)`);
-            } else {
-                showStatus(`LOAD FAIL: ${result.error}`, true);
-                console.error(`[R011] Load failed: ${result.error}`);
+
+            try {
+                const result = useSupabase
+                    ? await mgr.loadAsync('quicksave')
+                    : mgr.load('quicksave');
+
+                if (result.success) {
+                    const tick = this.simLoop.tickCount;
+                    const stateJson = JSON.stringify(result.data || {});
+                    const bytes = stateJson.length;
+                    const kb = (bytes / 1024).toFixed(1);
+                    const backend = useSupabase ? 'CLOUD' : 'LOCAL';
+                    showStatus(`LOAD OK t:${tick} ${kb}KB [${backend}]`);
+                    console.log(`[R012] Loaded at tick ${tick} (${kb}KB) via ${backend}`);
+                } else {
+                    showStatus(`LOAD FAIL: ${result.error}`, true);
+                    console.error(`[R012] Load failed: ${result.error}`);
+                }
+            } catch (err) {
+                showStatus(`LOAD ERR: ${err.message}`, true);
+                console.error(`[R012] Load exception:`, err);
             }
         };
 
