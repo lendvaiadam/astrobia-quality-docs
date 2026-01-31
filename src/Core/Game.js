@@ -151,6 +151,178 @@ export class Game {
         // Scene
         this.scene = new THREE.Scene();
 
+        // Starfield
+        this.starDistance = 500; // Distance to stars from origin
+
+        const starGeometry = new THREE.BufferGeometry();
+        const starCount = 10000;
+        const positions = new Float32Array(starCount * 3);
+
+        // visual-only randomness, nondeterministic allowed (starfield cosmetics)
+        for (let i = 0; i < starCount; i++) {
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            const r = this.starDistance;
+
+            positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+            positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+            positions[i * 3 + 2] = r * Math.cos(phi);
+        }
+
+        starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 1.5 });
+        this.stars = new THREE.Points(starGeometry, starMaterial);
+        this.scene.add(this.stars);
+
+        // Log star sizing info with adjustment instructions
+        console.log("=== STAR PARAMETERS ===");
+        console.log("Location: Planet.js water shader (~line 97-115)");
+        console.log("Grid Size: 100x100 (starUV * 100.0)");
+        console.log("Star Density: 15% (cellHash > 0.85) - lower = more stars");
+        console.log("Star Size: 0.08 - 0.13");
+        console.log("");
+        console.log("TO ADJUST DENSITY: Edit 'cellHash > 0.85' value in Planet.js");
+        console.log("  0.50 = 50% dense, 0.85 = 15% dense, 0.95 = 5% sparse");
+
+        // Camera
+        this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+        // LIGHTING SETUP
+        // Increased ambient light for better visibility in shadow (was 0.15)
+        this.ambientLight = new THREE.AmbientLight(0x405060, 0.9);
+        this.scene.add(this.ambientLight);
+
+        // Hemisphere Light: Subtle sky/ground color difference
+        const hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x444422, 0.2);
+        this.scene.add(hemiLight);
+
+        // Main Sun Light - slightly brighter (was 2.0)
+        const sunLight = new THREE.DirectionalLight(0xfffaf0, 2.3); // Warm white
+        sunLight.position.set(400, 0, 0); // Pure side = exact 50/50 light/shadow
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 4096;
+        sunLight.shadow.mapSize.height = 4096;
+        sunLight.shadow.camera.near = 50;
+        sunLight.shadow.camera.far = 600;
+        // Shadow frustum size - adjustable via debug panel
+        this.shadowDistance = 150;
+        sunLight.shadow.camera.left = -this.shadowDistance;
+        sunLight.shadow.camera.right = this.shadowDistance;
+        sunLight.shadow.camera.top = this.shadowDistance;
+        sunLight.shadow.camera.bottom = -this.shadowDistance;
+        sunLight.shadow.bias = -0.0001;
+        sunLight.shadow.camera.updateProjectionMatrix(); // CRITICAL: Apply shadow camera settings
+        this.sunLight = sunLight;
+        this.scene.add(sunLight);
+        // CRITICAL: Add sunLight.target to scene for shadows to work
+        sunLight.target.position.set(0, 0, 0);
+        this.scene.add(sunLight.target);
+
+        // Core Systems
+        this.input = new Input();
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+
+        // Asset Loading Manager
+        this.loadingManager = new THREE.LoadingManager();
+        this.assetsLoaded = false;
+
+        this.loadingManager.onLoad = () => {
+            console.log('[Game] All assets loaded!');
+            this.assetsLoaded = true;
+        };
+
+        this.loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+            console.log(`[Game] Loading file: ${url}.\nLoaded ${itemsLoaded} of ${itemsTotal} files.`);
+        };
+
+        this.loadingManager.onError = (url) => {
+            console.error('[Game] There was an error loading ' + url);
+        };
+
+        // World
+        this.planet = new Planet(this.scene, this.loadingManager);
+        this.scene.add(this.planet.mesh);
+        this.scene.add(this.planet.waterMesh);
+        this.scene.add(this.planet.starField);
+
+        // Camera Controls (System 4.0 - Clean Rebuild)
+        this.cameraControls = new SphericalCameraController4(this.camera, this.renderer.domElement, this.planet);
+        this.cameraControls.game = this; // Reference for unit collision
+
+        // Audio Manager
+        this.audioManager = new AudioManager();
+
+        // Entities
+        this.units = [];
+        this.selectedUnit = null;
+        this.unitParams = {
+            speed: 5.0,
+            turnSpeed: 2.0,
+            groundOffset: 0.22,
+            smoothingRadius: 0.5 // Radius for terrain normal averaging
+        };
+        this.loadUnits();
+
+        // Fog of War
+        this.fogOfWar = new FogOfWar(this.renderer, this.planet.terrain.params.radius);
+
+        // Rocks on terrain (System V2)
+        this.rockSystem = new RockSystem(this, this.planet);
+        this.rockSystem.generateRocks();
+        this.planet.rockSystem = this.rockSystem;
+
+        // Rock Collision System (Broadphase + Slide)
+        this.rockCollision = new RockCollisionSystem(this.planet, this.rockSystem);
+        this.planet.rockCollision = this.rockCollision;
+
+        // Navigation Mesh (Spherical PathFinding)
+        this.navMesh = new SphericalNavMesh(this.planet.terrain, this.rockSystem);
+        this.navMesh.generate();
+        this.scene.add(this.navMesh.debugMesh);
+
+        // Path Planner (Hierarchical: Global A* + Local Refinement)
+        this.pathPlanner = new PathPlanner(this.navMesh, this.rockSystem, this.planet.terrain);
+        const sphereGeo = new THREE.SphereGeometry(15, 16, 16);
+        const sphereMat = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true, transparent: true, opacity: 0.2 });
+        this.visionHelper = new THREE.Mesh(sphereGeo, sphereMat);
+        this.visionHelper.visible = false;
+        console.log("Vision Helper is hidden. To enable: game.visionHelper.visible = true");
+        this.scene.add(this.visionHelper);
+
+        // UI
+        this.unit = new Unit(this.planet, nextEntityId());
+        this.debugPanel = new DebugPanel(this);
+
+        // Refinement: Rock Debugger
+        this.rockDebug = new RockDebug(this);
+
+        // Texture Debugger
+        this.textureDebugger = new TextureDebugger(this.renderer, this.fogOfWar.exploredTarget.texture);
+
+        // Camera Debug Overlay
+        this.cameraDebug = new CameraDebug(this);
+
+        // Navigation Mesh Debug Panel
+        this.navMeshDebug = new NavMeshDebug(this);
+
+        // Bindings
+        this.onWindowResize = this.onWindowResize.bind(this);
+        this.animate = this.animate.bind(this);
+
+        window.addEventListener('resize', this.onWindowResize);
+
+        // Path Drawing Visuals (hidden - using green waypoint curve instead)
+        this.currentPath = [];
+        this.pathGeometry = new THREE.BufferGeometry();
+        this.pathMaterial = new THREE.LineBasicMaterial({ color: 0xffff00 });
+        this.pathLine = new THREE.Line(this.pathGeometry, this.pathMaterial);
+        this.pathLine.visible = false;
+        this.scene.add(this.pathLine);
+
+        // Interaction Manager (System V3)
+        this.interactionManager = new InteractionManager(this);
+
     } // End Constructor
 
     // R012: Unified dev HUD for observability (only shown when dev=1)
@@ -304,191 +476,12 @@ export class Game {
                 return;
             }
 
-            this._supabaseUserId = data.user?.id;
+            this._supabaseUserId = (data.user && data.user.id) ? data.user.id : null;
             console.log('[Game] Supabase auth: Signed in anonymously as', this._supabaseUserId);
         } catch (err) {
             console.error('[Game] Supabase auth error:', err);
         }
     }
-
-        // Starfield
-        this.starDistance = 500; // Distance to stars from origin
-
-        const starGeometry = new THREE.BufferGeometry();
-        const starCount = 10000;
-        const positions = new Float32Array(starCount * 3);
-
-        // visual-only randomness, nondeterministic allowed (starfield cosmetics)
-        for (let i = 0; i < starCount; i++) {
-            const theta = Math.random() * Math.PI * 2;
-            const phi = Math.acos(2 * Math.random() - 1);
-            const r = this.starDistance;
-
-            positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-            positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-            positions[i * 3 + 2] = r * Math.cos(phi);
-        }
-
-        starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 1.5 });
-        this.stars = new THREE.Points(starGeometry, starMaterial);
-        this.scene.add(this.stars);
-
-        // Log star sizing info with adjustment instructions
-        console.log("=== STAR PARAMETERS ===");
-        console.log("Location: Planet.js water shader (~line 97-115)");
-        console.log("Grid Size: 100x100 (starUV * 100.0)");
-        console.log("Star Density: 15% (cellHash > 0.85) - lower = more stars");
-        console.log("Star Size: 0.08 - 0.13");
-        console.log("");
-        console.log("TO ADJUST DENSITY: Edit 'cellHash > 0.85' value in Planet.js");
-        console.log("  0.50 = 50% dense, 0.85 = 15% dense, 0.95 = 5% sparse");
-
-        // Camera
-        this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        // LIGHTING SETUP
-        // Increased ambient light for better visibility in shadow (was 0.15)
-        // Increased ambient light for better visibility in shadow (was 0.15)
-        this.ambientLight = new THREE.AmbientLight(0x405060, 0.9);
-        this.scene.add(this.ambientLight);
-
-        // Hemisphere Light: Subtle sky/ground color difference
-        const hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x444422, 0.2);
-        this.scene.add(hemiLight);
-
-        // Main Sun Light - slightly brighter (was 2.0)
-        const sunLight = new THREE.DirectionalLight(0xfffaf0, 2.3); // Warm white
-        sunLight.position.set(400, 0, 0); // Pure side = exact 50/50 light/shadow
-        sunLight.castShadow = true;
-        sunLight.shadow.mapSize.width = 4096;
-        sunLight.shadow.mapSize.height = 4096;
-        sunLight.shadow.camera.near = 50;
-        sunLight.shadow.camera.far = 600;
-        // Shadow frustum size - adjustable via debug panel
-        this.shadowDistance = 150;
-        sunLight.shadow.camera.left = -this.shadowDistance;
-        sunLight.shadow.camera.right = this.shadowDistance;
-        sunLight.shadow.camera.top = this.shadowDistance;
-        sunLight.shadow.camera.bottom = -this.shadowDistance;
-        sunLight.shadow.bias = -0.0001;
-        sunLight.shadow.camera.updateProjectionMatrix(); // CRITICAL: Apply shadow camera settings
-        this.sunLight = sunLight;
-        this.scene.add(sunLight);
-        // CRITICAL: Add sunLight.target to scene for shadows to work
-        sunLight.target.position.set(0, 0, 0);
-        this.scene.add(sunLight.target);
-
-        // Core Systems
-        this.input = new Input();
-        this.raycaster = new THREE.Raycaster();
-        this.mouse = new THREE.Vector2();
-
-        // Asset Loading Manager
-        this.loadingManager = new THREE.LoadingManager();
-        this.assetsLoaded = false;
-
-        this.loadingManager.onLoad = () => {
-            console.log('[Game] All assets loaded!');
-            this.assetsLoaded = true;
-        };
-
-        this.loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
-            console.log(`[Game] Loading file: ${url}.\nLoaded ${itemsLoaded} of ${itemsTotal} files.`);
-        };
-
-        this.loadingManager.onError = (url) => {
-            console.error('[Game] There was an error loading ' + url);
-        };
-
-        // World
-        this.planet = new Planet(this.scene, this.loadingManager);
-        this.scene.add(this.planet.mesh);
-        this.scene.add(this.planet.waterMesh);
-        this.scene.add(this.planet.starField);
-
-        // Camera Controls (System 4.0 - Clean Rebuild)
-        this.cameraControls = new SphericalCameraController4(this.camera, this.renderer.domElement, this.planet);
-        this.cameraControls.game = this; // Reference for unit collision
-
-        // Audio Manager
-        this.audioManager = new AudioManager();
-
-        // Entities
-        this.units = [];
-        this.selectedUnit = null;
-        this.unitParams = {
-            speed: 5.0,
-            turnSpeed: 2.0,
-            groundOffset: 0.22,
-            smoothingRadius: 0.5 // Radius for terrain normal averaging
-        };
-        this.loadUnits();
-
-        // Fog of War
-        this.fogOfWar = new FogOfWar(this.renderer, this.planet.terrain.params.radius);
-
-        // Rocks on terrain (System V2)
-        this.rockSystem = new RockSystem(this, this.planet); // Rocks are procedural, no external assets effectively
-        this.rockSystem.generateRocks(); // Initial generation 
-        this.planet.rockSystem = this.rockSystem; // Make accessible to Units
-
-        // Rock Collision System (Broadphase + Slide)
-        this.rockCollision = new RockCollisionSystem(this.planet, this.rockSystem);
-        this.planet.rockCollision = this.rockCollision; // Make accessible to Units
-
-        // Navigation Mesh (Spherical PathFinding)
-        this.navMesh = new SphericalNavMesh(this.planet.terrain, this.rockSystem);
-        this.navMesh.generate();
-        this.scene.add(this.navMesh.debugMesh);
-        
-        // Path Planner (Hierarchical: Global A* + Local Refinement)
-        this.pathPlanner = new PathPlanner(this.navMesh, this.rockSystem, this.planet.terrain);
-        const sphereGeo = new THREE.SphereGeometry(15, 16, 16);
-        const sphereMat = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true, transparent: true, opacity: 0.2 });
-        this.visionHelper = new THREE.Mesh(sphereGeo, sphereMat);
-        this.visionHelper.visible = false; // Hidden by default
-        console.log("Vision Helper is hidden. To enable: game.visionHelper.visible = true");
-        this.scene.add(this.visionHelper);
-
-        // UI
-        this.unit = new Unit(this.planet, nextEntityId()); // Dummy for initial DebugPanel (R003: deterministic ID)
-        this.debugPanel = new DebugPanel(this);
-
-        // Refinement: Rock Debugger
-        this.rockDebug = new RockDebug(this);
-
-        // Texture Debugger
-        this.textureDebugger = new TextureDebugger(this.renderer, this.fogOfWar.exploredTarget.texture);
-
-        // Camera Debug Overlay
-        this.cameraDebug = new CameraDebug(this);
-
-        // Navigation Mesh Debug Panel
-        this.navMeshDebug = new NavMeshDebug(this);
-
-        // Bindings
-        this.onWindowResize = this.onWindowResize.bind(this);
-        // this.onMouseDown... etc removed, handled by InteractionManager
-        this.animate = this.animate.bind(this);
-
-        window.addEventListener('resize', this.onWindowResize);
-
-        // Path Drawing Visuals (hidden - using green waypoint curve instead)
-        this.currentPath = [];
-        this.pathGeometry = new THREE.BufferGeometry();
-        this.pathMaterial = new THREE.LineBasicMaterial({ color: 0xffff00 });
-        this.pathLine = new THREE.Line(this.pathGeometry, this.pathMaterial);
-        this.pathLine.visible = false; // Hidden - we use the green tube now
-        this.scene.add(this.pathLine);
-
-        // Interaction Manager (System V3)
-        this.interactionManager = new InteractionManager(this);
-
-        // Audio Manager (Initialized above before loadUnits)
-    }
-
-    // Unit Loading handled below
 
     loadUnits() {
         // Use the centralized loading manager
@@ -1429,7 +1422,10 @@ export class Game {
                     
                     if (newTarget && newTarget.id !== oldTargetId) {
                         unit.targetWaypointId = newTarget.id;
-                        console.log(`[REORDER] Target updated: ${oldTargetId?.slice(-4)} → ${newTarget.id?.slice(-4)} (after lastWaypointId ${unit.lastWaypointId?.slice(-4)})`);
+                        const oldTgtId = oldTargetId ? oldTargetId.slice(-4) : 'null';
+                        const newTgtId = newTarget.id ? newTarget.id.slice(-4) : 'null';
+                        const lastWpId = unit.lastWaypointId ? unit.lastWaypointId.slice(-4) : 'null';
+                        console.log(`[REORDER] Target updated: ${oldTgtId} -> ${newTgtId} (after lastWaypointId ${lastWpId})`);
                         
                         // Update logical states
                         unit.waypoints.forEach(wp => {
@@ -2090,7 +2086,10 @@ export class Game {
 
                 // DEBUG: Log first marker of first unit to see what's happening
                 if (index === 0 && this.units.indexOf(unit) === 0) {
-                    console.log(`[COLOR DEBUG] markerId=${markerId?.slice(-4)} lastId=${unit.lastWaypointId?.slice(-4)} targetId=${unit.targetWaypointId?.slice(-4)}`);
+                    const mId = markerId ? markerId.slice(-4) : 'null';
+                    const lId = unit.lastWaypointId ? unit.lastWaypointId.slice(-4) : 'null';
+                    const tId = unit.targetWaypointId ? unit.targetWaypointId.slice(-4) : 'null';
+                    console.log(`[COLOR DEBUG] markerId=${mId} lastId=${lId} targetId=${tId}`);
                 }
 
                 if (markerId && unit.targetWaypointId && markerId === unit.targetWaypointId) {
@@ -2323,10 +2322,10 @@ export class Game {
 
         // DEBUG LOG
         console.log('[Panel] updatePanelContent', {
-            unit: unit?.name || 'NO UNIT',
-            waypointControlPoints: unit?.waypointControlPoints?.length || 0,
-            focusedUnit: this.focusedUnit?.name || 'none',
-            selectedUnit: this.selectedUnit?.name || 'none',
+            unit: (unit && unit.name) || 'NO UNIT',
+            waypointControlPoints: (unit && unit.waypointControlPoints) ? unit.waypointControlPoints.length : 0,
+            focusedUnit: (this.focusedUnit && this.focusedUnit.name) || 'none',
+            selectedUnit: (this.selectedUnit && this.selectedUnit.name) || 'none',
             panelFound: !!panelContent
         });
 
