@@ -48,7 +48,7 @@ Current engineering priority: Refactor toward Phase 0 “Netcode Readiness” (h
 ## CHATGPT OPENING PACK (BINDING)
 
 - The canonical, self-updating opening message + RAW link library lives in:
-  https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/CHATGPT_OPENING_PACK.md
+  https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/CHATGPT_OPENING_PACK.md
 
 **Fresh ChatGPT session procedure**
 1) ChatGPT reads START_HERE.
@@ -137,10 +137,10 @@ You MUST read these binding specs from `publish/quality_docs_snapshot_2026-01-14
 
 ## Language Rules (Binding)
 - Do NOT add Hungarian translations to coding prompts. English-only for inter-agent coding prompts. Hungarian is only for Ádám-facing summaries and HU test scenarios.
-- **Planning Protocol (Binding)**: [docs/PLANNING_PROTOCOL.md](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/PLANNING_PROTOCOL.md). All implementation work must follow this.
-- **Fresh session rule (binding)**: Open [docs/STATUS_WALKTHROUGH.md](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/STATUS_WALKTHROUGH.md) and follow the **## NOW** section before asking any questions.
-- **Spec Update Rule**: After any Release is completed and verified: update [CURRENT_SYSTEM_SPEC](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/CURRENT_SYSTEM_SPEC.md) with what changed.
-- **Bugbook Rule**: When a recurring issue is discovered/fixed twice: add it to [BUGBOOK](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/BUGBOOK.md).
+- **Planning Protocol (Binding)**: [docs/PLANNING_PROTOCOL.md](https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/PLANNING_PROTOCOL.md). All implementation work must follow this.
+- **Fresh session rule (binding)**: Open [docs/STATUS_WALKTHROUGH.md](https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/STATUS_WALKTHROUGH.md) and follow the **## NOW** section before asking any questions.
+- **Spec Update Rule**: After any Release is completed and verified: update [CURRENT_SYSTEM_SPEC](https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/CURRENT_SYSTEM_SPEC.md) with what changed.
+- **Bugbook Rule**: When a recurring issue is discovered/fixed twice: add it to [BUGBOOK](https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/BUGBOOK.md).
 
 ---
 ## VISIBILITY & PUSH GATE (BINDING)
@@ -190,16 +190,16 @@ Every agent reply must include a 1–3 bullet broadcast:
 
 ---
 ## Versioning & Rollback (Binding)
-- **Policy**: [VERSIONING_ROLLBACK.md](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/VERSIONING_ROLLBACK.md)
+- **Policy**: [VERSIONING_ROLLBACK.md](https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/VERSIONING_ROLLBACK.md)
 - **Live UI**: [play.asterobia.com](https://play.asterobia.com)
 - **Mailbox Rule**: The Mailbox is for **agent-to-agent info sync** only. All strategy decisions & instructions flow via Ádám.
 
 ---
 
 ## Release System (Binding)
-- **Rules**: [RELEASE_SYSTEM.md](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/RELEASE_SYSTEM.md)
-- **Plan**: [RELEASE_PLAN.md](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/RELEASE_PLAN.md) (10+ Step-by-step milestones)
-- **Registry**: [public/versions.json](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/public/versions.json)
+- **Rules**: [RELEASE_SYSTEM.md](https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/RELEASE_SYSTEM.md)
+- **Plan**: [RELEASE_PLAN.md](https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/RELEASE_PLAN.md) (10+ Step-by-step milestones)
+- **Registry**: [public/versions.json](https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/public/versions.json)
 - **Rule**: All agents must follow this; mailbox is info sync only.
 
 ---
@@ -214,22 +214,22 @@ Every agent reply must include a 1–3 bullet broadcast:
 - https://raw.githubusercontent.com/lendvaiadam/asterobia/baseline/pre-claude-stable/docs/CANONICAL_SOURCES_INDEX.md
 
 ### Live status (what is happening now)
-- https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/STATUS_WALKTHROUGH.md
-- **Reality Spec**: https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/CURRENT_SYSTEM_SPEC.md
-- **Bugbook**: https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/BUGBOOK.md
-- **Idea Log**: https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/IDEA_LOG.md
-- **ChatGPT Opening Pack**: https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/CHATGPT_OPENING_PACK.md
+- https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/STATUS_WALKTHROUGH.md
+- **Reality Spec**: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/CURRENT_SYSTEM_SPEC.md
+- **Bugbook**: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/BUGBOOK.md
+- **Idea Log**: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/IDEA_LOG.md
+- **ChatGPT Opening Pack**: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/CHATGPT_OPENING_PACK.md
 
 ### Cross-agent requests / waiting items
-- https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/MAILBOX.md
+- https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/MAILBOX.md
 
 ### Agent notes
-- Claude: https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/NOTES_CLAUDE.md
-- Antigravity: https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/NOTES_ANTIGRAVITY.md
-- ChatGPT: https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/NOTES_CHATGPT.md
+- Claude: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/NOTES_CLAUDE.md
+- Antigravity: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/NOTES_ANTIGRAVITY.md
+- ChatGPT: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/NOTES_CHATGPT.md
 
 ### Verification gates
-- https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/IMPLEMENTATION_GATES.md
+- https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/IMPLEMENTATION_GATES.md
 
 ---
 

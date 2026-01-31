@@ -8,8 +8,8 @@ Last updated: 2026-01-29 (Europe/Budapest)
 
 ## Current baseline
 - Stable starting ref: baseline/pre-claude-stable
-- Canonical index (stable): https://raw.githubusercontent.com/lendvaiadam/asterobia/baseline/pre-claude-stable/docs/CANONICAL_SOURCES_INDEX.md
-- Preflight: https://raw.githubusercontent.com/lendvaiadam/asterobia/baseline/pre-claude-stable/quality/NETCODE_PREFLIGHT.md
+- Canonical index (stable): https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/baseline/pre-claude-stable/docs/CANONICAL_SOURCES_INDEX.md
+- Preflight: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/baseline/pre-claude-stable/quality/NETCODE_PREFLIGHT.md
 
 ---
 
@@ -72,7 +72,7 @@ Multiplayer target:
 - **Summary**: `Game.js` A-class RNG fixes applied (3); B-class visuals audited.
 
 **E2E Determinism Test — PASS**
-- **File**: [src/SimCore/__tests__/e2e-determinism.test.js](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/src/SimCore/__tests__/e2e-determinism.test.js)
+- **File**: [src/SimCore/__tests__/e2e-determinism.test.js](https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/src/SimCore/__tests__/e2e-determinism.test.js)
 - **Command**: `node --experimental-vm-modules src/SimCore/__tests__/e2e-determinism.test.js`
 - **Result**: PASSED (Identical states across 2 instances)
 
@@ -160,6 +160,6 @@ Multiplayer target:
 ---
 
 ## Release Registry
-- **Manifest**: [public/versions.json](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/public/versions.json)
-- **Release Plan**: [docs/RELEASE_PLAN.md](https://raw.githubusercontent.com/lendvaiadam/asterobia/main/docs/RELEASE_PLAN.md)
+- **Manifest**: [public/versions.json](https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/public/versions.json)
+- **Release Plan**: [docs/RELEASE_PLAN.md](https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/docs/RELEASE_PLAN.md)
 - **Current target release**: Release 013 (Multiplayer Handshake)
