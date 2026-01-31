@@ -151,166 +151,6 @@ export class Game {
         // Scene
         this.scene = new THREE.Scene();
 
-    } // End Constructor
-
-    // R012: Unified dev HUD for observability (only shown when dev=1)
-    _createDevHUD() {
-        const hud = document.createElement('div');
-        hud.id = 'r012-dev-hud';
-        hud.style.cssText = `
-            position: fixed;
-            top: 8px;
-            right: 8px;
-            background: rgba(0,0,0,0.9);
-            color: #ccc;
-            font-family: monospace;
-            font-size: 11px;
-            padding: 10px 14px;
-            border-radius: 6px;
-            z-index: 99999;
-            user-select: none;
-            min-width: 180px;
-            border: 1px solid #333;
-        `;
-
-        hud.innerHTML = `
-            <div style="color:#0ff;font-weight:bold;margin-bottom:8px;border-bottom:1px solid #333;padding-bottom:4px;">R012 DEV HUD</div>
-            <div id="r012-net-mode" style="margin-bottom:4px;">NET MODE: <span style="color:#888;">---</span></div>
-            <div id="r012-config" style="margin-bottom:4px;">CONFIG: <span style="color:#888;">---</span></div>
-            <div id="r012-auth" style="margin-bottom:4px;">AUTH: <span style="color:#888;">---</span></div>
-            <div id="r012-realtime" style="margin-bottom:8px;">REALTIME: <span style="color:#888;">---</span></div>
-            <div style="border-top:1px solid #333;padding-top:8px;margin-bottom:6px;">
-                <div style="display:flex;gap:8px;margin-bottom:6px;">
-                    <button id="r012-btn-save" style="
-                        background:#1a1;color:#fff;border:none;padding:4px 12px;
-                        border-radius:3px;cursor:pointer;font-family:monospace;font-size:11px;
-                    ">Save</button>
-                    <button id="r012-btn-load" style="
-                        background:#17a;color:#fff;border:none;padding:4px 12px;
-                        border-radius:3px;cursor:pointer;font-family:monospace;font-size:11px;
-                    ">Load</button>
-                </div>
-            </div>
-            <div id="r012-db-status" style="color:#888;font-size:10px;">DB: ready</div>
-        `;
-        document.body.appendChild(hud);
-
-        // Store reference for updates
-        this._devHUD = {
-            netMode: document.getElementById('r012-net-mode').querySelector('span'),
-            config: document.getElementById('r012-config').querySelector('span'),
-            auth: document.getElementById('r012-auth').querySelector('span'),
-            realtime: document.getElementById('r012-realtime').querySelector('span'),
-            dbStatus: document.getElementById('r012-db-status'),
-            btnSave: document.getElementById('r012-btn-save'),
-            btnLoad: document.getElementById('r012-btn-load')
-        };
-    }
-
-    // R012: Update network status in dev HUD
-    _updateNetStatus(status, extraInfo = {}) {
-        if (!this._devHUD) return;
-
-        // NET MODE
-        const isSupabase = status === 'SUPABASE';
-        this._devHUD.netMode.textContent = isSupabase ? 'SUPABASE' : 'LOCAL';
-        this._devHUD.netMode.style.color = isSupabase ? '#4caf50' : '#888';
-
-        // CONFIG status
-        if (extraInfo.config) {
-            const cfg = extraInfo.config;
-            this._devHUD.config.textContent = cfg;
-            this._devHUD.config.style.color = cfg === 'OK' ? '#4caf50' : '#f44336';
-        }
-
-        // AUTH status
-        if (extraInfo.auth) {
-            const auth = extraInfo.auth;
-            this._devHUD.auth.textContent = auth;
-            this._devHUD.auth.style.color = auth === 'ANON OK' ? '#4caf50' : '#f44336';
-        }
-
-        // REALTIME status
-        if (extraInfo.rt) {
-            const rt = extraInfo.rt;
-            this._devHUD.realtime.textContent = rt;
-            if (rt === 'CONNECTED') {
-                this._devHUD.realtime.style.color = '#4caf50';
-            } else if (rt === 'CONNECTING...') {
-                this._devHUD.realtime.style.color = '#ff9800';
-            } else {
-                this._devHUD.realtime.style.color = '#f44336';
-            }
-        }
-    }
-
-    // R012: Update DB status in dev HUD (called by save/load)
-    _updateDBStatus(msg, isError = false) {
-        if (!this._devHUD) return;
-        this._devHUD.dbStatus.textContent = `DB: ${msg}`;
-        this._devHUD.dbStatus.style.color = isError ? '#f44336' : '#4caf50';
-    }
-
-    // R012: Poll Supabase transport state and update REALTIME status in HUD
-    _startRealtimeStatusPolling() {
-        if (!this._supabaseTransport || !this._devHUD) return;
-
-        let lastState = null;
-        const poll = () => {
-            const state = this._supabaseTransport.state;
-            if (state !== lastState) {
-                lastState = state;
-                let rtText = 'UNKNOWN';
-                if (state === 'CONNECTED') rtText = 'CONNECTED';
-                else if (state === 'CONNECTING') rtText = 'CONNECTING...';
-                else if (state === 'DISCONNECTED') rtText = 'DISCONNECTED';
-                else if (state === 'ERROR') rtText = 'ERROR';
-
-                this._devHUD.realtime.textContent = rtText;
-                if (state === 'CONNECTED') {
-                    this._devHUD.realtime.style.color = '#4caf50';
-                } else if (state === 'CONNECTING') {
-                    this._devHUD.realtime.style.color = '#ff9800';
-                } else {
-                    this._devHUD.realtime.style.color = '#f44336';
-                }
-            }
-        };
-
-        // Poll every 500ms
-        this._rtStatusInterval = setInterval(poll, 500);
-        poll(); // Initial check
-    }
-
-    // R012: Initialize Supabase auth (anonymous sign-in for persistence)
-    async _initSupabaseAuth(client) {
-        try {
-            // Check if already signed in
-            const { data: { user } } = await client.auth.getUser();
-            if (user) {
-                console.log('[Game] Supabase auth: Already signed in as', user.id);
-                this._supabaseUserId = user.id;
-                return;
-            }
-
-            // Sign in anonymously
-            const { data, error } = await client.auth.signInAnonymously();
-            if (error) {
-                console.error('[Game] Supabase anonymous sign-in failed:', error.message);
-                if (this._devHUD) {
-                    this._devHUD.auth.textContent = 'AUTH FAIL';
-                    this._devHUD.auth.style.color = '#f44336';
-                }
-                return;
-            }
-
-            this._supabaseUserId = data.user?.id;
-            console.log('[Game] Supabase auth: Signed in anonymously as', this._supabaseUserId);
-        } catch (err) {
-            console.error('[Game] Supabase auth error:', err);
-        }
-    }
-
         // Starfield
         this.starDistance = 500; // Distance to stars from origin
 
@@ -3511,4 +3351,163 @@ export class Game {
         
         console.log(`[Game] PathPlanner debug: ${debugPoints.length} points visualized`);
     }
+
+    // R012: Unified dev HUD for observability (only shown when dev=1)
+    _createDevHUD() {
+        const hud = document.createElement('div');
+        hud.id = 'r012-dev-hud';
+        hud.style.cssText = `
+            position: fixed;
+            top: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.9);
+            color: #ccc;
+            font-family: monospace;
+            font-size: 11px;
+            padding: 10px 14px;
+            border-radius: 6px;
+            z-index: 99999;
+            user-select: none;
+            min-width: 180px;
+            border: 1px solid #333;
+        `;
+
+        hud.innerHTML = `
+            <div style="color:#0ff;font-weight:bold;margin-bottom:8px;border-bottom:1px solid #333;padding-bottom:4px;">R012 DEV HUD</div>
+            <div id="r012-net-mode" style="margin-bottom:4px;">NET MODE: <span style="color:#888;">---</span></div>
+            <div id="r012-config" style="margin-bottom:4px;">CONFIG: <span style="color:#888;">---</span></div>
+            <div id="r012-auth" style="margin-bottom:4px;">AUTH: <span style="color:#888;">---</span></div>
+            <div id="r012-realtime" style="margin-bottom:8px;">REALTIME: <span style="color:#888;">---</span></div>
+            <div style="border-top:1px solid #333;padding-top:8px;margin-bottom:6px;">
+                <div style="display:flex;gap:8px;margin-bottom:6px;">
+                    <button id="r012-btn-save" style="
+                        background:#1a1;color:#fff;border:none;padding:4px 12px;
+                        border-radius:3px;cursor:pointer;font-family:monospace;font-size:11px;
+                    ">Save</button>
+                    <button id="r012-btn-load" style="
+                        background:#17a;color:#fff;border:none;padding:4px 12px;
+                        border-radius:3px;cursor:pointer;font-family:monospace;font-size:11px;
+                    ">Load</button>
+                </div>
+            </div>
+            <div id="r012-db-status" style="color:#888;font-size:10px;">DB: ready</div>
+        `;
+        document.body.appendChild(hud);
+
+        // Store reference for updates
+        this._devHUD = {
+            netMode: document.getElementById('r012-net-mode').querySelector('span'),
+            config: document.getElementById('r012-config').querySelector('span'),
+            auth: document.getElementById('r012-auth').querySelector('span'),
+            realtime: document.getElementById('r012-realtime').querySelector('span'),
+            dbStatus: document.getElementById('r012-db-status'),
+            btnSave: document.getElementById('r012-btn-save'),
+            btnLoad: document.getElementById('r012-btn-load')
+        };
+    }
+
+    // R012: Update network status in dev HUD
+    _updateNetStatus(status, extraInfo = {}) {
+        if (!this._devHUD) return;
+
+        // NET MODE
+        const isSupabase = status === 'SUPABASE';
+        this._devHUD.netMode.textContent = isSupabase ? 'SUPABASE' : 'LOCAL';
+        this._devHUD.netMode.style.color = isSupabase ? '#4caf50' : '#888';
+
+        // CONFIG status
+        if (extraInfo.config) {
+            const cfg = extraInfo.config;
+            this._devHUD.config.textContent = cfg;
+            this._devHUD.config.style.color = cfg === 'OK' ? '#4caf50' : '#f44336';
+        }
+
+        // AUTH status
+        if (extraInfo.auth) {
+            const auth = extraInfo.auth;
+            this._devHUD.auth.textContent = auth;
+            this._devHUD.auth.style.color = auth === 'ANON OK' ? '#4caf50' : '#f44336';
+        }
+
+        // REALTIME status
+        if (extraInfo.rt) {
+            const rt = extraInfo.rt;
+            this._devHUD.realtime.textContent = rt;
+            if (rt === 'CONNECTED') {
+                this._devHUD.realtime.style.color = '#4caf50';
+            } else if (rt === 'CONNECTING...') {
+                this._devHUD.realtime.style.color = '#ff9800';
+            } else {
+                this._devHUD.realtime.style.color = '#f44336';
+            }
+        }
+    }
+
+    // R012: Update DB status in dev HUD (called by save/load)
+    _updateDBStatus(msg, isError = false) {
+        if (!this._devHUD) return;
+        this._devHUD.dbStatus.textContent = `DB: ${msg}`;
+        this._devHUD.dbStatus.style.color = isError ? '#f44336' : '#4caf50';
+    }
+
+    // R012: Poll Supabase transport state and update REALTIME status in HUD
+    _startRealtimeStatusPolling() {
+        if (!this._supabaseTransport || !this._devHUD) return;
+
+        let lastState = null;
+        const poll = () => {
+            const state = this._supabaseTransport.state;
+            if (state !== lastState) {
+                lastState = state;
+                let rtText = 'UNKNOWN';
+                if (state === 'CONNECTED') rtText = 'CONNECTED';
+                else if (state === 'CONNECTING') rtText = 'CONNECTING...';
+                else if (state === 'DISCONNECTED') rtText = 'DISCONNECTED';
+                else if (state === 'ERROR') rtText = 'ERROR';
+
+                this._devHUD.realtime.textContent = rtText;
+                if (state === 'CONNECTED') {
+                    this._devHUD.realtime.style.color = '#4caf50';
+                } else if (state === 'CONNECTING') {
+                    this._devHUD.realtime.style.color = '#ff9800';
+                } else {
+                    this._devHUD.realtime.style.color = '#f44336';
+                }
+            }
+        };
+
+        // Poll every 500ms
+        this._rtStatusInterval = setInterval(poll, 500);
+        poll(); // Initial check
+    }
+
+    // R012: Initialize Supabase auth (anonymous sign-in for persistence)
+    async _initSupabaseAuth(client) {
+        try {
+            // Check if already signed in
+            const { data: { user } } = await client.auth.getUser();
+            if (user) {
+                console.log('[Game] Supabase auth: Already signed in as', user.id);
+                this._supabaseUserId = user.id;
+                return;
+            }
+
+            // Sign in anonymously
+            const { data, error } = await client.auth.signInAnonymously();
+            if (error) {
+                console.error('[Game] Supabase anonymous sign-in failed:', error.message);
+                if (this._devHUD) {
+                    this._devHUD.auth.textContent = 'AUTH FAIL';
+                    this._devHUD.auth.style.color = '#f44336';
+                }
+                return;
+            }
+
+            this._supabaseUserId = (data.user && data.user.id) ? data.user.id : null;
+            console.log('[Game] Supabase auth: Signed in anonymously as', this._supabaseUserId);
+        } catch (err) {
+            console.error('[Game] Supabase auth error:', err);
+        }
+    }
 }
+
