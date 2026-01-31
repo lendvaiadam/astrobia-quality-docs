@@ -95,3 +95,12 @@
   - [ ] Realtime subscription receives updates from other clients (basic echo test).
   - [ ] **HU Gate**: Multiplayer "Hello World" (Client A moves, Client B sees it).
 
+
+## Release 013: Multiplayer Handshake & Host Authority
+- **Objective**: Establish strict Host vs Peer handshake sequence.
+- **Canonical Sources**: `docs/specs/R013_MULTIPLAYER_HANDSHAKE_HOST_AUTHORITY.md`
+- **Definition of Done**:
+  - [ ] `SupabaseTransport` handles "Join" request.
+  - [ ] Host Authority logic (Client A becomes Host if first).
+  - [ ] Peer (Client B) acknowledges Host.
+  - [ ] Handshake sequence verified (Log output).

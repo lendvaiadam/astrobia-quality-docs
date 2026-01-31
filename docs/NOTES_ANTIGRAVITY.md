@@ -130,3 +130,32 @@ Default output: MD files under /quality or /docs.
 - **Prompt Delivery**: If generating a prompt for Claude, return it **directly in chat**. Do not tell Ádám to read MAILBOX.
 - **Ádám Test Checklist (Mandatory)**: After every implementation step, output a checklist (Steps + Expected + Risk Focus).
 
+
+
+## Snapshot Log
+
+
+### Savepoint 002
+- **Date**: 2026-02-01
+- **Tag**: `savepoint/r013-docs-pack-merged`
+- **SHA**: `bd083aa` (Merge Commit)
+- **Scope**: R013 Specs (Handshake/Schema) + Entrypoint wiring.
+- **Gates**: 
+    - Docs only (No runtime risk).
+    - Compliance verified (Absolute Scope Lock).
+- **Risk notes**: None (docs only).
+- **Rollback**: `git checkout savepoint/r013-docs-pack-merged`
+
+### Savepoint 001
+- **Date**: 2026-01-31
+- **Tag**: `savepoint/r012-hud-fix-verified`
+- **SHA**: `80b511aa573868704fc698b89d81e6a3103680f9`
+- **Scope**: Game.js structure repair (methods moved out of constructor), R012 HUD implementation, Config loading safety.
+- **Gates**: 
+    - Automated Tests: PASS (Lint/Syntax fixed)
+    - HU Golden Path: PASS (Verified http://localhost:8081/game.html?net=supabase&dev=1)
+- **Risk notes**: 
+    - 1. Requires `public/config.js` for full green HUD.
+    - 2. Dev HUD restricted to `?dev=1` or `#dev=1`.
+- **Rollback**: `git checkout savepoint/r012-hud-fix-verified`
+

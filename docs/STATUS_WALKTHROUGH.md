@@ -128,6 +128,12 @@ Multiplayer target:
 - **Reference**: `docs/RELEASE_PLAN.md` -> `docs/specs/R012_SUPABASE_SETUP.md`
 - **Security**: See `docs/specs/R012_CONFIG_AND_SECRETS_STRATEGY.md` for Dev/Prod key isolation.
 
+### Release 013: Multiplayer Handshake & Host Authority (Specs Ready)
+- **Objective**: Implement the Host-Authority Handshake protocol.
+- **Spec**: `docs/specs/R013_MULTIPLAYER_HANDSHAKE_HOST_AUTHORITY.md`
+- **Schema**: `docs/specs/R013_DB_SCHEMA_OPTIONAL.md`
+- **Status**: **Ready for Implementation** (Docs Merged).
+
 ---
 
 ## Who is doing what (roles)
