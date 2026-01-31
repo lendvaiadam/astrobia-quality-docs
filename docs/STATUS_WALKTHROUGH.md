@@ -114,11 +114,16 @@ Multiplayer target:
 - **Status**: **DONE** (SHA: eeb1bf1).
 - **Ref**: `docs/RELEASE_PLAN.md` (Release 010).
 
-### Release 011: Save/Load System — NEXT
+### Release 011: Save/Load System — DONE (SHA: 60ccf73)
 - **Objective**: Implement save/load via `LocalTransport` and persistence.
+- **HU Protocol**: Use `?dev=1` or `#dev=1` to enable HUD. Test [Save]/[Load] buttons. Verify persistence across hard refresh.
+- **Limitations**:
+  - KNOWN-GAP-R011-001: Fog-of-War / explored area not persisted (see BUGLIST).
+  - Camera pose is client-side only (not saved).
+- **Notes**: See [Persistent World State Notes](specs/PERSISTENT_WORLD_STATE_NOTES.md) for future server-sync requirements.
 - **Ref**: `docs/RELEASE_PLAN.md` (Release 011).
 
-### Current target release: Release 011 (Save/Load System)
+### Current target release: Release 012 (Supabase Integration)
 
 ---
 

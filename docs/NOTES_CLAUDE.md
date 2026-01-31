@@ -12,6 +12,7 @@
 
 ## 2. Workflows
 *   **Master Plan:** Follow `docs/master_plan/MASTER_DEVELOPMENT_PLAN_Merged_v1.md` (once created).
+*   **Skills:** Use repo-native skills in `/.claude/skills/` for Determinism, UI, and Testing. See `docs/CLAUDE_CODE_SKILLS.md`.
 ## 4. Binding Rules (Consolidated)
 *   **Remote Discipline:**
     *   **Code** (`src/`, `package.json`): Push to `code` remote (`lendvaiadam/asterobia`).

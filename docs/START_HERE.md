@@ -25,6 +25,12 @@ Current engineering priority: Refactor toward Phase 0 “Netcode Readiness” (h
 - **Quality**: Enforces gates, rollbacks, and delivers evidence (commit SHA, RAW links).
 - **Escalation Rule**: If a PR is risky/complex → Claude codes, Antigravity reviews/packages. If mechanical → Antigravity may code.
 
+### Tools / Workflow / How we work
+- **Source of Truth**: `docs/START_HERE.md` (this file)
+- **Work Tracking**: `docs/STATUS_WALKTHROUGH.md`
+- **Bug Tracking**: `docs/BUGLIST.md`
+- **Claude Skills**: `docs/CLAUDE_CODE_SKILLS.md` (See `/.claude/skills/` for local tools)
+
 ### Claude / Claude Code — Coder-of-Remember
 - **Primary Coder**: Implements complex features and core systems.
 - **Planner**: Authors concrete plan packages and PR sequences.

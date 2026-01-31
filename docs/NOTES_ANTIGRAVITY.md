@@ -90,6 +90,7 @@ Allowed:
 - Audits, repo mapping, risk registers, documentation snapshots, link indexing.
 - Preflight checks / detection tooling (search for forbidden patterns).
 - Small doc updates when requested.
+- **Skills Packaging**: Maintain `/.claude/skills/` and `docs/CLAUDE_CODE_SKILLS.md`.
 
 Not allowed (unless explicitly asked by Ádám):
 - Deep refactors in Game.js / Unit.js
