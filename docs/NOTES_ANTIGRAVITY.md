@@ -177,4 +177,14 @@ Default output: MD files under /quality or /docs.
   - Refactored `docs/STATUS_WALKTHROUGH.md` to clear `## NOW` and move completed items to "Release Status".
 - **Ref**: `savepoint/docs-opening-pack-fixed` (`41f8475`)
 
+### 2026-02-01: Opening Pack V3 (Full Links)
+- **Context**: Truncation issues persisted; user required full link library + workflow embedding.
+- **Action**:
+  - Rewrote `CHATGPT_OPENING_PACK.md` with explicit `---BEGIN-OPENING-PAYLOAD---` markers.
+  - Embedded full canonical link library (no stubs).
+  - Embedded "Consultation Round" + "Doc-Answer Gate" rules directly in the payload.
+  - Cleaned `STATUS_WALKTHROUGH.md` to point strictly to the Consultation step.
+- **Ref**: `savepoint/opening-pack-v3-full-links` (`b3929c5`)
+
+
 
