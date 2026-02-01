@@ -243,3 +243,5 @@ Every agent reply must include a 1–3 bullet broadcast:
 4) Continue from the top “NOW” task and report blockers via Ádám.
 
 ---END-PAYLOAD---
+
+<!-- reflow -->

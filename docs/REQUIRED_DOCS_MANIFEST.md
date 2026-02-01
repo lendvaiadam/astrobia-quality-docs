@@ -25,3 +25,5 @@
 - [x] [spec_sources/ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md](https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/main/spec_sources/ASTEROBIA_CANONICAL_GRFDTRDPU_SYSTEM_2026-01-13.md)
 
 ---END-PAYLOAD---
+
+<!-- reflow -->
