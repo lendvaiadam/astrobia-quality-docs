@@ -30,64 +30,44 @@ Multiplayer target:
 
 ### Release 001: Fixed Timestep Authority — DONE
 - **Branch**: `work/r001-determinism-wiring` (merged to main)
-- **Commits**: SimLoop.js (50ms tick), Game.js simTick/renderUpdate split
 - **HU Test**: PASS (2026-01-28)
 
 ### Release 002: Command Buffer Shim — DONE
-- **Branch**: `work/r002-command-buffer`
-- **Commits**: `2f3a1d0..9a8b11e` (9 commits)
-- **Head**: `9a8b11e` r002: add CommandDebugOverlay for queue inspection
-- **Raw link**: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/work/r002-command-buffer/src/SimCore/commands/index.js
+- **Branch**: `work/r002-command-buffer` (merged to main)
 - **HU Test**: PASS (2026-01-29)
 
 ### Release 003: Deterministic IDs — DONE
 - **Branch**: `work/r003-deterministic-ids` (merged to main)
-- **Head**: `21750f4` r003: implement deterministic entity ID generation
-- **Raw link**: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/work/r003-deterministic-ids/src/SimCore/runtime/IdGenerator.js
 - **HU Test**: PASS (2026-01-29)
 
-### Release 004: Seeded RNG (Deterministic PRNG) — DONE
+### Release 004: Seeded RNG — DONE
 - **Branch**: `work/r004-seeded-rng` (merged to main)
-- **Head**: `8a2cc60` r004: implement seeded PRNG (Mulberry32) for determinism
-- **Raw link**: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/work/r004-seeded-rng/src/SimCore/runtime/SeededRNG.js
 - **HU Test**: PASS (2026-01-29)
 
-### Release 005: State Surface Definition (serializeState) — DONE
+### Release 005: State Surface Definition — DONE
 - **Branch**: `work/r005-state-surface` (merged to main)
-- **Head**: `76eb176` r005: implement authoritative StateSurface and serialization
-- **Raw link**: https://raw.githubusercontent.com/lendvaiadam/asterobia-quality-docs/work/r005-state-surface/src/SimCore/runtime/StateSurface.js
 - **HU Test**: PASS (2026-01-29)
 
-### Release 006: Input Factory (Command Abstraction) — DONE
+### Release 006: Input Factory — DONE
 - **Branch**: `work/r006-input-factory` (merged to main)
-- **Status**: DONE
 
 ### Release 007: Local Transport Shim — DONE
-- **Objective**: Define `ITransport` and `LocalTransport` (loopback).
 - **Status**: **DONE**.
-- **Ref**: `docs/RELEASE_PLAN.md` (Release 007).
 
-### Release 008: Snapshot Interpolation (Verify & Tune) — DONE
-- **Objective**: Verify render interpolation sufficiency; Fix Stutter Bug.
-- **Status**: **DONE** (SHA: 4cd448d).
+### Release 008: Snapshot Interpolation — DONE
+- **Status**: **DONE**.
 
 ### Release 009: Pathfinding Determinism — DONE
-- **Objective**: Ensure pathfinding runs strictly inside `SimCore.step`.
-- **Status**: **DONE** (SHA: 3d3cf42).
+- **Status**: **DONE**.
 
 ### Release 010: Full Determinism Verification — DONE
-- **Objective**: Prove determinism via dual-run hash match.
-- **Status**: **DONE** (SHA: eeb1bf1).
+- **Status**: **DONE**.
 
-### Release 011: Save/Load System — DONE (SHA: 60ccf73)
-- **Objective**: Implement save/load via `LocalTransport` and persistence.
-- **HU Protocol**: Use `?dev=1` or `#dev=1` to enable HUD.
-- **Ref**: `docs/RELEASE_PLAN.md` (Release 011).
+### Release 011: Save/Load System — DONE
+- **Status**: **DONE**.
 
 ### Release 012: Supabase HUD & Config — DONE
-- **Objective**: HUD + Config for Supabase.
 - **Status**: **DONE** (SHA: 80b511a).
-- **Ref**: `docs/RELEASE_PLAN.md` (Release 012).
 
 ---
 
@@ -106,7 +86,7 @@ Multiplayer target:
 - **Objective**: Implement the Host-Authority Handshake protocol.
 - **Spec**: `docs/specs/R013_MULTIPLAYER_HANDSHAKE_HOST_AUTHORITY.md`
 - **Schema**: `docs/specs/R013_DB_SCHEMA_OPTIONAL.md`
-- **Status**: **Ready for Implementation** (Docs Merged).
+- **Status**: **READY FOR HU** (Pending Consultation Round).
 
 ---
 
@@ -116,11 +96,6 @@ Multiplayer target:
 - Antigravity (Gemini): audits, repo mapping, preflight checks, doc snapshots (no deep refactors unless asked).
 - Claude Code: implements code PRs per canonical Phase 0 rules.
 - ChatGPT: writes prompts + checks plans against canonical docs.
-
----
-
-## Blockers / Decisions needed from Ádám
-- Approval of R013 Decision Packet (once generated).
 
 ---
 
